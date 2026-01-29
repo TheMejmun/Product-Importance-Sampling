@@ -7,15 +7,18 @@
 #include "coords.h"
 
 class BRDF {
+protected:
+    BRDF() = default;
+
+    ~BRDF() = default;
+
 public:
     // Should return the "color" -> in this case monochrome brightness
-    virtual float eval(const Polar& wi,const Polar& wo) = 0;
+    virtual float eval(const Polar &wi, const Polar &wo) = 0;
 
-    virtual float pdf(const Polar& wi,const Polar& wo) = 0;
+    virtual float pdf(const Polar &wi, const Polar &wo) = 0;
 
-    virtual Polar sample(const Polar& wi) = 0;
-
-private:
+    virtual Polar sample(const Polar &wi) = 0;
 };
 
 #endif //PIS_BRDF_H

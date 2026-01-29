@@ -7,15 +7,13 @@
 
 #include "brdf.h"
 
-class DiffuseBRDF : public BRDF {
+class DiffuseBRDF final : public BRDF {
 public:
     float eval(const Polar &wi, const Polar &wo) override;
 
     float pdf(const Polar &wi, const Polar &wo) override;
 
     Polar sample(const Polar &wi) override;
-
-private:
 };
 
 #endif //PIS_DIFFUSE_BRDF_H
