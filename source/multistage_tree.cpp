@@ -4,16 +4,19 @@
 
 #include "multistage_tree.h"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <fstream>
 #include <random>
 
-std::random_device randDev;
-std::default_random_engine randEng(randDev());
-std::uniform_real_distribution<float> randDistr(0.f, 1.f);
+// Anonymous namespace ensures internal linkage
+namespace {
+    std::random_device randDev;
+    std::default_random_engine randEng(randDev());
+    std::uniform_real_distribution<float> randDistr(0.f, 1.f);
+}
 
 void MSTree::add(const float position, const float value) {
-    assert(position >= 0.f && position <= 1.f);
+    assert(position >= 0.f && position <= M_PI);
     mTotalFlux += value;
     mSamples.emplace_back(value, position);
 }
@@ -31,7 +34,7 @@ void MSTree::compileRec(float leftBoundary, float rightBoundary) {
         ++count;
     }
 
-    if (flux / mTotalFlux > SUBDIV_THRESHOLD) {
+    if (mTotalFlux > 0.0f && count > 1 && flux / mTotalFlux > SUBDIV_THRESHOLD) {
         assert(count > 1);
         const float midPoint = leftBoundary + ((rightBoundary - leftBoundary) / 2.f);
         //printf("subdividing [%f, %f] at %f\n", leftBoundary, rightBoundary, midPoint);
@@ -45,9 +48,11 @@ void MSTree::compileRec(float leftBoundary, float rightBoundary) {
 
 void MSTree::compile() {
     mNodes.clear();
+    printf("Total flux %f\n",mTotalFlux);
+    assert(mTotalFlux > 0.f);
 
     std::sort(mSamples.begin(), mSamples.end());
-    compileRec(0.f, 1.f);
+    compileRec(0.f, M_PI);
 
     printf("Compiled %lu samples into %lu nodes", mSamples.size(), mNodes.size());
 }
