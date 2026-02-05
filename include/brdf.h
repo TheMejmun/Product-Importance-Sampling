@@ -14,11 +14,11 @@ protected:
 
 public:
     // Should return the "color" -> in this case monochrome brightness
-    virtual float eval(const Polar &wi, const Polar &wo) = 0;
+    [[nodiscard]] virtual float eval(const Polar &wi, const Polar &wo)  const = 0;
 
-    virtual float pdf(const Polar &wi, const Polar &wo) = 0;
+    [[nodiscard]] virtual float pdf(const Polar &wi, const Polar &wo) const= 0;
 
-    virtual Polar sample(const Polar &wi) = 0;
+    [[nodiscard]] virtual Polar sample(const Polar &wi)const = 0;
 };
 
 #endif //PIS_BRDF_H

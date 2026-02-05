@@ -11,7 +11,7 @@ std::random_device r;
 std::default_random_engine re(r());
 std::uniform_real_distribution<float> hemisphereDist(0.f, M_PI);
 
-float DiffuseBRDF::eval(const Polar &wi, const Polar &wo) {
+float DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
     assert(wi.phi >= 0.0f && wi.phi <= (2*M_PI));
     assert(wo.phi >= 0.0f && wo.phi <= (2*M_PI));
     if (wi.phi > M_PI || wo.phi > M_PI) {
@@ -21,7 +21,7 @@ float DiffuseBRDF::eval(const Polar &wi, const Polar &wo) {
     return 1.0f / M_PI;
 }
 
-float DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) {
+float DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
     assert(wi.phi >= 0.0f && wi.phi <= (2*M_PI));
     assert(wo.phi >= 0.0f && wo.phi <= (2*M_PI));
     if (wi.phi > M_PI || wo.phi > M_PI) {
@@ -31,7 +31,7 @@ float DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) {
     return 1.0f / M_PI;
 }
 
-Polar DiffuseBRDF::sample(const Polar &wi) {
+Polar DiffuseBRDF::sample(const Polar &wi) const {
     assert(wi.phi >= 0.0f && wi.phi <= (2*M_PI));
 
     const float phi = hemisphereDist(re);
@@ -41,4 +41,3 @@ Polar DiffuseBRDF::sample(const Polar &wi) {
     //     bRec.value = (eval(bRec.params) / pdf(bRec.params)) * Frame::cosTheta(bRec.params.wo);
     // }
 }
-

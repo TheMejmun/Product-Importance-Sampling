@@ -9,11 +9,11 @@
 
 class DiffuseBRDF final : public BRDF {
 public:
-    float eval(const Polar &wi, const Polar &wo) override;
+    [[nodiscard]] float eval(const Polar &wi, const Polar &wo) const override;
 
-    float pdf(const Polar &wi, const Polar &wo) override;
+    [[nodiscard]] float pdf(const Polar &wi, const Polar &wo) const override;
 
-    Polar sample(const Polar &wi) override;
+    [[nodiscard]] Polar sample(const Polar &wi) const override;
 };
 
 #endif //PIS_DIFFUSE_BRDF_H

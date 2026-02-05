@@ -7,14 +7,18 @@
 #include <ostream>
 
 #include "brdf.h"
+#include "brdf_sampling.h"
 #include "diffuse_brdf.h"
 #include "light_source.h"
 #include "multistage_tree.h"
 
 constexpr float M_PI_F = M_PI;
 constexpr uint32_t LIGHT_SOURCES = 1;
-constexpr float LIGHT_MAX_INTENSITY = 1.0f;
-constexpr uint32_t MS_TREE_SAMPLES = 64;
+constexpr float LIGHT_MAX_INTENSITY = 100.0f;
+constexpr uint32_t MS_TREE_SAMPLES = 1024;
+
+constexpr uint32_t REFERENCE_SAMPLES = 1048576; // 2 ^ 20
+constexpr uint32_t BENCHMARK_SAMPLES = 128;
 
 // Anonymous namespace ensures internal linkage
 namespace {
@@ -48,7 +52,7 @@ MSTree setupIrradianceTree(const std::vector<LightSource> &lightSources) {
         float intensity = reachableLights.empty()
                               ? 0
                               : reachableLights[randIntDistr(randEng) % reachableLights.size()]->intensity;
-        std::cout << "lightSources: " << reachableLights.size() << ", selected intensity " << intensity<< std::endl;
+        std::cout << "lightSources: " << reachableLights.size() << ", selected intensity " << intensity << std::endl;
         irradianceTree.add(angle, intensity);
     }
     irradianceTree.compile();
@@ -67,6 +71,16 @@ int main() {
     }
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
+    // TOOD only works for single light for now
+    float analyticalColor = lightSources[0].intensity * (lightSources[0].end_angle - lightSources[0].start_angle) / M_PI_F;
+    std::cout << "analyticalColor: " << analyticalColor << std::endl;
+
+    const Polar wi{1.f, randDistr(randEng) * M_PI_F};
+
+    float referenceColor = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse,lightSources, wi);
+    std::cout << "referenceColor: " << referenceColor << std::endl;
+    float benchmarkColor = sampling::sample_brdf(BENCHMARK_SAMPLES, diffuse,lightSources, wi);
+    std::cout << "benchmarkColor: " << benchmarkColor << std::endl;
 
     return 0;
 }

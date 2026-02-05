@@ -54,7 +54,7 @@ void MSTree::compile() {
     std::sort(mSamples.begin(), mSamples.end());
     compileRec(0.f, M_PI);
 
-    printf("Compiled %lu samples into %lu nodes", mSamples.size(), mNodes.size());
+    printf("Compiled %lu samples into %lu nodes\n", mSamples.size(), mNodes.size());
 }
 
 const Node &MSTree::sample() const {
