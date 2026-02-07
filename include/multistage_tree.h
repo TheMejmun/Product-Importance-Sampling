@@ -8,6 +8,8 @@
 #include <random>
 #include <vector>
 
+#include "coords.h"
+
 // Müller mentions 0.01f for a quadtree,
 // We will use 0.1f for a 1D toy example
 #define SUBDIV_THRESHOLD 0.1f
@@ -20,17 +22,27 @@ struct Node {
     bool operator <(const Node &rhs) const {
         return this->leftBoundary < rhs.leftBoundary;
     }
+
+    [[nodiscard]] float width() const {
+        return rightBoundary - leftBoundary;
+    }
 };
 
-struct Sample {
+struct LightSample {
     float flux;
     float position;
 
-    bool operator <(const Sample &rhs) const {
+    bool operator <(const LightSample &rhs) const {
         return this->position < rhs.position;
     }
 };
 
+struct MSTSample {
+    Polar wo;
+    float pdf;
+};
+
+// TODO convert this to a binary tree
 class MSTree {
 public:
     MSTree() = default;
@@ -42,7 +54,7 @@ public:
     void compile();
 
     // Get a random sample
-    [[nodiscard]] const Node &sample() const;
+    [[nodiscard]] const MSTSample &sample() const;
 
     // Calculate the probability for a given sample
     [[nodiscard]] float pdf(const Node &node) const;
@@ -52,8 +64,9 @@ public:
 private:
     float mTotalFlux = 0.f;
     std::vector<Node> mNodes;
-    std::vector<Sample> mSamples;
-    std::discrete_distribution<> mDistribution;
+    std::vector<LightSample> mLightSamples;
+    std::discrete_distribution<size_t> mDistribution;
+    std::vector<float> pdfs;
 
     void compileRec(float leftBoundary, float rightBoundary);
 };

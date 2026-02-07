@@ -11,6 +11,7 @@
 #include "brdf/diffuse_brdf.h"
 #include "light_source.h"
 #include "multistage_tree.h"
+#include "renderers/mstree_sampling.h"
 
 constexpr float M_PI_F = M_PI;
 constexpr uint32_t LIGHT_SOURCES = 4;
@@ -85,10 +86,15 @@ int main() {
 
     const Polar wi{1.f, randDistr(randEng) * M_PI_F};
 
-    float referenceColor = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse,lightSources, wi);
-    std::cout << "referenceColor: " << referenceColor << std::endl;
-    float benchmarkColor = sampling::sample_brdf(BENCHMARK_SAMPLES, diffuse,lightSources, wi);
-    std::cout << "benchmarkColor: " << benchmarkColor << std::endl;
+    float brdfReferenceColor = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
+    std::cout << "BRDF reference: " << brdfReferenceColor << std::endl;
+    float brdfBenchmarkColor = sampling::sample_brdf(BENCHMARK_SAMPLES, diffuse, lightSources, wi);
+    std::cout << "BRDF benchmark: " << brdfBenchmarkColor << std::endl;
+
+    float msTreeReferenceColor = sampling::sample_mstree(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    std::cout << "MSTree reference: " << msTreeReferenceColor << std::endl;
+    float msTreeBenchmarkColor = sampling::sample_mstree(BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    std::cout << "MSTree benchmark: " << msTreeBenchmarkColor << std::endl;
 
     return 0;
 }

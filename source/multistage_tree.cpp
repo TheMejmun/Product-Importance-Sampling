@@ -13,18 +13,19 @@ namespace {
     std::random_device randDev;
     std::default_random_engine randEng(randDev());
     std::uniform_real_distribution<float> randDistr(0.f, 1.f);
+    std::uniform_int_distribution<uint32_t> randIntDistr(0, std::numeric_limits<uint32_t>::max());
 }
 
 void MSTree::add(const float position, const float value) {
     assert(position >= 0.f && position <= M_PI);
     mTotalFlux += value;
-    mSamples.emplace_back(value, position);
+    mLightSamples.emplace_back(value, position);
 }
 
 void MSTree::compileRec(float leftBoundary, float rightBoundary) {
     float flux = 0.f;
     size_t count = 0;
-    for (const auto &sample: mSamples) {
+    for (const auto &sample: mLightSamples) {
         if (sample.position < leftBoundary)
             continue;
         if (sample.position > rightBoundary)
@@ -48,27 +49,45 @@ void MSTree::compileRec(float leftBoundary, float rightBoundary) {
 
 void MSTree::compile() {
     mNodes.clear();
-    printf("Total flux in MSTree %f\n",mTotalFlux);
+    printf("Total flux in MSTree %f\n", mTotalFlux);
     assert(mTotalFlux > 0.f);
 
-    std::sort(mSamples.begin(), mSamples.end());
+    std::sort(mLightSamples.begin(), mLightSamples.end());
     compileRec(0.f, M_PI);
 
-    printf("Compiled %lu samples into %lu nodes\n", mSamples.size(), mNodes.size());
+    printf("Compiled %lu samples into %lu nodes\n", mLightSamples.size(), mNodes.size());
+
+
+    pdfs = std::vector<float>(mNodes.size());
+    float newTotalFlux = 0.f;
+    float pdfSum = 0.f;
+    for (size_t i = 0; i < mNodes.size(); ++i) {
+        pdfs[i] = pdf(mNodes[i]);
+        pdfSum += pdfs[i];
+        newTotalFlux += mNodes[i].flux;
+    }
+    printf("mTotalFlux %f -> %f\n", mTotalFlux, newTotalFlux);
+    printf("PDF sum: %f\n", pdfSum);
 }
 
-const Node &MSTree::sample() const {
-    float rand = randDistr(randEng);
-    for (const auto &node: mNodes) {
-        if (rand < node.flux / mTotalFlux)
-            return node;
-        rand -= node.flux / mTotalFlux;
-    }
-    return mNodes.back();
+const MSTSample &MSTree::sample() const {
+    // Get a random Node weighted by its relative flux
+    // TODO this would be faster in a binary tree
+    const size_t index = std::discrete_distribution<size_t>(pdfs.begin(), pdfs.end())(randEng);
+    const Node &sampleNode = mNodes[index];
+
+    float position = sampleNode.leftBoundary + randDistr(randEng) * sampleNode.width();
+    MSTSample result{
+        Polar{1.f, position},
+        pdfs[index] / sampleNode.width()
+    };
+    return {result};
 }
 
 float MSTree::pdf(const Node &node) const {
-    return node.flux / mTotalFlux;
+    float relativeFlux = node.flux / mTotalFlux;
+    // float nodeAngle = node.width() / static_cast<float>(M_PI);
+    return relativeFlux;
 }
 
 void MSTree::exportToCsv(const std::string &filename) {
