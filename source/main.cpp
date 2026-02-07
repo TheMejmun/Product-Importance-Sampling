@@ -11,6 +11,7 @@
 #include "brdf/diffuse_brdf.h"
 #include "light_source.h"
 #include "multistage_tree.h"
+#include "renderers/mis.h"
 #include "renderers/mstree_sampling.h"
 
 constexpr float M_PI_F = M_PI;
@@ -80,21 +81,26 @@ int main() {
     }
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
-    // TOOD only works for single light for now
-    float analyticalColor = calculateAnalyticalIrradiance(lightSources);
-    std::cout << "analyticalColor: " << analyticalColor << std::endl;
-
     const Polar wi{1.f, randDistr(randEng) * M_PI_F};
 
-    float brdfReferenceColor = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
-    std::cout << "BRDF reference: " << brdfReferenceColor << std::endl;
-    float brdfBenchmarkColor = sampling::sample_brdf(BENCHMARK_SAMPLES, diffuse, lightSources, wi);
-    std::cout << "BRDF benchmark: " << brdfBenchmarkColor << std::endl;
+    printf("Reference:\n");
+    // TOOD only works for diffuse brdf
+    float analytical = calculateAnalyticalIrradiance(lightSources);
+    printf("\tAnalytical: %f\n", analytical);
+    float brdfReference = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
+    printf("\tBRDF: %f\n", brdfReference);
+    float mstReference = sampling::sample_mstree(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tMST Sampling: %f\n", mstReference);
+    float misReference = sampling::mis(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tMIS: %f\n", misReference);
 
-    float msTreeReferenceColor = sampling::sample_mstree(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    std::cout << "MSTree reference: " << msTreeReferenceColor << std::endl;
-    float msTreeBenchmarkColor = sampling::sample_mstree(BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    std::cout << "MSTree benchmark: " << msTreeBenchmarkColor << std::endl;
+    printf("Equal Samples %d:\n", BENCHMARK_SAMPLES);
+    float brdfBenchmarkES = sampling::sample_brdf(BENCHMARK_SAMPLES, diffuse, lightSources, wi);
+    printf("\tBRDF: %f\n", brdfBenchmarkES);
+    float mstBenchmarkES = sampling::sample_mstree(BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tMST Sampling: %f\n", mstBenchmarkES);
+    float misBenchmarkES = sampling::mis(BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tMIS: %f\n", misBenchmarkES);
 
     return 0;
 }
