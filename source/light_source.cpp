@@ -49,6 +49,7 @@ float sample_lights_average(const std::vector<LightSource> &lightSources, const 
     return intensity / static_cast<float>(count);
 }
 
-float sampling::sample_lights(const std::vector<LightSource> &lightSources, const Polar &wo) {
-    return sample_lights_random(lightSources, wo);
+float sampling::intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo) {
+    // The additive method makes it easiest to calculate analytical irradiance
+    return sample_lights_additive(lightSources, wo);
 }

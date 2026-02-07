@@ -41,14 +41,14 @@ void MSTree::compileRec(float leftBoundary, float rightBoundary) {
         compileRec(leftBoundary, midPoint);
         compileRec(midPoint, rightBoundary);
     } else {
-        printf("adding node [%f, %f] with flux %f\n", leftBoundary, rightBoundary, flux);
+        // printf("adding node [%f, %f] with flux %f\n", leftBoundary, rightBoundary, flux);
         mNodes.emplace_back(flux, leftBoundary, rightBoundary);
     }
 }
 
 void MSTree::compile() {
     mNodes.clear();
-    printf("Total flux %f\n",mTotalFlux);
+    printf("Total flux in MSTree %f\n",mTotalFlux);
     assert(mTotalFlux > 0.f);
 
     std::sort(mSamples.begin(), mSamples.end());

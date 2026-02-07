@@ -4,7 +4,7 @@
 
 #ifndef PIS_BRDF_H
 #define PIS_BRDF_H
-#include "coords.h"
+#include "../coords.h"
 
 class BRDF {
 protected:

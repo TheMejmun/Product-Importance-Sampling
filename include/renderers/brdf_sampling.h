@@ -5,8 +5,8 @@
 #ifndef PIS_BRDF_SAMPLING_H
 #define PIS_BRDF_SAMPLING_H
 
-#include "brdf.h"
-#include "light_source.h"
+#include "../brdf/brdf.h"
+#include "../light_source.h"
 #include <cstdint>
 #include   <vector>
 

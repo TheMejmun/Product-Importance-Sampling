@@ -2,7 +2,7 @@
 // Created by Saman on 29.01.26.
 //
 
-#include "diffuse_brdf.h"
+#include "../../include/brdf/diffuse_brdf.h"
 #include <cmath>
 #include <cassert>
 #include <random>

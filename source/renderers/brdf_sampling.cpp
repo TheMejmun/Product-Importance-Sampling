@@ -2,7 +2,7 @@
 // Created by Saman on 05.02.26.
 //
 
-#include "brdf_sampling.h"
+#include "../../include/renderers/brdf_sampling.h"
 
 #include "light_source.h"
 
@@ -22,6 +22,6 @@ float sampling::sample_brdf(
 
 float sampling::sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) {
     const Polar wo = brdf.sample(wi);
-    const float incomingLight = sampling::sample_lights(lightSources, wo);
+    const float incomingLight = sampling::intersect_lights(lightSources, wo);
     return incomingLight * brdf.eval(wi, wo) / brdf.pdf(wi, wo);
 }
