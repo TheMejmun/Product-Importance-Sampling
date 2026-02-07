@@ -22,6 +22,6 @@ float sampling::sample_brdf(
 
 float sampling::sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) {
     const Polar wo = brdf.sample(wi);
-    const float incomingLight = sampling::intersect_lights(lightSources, wo);
+    const float incomingLight = intersect_lights(lightSources, wo);
     return incomingLight * brdf.eval(wi, wo) / brdf.pdf(wi, wo);
 }
