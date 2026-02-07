@@ -22,8 +22,8 @@ float DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
 }
 
 float DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
-    assert(wi.phi >= 0.0f && wi.phi <= (2*M_PI));
-    assert(wo.phi >= 0.0f && wo.phi <= (2*M_PI));
+    assert(wi.phi >= 0.0f && wi.phi < (2*M_PI));
+    assert(wo.phi >= 0.0f && wo.phi < (2*M_PI));
     if (wi.phi > M_PI || wo.phi > M_PI) {
         return 0.0f;
     }
