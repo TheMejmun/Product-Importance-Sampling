@@ -4,8 +4,7 @@
 
 #include   "utils.h"
 
-#include <assert.h>
-#include <cmath>
+#include <cassert>
 
 Polar utils::toPolar(const Vec2f &vec) {
     const float r = sqrt(vec.x * vec.x + vec.y * vec.y);
@@ -70,7 +69,7 @@ float utils::sinTheta(const Vec2f &v) {
     float sinTheta2 = 1.0f - v.y * v.y;
     if (sinTheta2 <= 0.0f)
         return 0.0f;
-    return std::sqrt(sinTheta2);
+    return sqrt(sinTheta2);
 }
 
 float utils::sinTheta(const Polar &p) {
@@ -93,4 +92,8 @@ Vec2f utils::normalize(const Vec2f &v) {
 
 Polar utils::normalize(const Polar &p) {
     return {1.0f, p.phi};
+}
+
+float utils::safe_sqrt(float x) {
+    return x < 0 ? 0 : sqrt(x);
 }

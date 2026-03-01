@@ -11,6 +11,7 @@
 #include "brdf/diffuse_brdf.h"
 #include "light_source.h"
 #include "multistage_tree.h"
+#include "utils.h"
 #include "renderers/mis.h"
 #include "renderers/mstree_sampling.h"
 

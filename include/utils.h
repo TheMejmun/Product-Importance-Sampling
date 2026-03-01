@@ -5,7 +5,6 @@
 #ifndef PIS_UTILS_H
 #define PIS_UTILS_H
 
-#include <cmath>
 #include "coords.h"
 
 namespace utils {
@@ -43,9 +42,7 @@ namespace utils {
 
     Polar normalize(const Polar &p);
 
-    inline float safe_sqrt(const float x) {
-        return x < 0.0f ? 0.0f : std::sqrt<float>(x);
-    }
+    float safe_sqrt(float x);
 }
 
 #endif //PIS_UTILS_H
