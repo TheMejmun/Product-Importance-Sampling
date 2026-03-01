@@ -4,6 +4,7 @@
 
 #include "renderers/mstree_sampling.h"
 
+// TODO cosTheta wi
 float sampling::sample_mstree(
     std::uint32_t iterations,
     const MSTree &msTree,
@@ -19,6 +20,7 @@ float sampling::sample_mstree(
     return color;
 }
 
+// TODO cosTheta wo
 float sampling::sample_mstree(
     const MSTree &msTree,
     const BRDF &brdf,

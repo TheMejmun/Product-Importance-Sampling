@@ -37,8 +37,60 @@ Polar utils::reflect(const Polar &p, const Polar &axis) {
     return {p.r, phi};
 }
 
+// TODO implement without converting to polar coords
 Vec2f utils::reflect(const Vec2f &v, const Vec2f &axis) {
     return toVec(
         reflect(toPolar(v), toPolar(axis))
     );
+}
+
+Vec3f utils::toVec(const Spherical &) {
+    throw std::runtime_error("Not implemented");
+}
+
+float utils::dot(const Vec2f &v1, const Vec2f &v2) {
+    return v1.x * v2.x + v1.y * v2.y;
+}
+
+float utils::dot(const Vec3f &v1, const Vec3f &v2) {
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+float utils::cosTheta(const Vec2f &v) {
+    return normalize(v).y;
+}
+
+float utils::cosTheta(const Polar &p) {
+    // Instead of calculating the cosine against the normal, we take the sine of the angle itself
+    // https://en.wikipedia.org/wiki/Sine_and_cosine#/media/File:Sine_cosine_one_period.svg
+    return cos(p.phi - static_cast<float>(0.5 * M_PI));
+}
+
+float utils::sinTheta(const Vec2f &v) {
+    float sinTheta2 = 1.0f - v.y * v.y;
+    if (sinTheta2 <= 0.0f)
+        return 0.0f;
+    return std::sqrt(sinTheta2);
+}
+
+float utils::sinTheta(const Polar &p) {
+    return sin(p.phi - static_cast<float>(0.5 * M_PI));
+}
+
+float utils::tanTheta(const Vec2f &v) {
+    return sinTheta(v) / cosTheta(v);
+}
+
+float utils::tanTheta(const Polar &p) {
+    return sinTheta(p) / cosTheta(p);
+}
+
+Vec2f utils::normalize(const Vec2f &v) {
+    const float l = sqrt(v.x * v.x + v.y * v.y);
+    assert(l > 0);
+    return {v.x / l, v.y / l};
+}
+
+Polar utils::normalize(const Polar &p) {
+    return {1.0f, p.phi};
 }

@@ -16,9 +16,6 @@ struct Vec3f {
 
 struct Polar {
     float r, phi;
-    // Instead of calculating the cosine against the normal, we take the sine of the angle itself
-    // https://en.wikipedia.org/wiki/Sine_and_cosine#/media/File:Sine_cosine_one_period.svg
-    [[nodiscard]] float cosTheta() const { return sin(phi); }
 };
 
 // polar angle theta
