@@ -37,10 +37,8 @@ Polar utils::reflect(const Polar &p, const Polar &axis) {
 }
 
 // TODO implement without converting to polar coords
-Vec2f utils::reflect(const Vec2f &v, const Vec2f &axis) {
-    return toVec(
-        reflect(toPolar(v), toPolar(axis))
-    );
+Vec2f utils::reflect(const Vec2f &v, const Vec2f &n) {
+    return (n * (2 * dot(v, n))) - v;
 }
 
 Vec3f utils::toVec(const Spherical &) {

@@ -8,6 +8,18 @@
 
 struct Vec2f {
     float x, y;
+
+    Vec2f operator+(const Vec2f &rhs) const {
+        return {x + rhs.x, y + rhs.y};
+    }
+
+    Vec2f operator-(const Vec2f &rhs) const {
+        return {x - rhs.x, y - rhs.y};
+    }
+
+    Vec2f operator*(float rhs) const {
+        return {x * rhs, y * rhs};
+    }
 };
 
 struct Vec3f {
