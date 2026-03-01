@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "coords.h"
 #include <cassert>
+#include <cmath>
 #include <random>
 // https://github.com/mitsuba-renderer/mitsuba/blob/10af06f365886c1b6dd8818e0a3841078a62f283/src/bsdfs/roughconductor.cpp#L257
 
@@ -173,3 +174,13 @@ Polar MicrofacetBRDF::sample(const Polar &wi) const {
     float spectrum = F * weight;
     // return F * weight;
 }
+
+// float MicrofacetBRDF::eval(const Polar &wi, const Polar &wo) const {
+//     float F = fresnelConductorExact(utils::dot(wiVec, m), mEta, mK)
+//               * mSpecularReflectance;
+//
+//     float weight = microfacetDistrSmithG1(wo, m, mAlpha);
+//
+//     return F * weight;
+//
+// }
