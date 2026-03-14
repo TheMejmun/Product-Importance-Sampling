@@ -22,9 +22,15 @@ struct Vec2f {
     }
 };
 
+typedef Vec2f Normal2f;
+typedef Vec2f Point2f;
+
+
 struct Vec3f {
     float x, y, z;
 };
+
+typedef Vec3f Normal3f;
 
 struct Polar {
     float r, phi;

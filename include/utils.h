@@ -8,41 +8,53 @@
 #include "coords.h"
 
 namespace utils {
-    // float cosTheta(float);
+    float safeSqrt(float x);
 
+    /// Vec2f
     Polar toPolar(const Vec2f &);
-
-    Vec2f toVec(const Polar &);
-
-    Spherical toSpherical(const Vec3f &);
-
-    Vec3f toVec(const Spherical &);
-
-    Polar reflect(const Polar &p, const Polar &axis);
 
     Vec2f reflect(const Vec2f &v, const Vec2f &axis);
 
     float dot(const Vec2f &v1, const Vec2f &v2);
 
-    float dot(const Vec3f &v1, const Vec3f &v2);
+    Vec2f normalize(const Vec2f &v);
 
     float cosTheta(const Vec2f &v);
 
-    float cosTheta(const Polar &p);
-
     float sinTheta(const Vec2f &v);
-
-    float sinTheta(const Polar &p);
 
     float tanTheta(const Vec2f &v);
 
-    float tanTheta(const Polar &p);
+    /// Vec3f
+    Spherical toSpherical(const Vec3f &);
 
-    Vec2f normalize(const Vec2f &v);
+    float dot(const Vec3f &v1, const Vec3f &v2);
+
+    Vec3f normalize(const Vec3f &v);
+
+    float cosTheta(const Vec3f &v);
+
+    float sinTheta(const Vec3f &v);
+
+    float cosPhi(const Vec3f &v);
+
+    float sinPhi(const Vec3f &v);
+
+    /// Polar
+    Vec2f toVec(const Polar &);
+
+    Polar reflect(const Polar &p, const Polar &axis);
+
+    float cosTheta(const Polar &p);
+
+    float sinTheta(const Polar &p);
+
+    float tanTheta(const Polar &p);
 
     Polar normalize(const Polar &p);
 
-    float safe_sqrt(float x);
+    /// Spherical
+    Vec3f toVec(const Spherical &);
 }
 
 #endif //PIS_UTILS_H
