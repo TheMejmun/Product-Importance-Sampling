@@ -28,6 +28,26 @@ typedef Vec2f Point2f;
 
 struct Vec3f {
     float x, y, z;
+
+    Vec3f operator+(const Vec3f &rhs) const {
+        return {x + rhs.x, y + rhs.y, z + rhs.z};
+    }
+
+    Vec3f operator-(const Vec3f &rhs) const {
+        return {x - rhs.x, y - rhs.y, z - rhs.z};
+    }
+
+    Vec3f operator*(float rhs) const {
+        return {x * rhs, y * rhs, z * rhs};
+    }
+
+    Vec3f operator*(Vec3f rhs) const {
+        return {x * rhs.x, y * rhs.y, z * rhs.z};
+    }
+
+    Vec3f operator/(float rhs) const {
+        return {x / rhs, y / rhs, z / rhs};
+    }
 };
 
 typedef Vec3f Normal3f;

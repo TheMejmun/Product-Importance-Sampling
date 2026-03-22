@@ -12,6 +12,7 @@
 #include "light_source.h"
 #include "multistage_tree.h"
 #include "utils.h"
+#include "mts/microfacet.h"
 #include "renderers/mis.h"
 #include "renderers/mstree_sampling.h"
 
@@ -22,6 +23,8 @@ constexpr uint32_t MS_TREE_SAMPLES = 1024;
 
 constexpr uint32_t REFERENCE_SAMPLES = 1048576; // 2 ^ 20
 constexpr uint32_t BENCHMARK_SAMPLES = 64;
+
+constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = 1000000;
 
 // Anonymous namespace ensures internal linkage
 namespace {
@@ -72,7 +75,63 @@ MSTree setupIrradianceTree(const std::vector<LightSource> &lightSources) {
     return irradianceTree;
 }
 
+struct Sample {
+    Vec3f normal;
+    Vec3f wo;
+    float pdf;
+};
+
+Sample sampleMicrofacet3D(const mts::MicrofacetDistribution &distr, const Vec3f &wi) {
+    const Point2f sample = {randDistr(randEng), randDistr(randEng)};
+    const auto [normal, pdf] = distr.sample(wi, sample);
+    const Vec3f wo = utils::reflect(wi, normal);
+    return {normal, wo, pdf};
+}
+
+void testMicrofacet3D() {
+    mts::MicrofacetDistribution test{0.1f};
+    const auto wi = utils::normalize(Vec3f{1.0f, 0.0f, 1.0f});
+    printf("wi=[%f, %f, %f]\n", wi.x, wi.y, wi.z);
+
+    std::vector<Sample> samples(MICROFACET_TEST_SAMPLE_COUNT);
+    for (int i = 0; i < MICROFACET_TEST_SAMPLE_COUNT; ++i) {
+        samples[i] = sampleMicrofacet3D(test, wi);
+    }
+
+    float avgPdf = 0.f;
+    Vec3f avgNormal = {0.f, 0.f, 0.f};
+    Vec3f avgWo = {0.f, 0.f, 0.f};
+    for (const auto &[normal,wo,pdf]: samples) {
+        avgPdf += pdf;
+        avgNormal = avgNormal + normal;
+        avgWo = avgWo + wo;
+    }
+    avgPdf = avgPdf / static_cast<float>(MICROFACET_TEST_SAMPLE_COUNT);
+    avgNormal = avgNormal / static_cast<float>(MICROFACET_TEST_SAMPLE_COUNT);
+    avgWo = avgWo / static_cast<float>(MICROFACET_TEST_SAMPLE_COUNT);
+
+    float varPdf = 0.f;
+    Vec3f varNormal = {0.f, 0.f, 0.f};
+    Vec3f varWo = {0.f, 0.f, 0.f};
+    for (const auto &[normal,wo,pdf]: samples) {
+        varPdf += (pdf - avgPdf) * (pdf - avgPdf);
+        varNormal = varNormal + (normal - avgNormal) * (normal - avgNormal);
+        varWo = varWo + (wo - avgWo) * (wo - avgWo);
+    }
+    varPdf = varPdf / static_cast<float>(MICROFACET_TEST_SAMPLE_COUNT);
+    varNormal = varNormal / static_cast<float>(MICROFACET_TEST_SAMPLE_COUNT);
+    varWo = varWo / static_cast<float>(MICROFACET_TEST_SAMPLE_COUNT);
+
+    printf("avgNormal=[%f, %f, %f], varNormal=[%f, %f, %f]\n", avgNormal.x, avgNormal.y, avgNormal.z, varNormal.x,
+           varNormal.y, varNormal.z);
+    printf("avgPdf=%f, varPdf=%f\n", avgPdf, varPdf);
+    printf("avgWo=[%f, %f, %f], varWo=[%f, %f, %f]\n", avgWo.x, avgWo.y, avgWo.z, varWo.x, varWo.y, varWo.z);
+}
+
 int main() {
+    testMicrofacet3D();
+    return 0;
+
     DiffuseBRDF diffuse{};
     std::vector<LightSource> lightSources(LIGHT_SOURCES);
     for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {

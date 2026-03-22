@@ -9,6 +9,9 @@
 #include <numbers>
 
 #include "utils.h"
+
+// Ported from: https://github.com/mitsuba-renderer/mitsuba3/blob/master/include/mitsuba/render/microfacet.h
+// sample_visible = True, type = GGX
 constexpr float PI = std::numbers::pi_v<float>;
 
 namespace mts {
@@ -69,15 +72,13 @@ namespace mts {
 
         float eval(const Vec3f &m) const {
             const float alpha_uv = m_alpha_u * m_alpha_v;
-            const float
-                    cos_theta = utils::cosTheta(m);
+            const float cos_theta = utils::cosTheta(m);
 
             const float result = 1.0f / (PI * alpha_uv * std::pow(
                                              std::pow(m.x / m_alpha_u, 2.0f) +
                                              std::pow(m.y / m_alpha_v, 2.0f) +
                                              std::pow(m.z, 2.0f), 2.0f)
                                  );
-
 
             // Prevent potential numerical issues in other stages of the model
             return result * cos_theta > 1e-20f ? result : 0.f;
@@ -122,7 +123,6 @@ namespace mts {
 
             return {m, pdf};
         }
-
 
         /**
          * \brief Smith's shadowing-masking function for a single direction
@@ -178,4 +178,61 @@ namespace mts {
         float m_alpha_u, m_alpha_v;
     };
 }
+
+
+// float eval_reflectance(const mts::MicrofacetDistribution &distr,
+//                        const Vec3f &wi,float eta) {
+//     MI_IMPORT_CORE_TYPES()
+//
+//     if (!distr.sample_visible())
+//         Throw("eval_reflectance(): requires visible normal sampling!");
+//
+//     int res = eta > 1 ? 32 : 128;
+//
+//     using FloatX = dr::DynamicArray<dr::scalar_t<float>>;
+//     auto [nodes, weights] = quad::gauss_legendre<FloatX>(res);
+//     float result = dr::zeros<float>(dr::width(wi));
+//
+//     auto [nodes_x, nodes_y]     = dr::meshgrid(nodes, nodes);
+//     auto [weights_x, weights_y] = dr::meshgrid(weights, weights);
+//
+//     using FloatP = dr::Packet<dr::scalar_t<float>>;
+//     using Normal3fP = Normal<FloatP, 3>;
+//     using Vector3fP = Vector<FloatP, 3>;
+//
+//     size_t packet_count = dr::width(wi) / FloatP::Size;
+//
+//     Assert(dr::width(wi) % FloatP::Size == 0);
+//
+//     for (size_t i = 0; i < packet_count; ++i) {
+//         Vector3fP wi_p;
+//         wi_p.x() = dr::load<FloatP>(wi.x().data() + i * FloatP::Size);
+//         wi_p.y() = dr::load<FloatP>(wi.y().data() + i * FloatP::Size);
+//         wi_p.z() = dr::load<FloatP>(wi.z().data() + i * FloatP::Size);
+//
+//         FloatP result_p = 0.f;
+//
+//         for (size_t j = 0; j < dr::width(nodes_x); ++j) {
+//             ScalarVector2f node = { nodes_x[j], nodes_y[j] };
+//             ScalarVector2f weight = { weights_x[j], weights_y[j] };
+//             node = dr::fmadd(node, 0.5f, 0.5f);
+//
+//             Normal3fP m = std::get<0>(distr.sample(wi_p, node));
+//             Vector3fP wo = reflect(wi_p, m);
+//             FloatP f = std::get<0>(fresnel(dr::dot(wi_p, m), FloatP(eta)));
+//             FloatP smith = distr.smith_g1(wo, m) * f;
+//             dr::masked(smith, wo.z() <= 0.f || wi_p.z() <= 0.f) = 0.f;
+//             result_p += smith * dr::prod(weight) * 0.25f;
+//
+//
+//             // float pdf = eval(m) * smith_g1(wi, m) * dr::abs_dot(wi, m) /
+//             //             Frame3f::cos_theta(wi);
+//         }
+//
+//         dr::store(result.data() + i * FloatP::Size, result_p);
+//     }
+//
+//     return result;
+// }
+
 #endif //PIS_MICROFACET_H

@@ -5,7 +5,13 @@
 #include   "utils.h"
 
 #include <cassert>
+#include <random>
 
+namespace {
+    std::random_device randDev;
+    std::default_random_engine randEng(randDev());
+    std::uniform_real_distribution<float> randDistr(0.f, 1.f);
+}
 
 float utils::safeSqrt(float x) {
     return x < 0 ? 0 : sqrt(x);
@@ -57,6 +63,10 @@ Spherical utils::toSpherical(const Vec3f &vec) {
     assert(sqrt(vec.x * vec.x + vec.y * vec.y) != 0);
     const float phi = sign * acos(vec.x / sqrt(vec.x * vec.x + vec.y * vec.y));
     return {r, theta, phi};
+}
+
+Vec3f utils::reflect(const Vec3f &v, const Vec3f &axis) {
+    return axis * (2 * dot(axis, v)) - v;
 }
 
 float utils::dot(const Vec3f &v1, const Vec3f &v2) {
@@ -138,4 +148,20 @@ Polar utils::normalize(const Polar &p) {
 /// Spherical
 Vec3f utils::toVec(const Spherical &) {
     throw std::runtime_error("Not implemented");
+}
+
+Vec3f utils::hemisphereSample() {
+    while (true) {
+        const Vec3f sampleUnnormalized(
+            randDistr(randEng) * 2 - 1,
+            randDistr(randEng) * 2 - 1,
+            randDistr(randEng)
+        );
+        const float mag2 = sampleUnnormalized.x * sampleUnnormalized.x +
+                           sampleUnnormalized.y * sampleUnnormalized.y +
+                           sampleUnnormalized.z * sampleUnnormalized.z;
+        if (mag2 < 1.0f) {
+            return normalize(sampleUnnormalized);
+        }
+    }
 }

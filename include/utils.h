@@ -28,6 +28,8 @@ namespace utils {
     /// Vec3f
     Spherical toSpherical(const Vec3f &);
 
+    Vec3f reflect(const Vec3f &v, const Vec3f &axis);
+
     float dot(const Vec3f &v1, const Vec3f &v2);
 
     Vec3f normalize(const Vec3f &v);
@@ -55,6 +57,8 @@ namespace utils {
 
     /// Spherical
     Vec3f toVec(const Spherical &);
+
+    Vec3f hemisphereSample();
 }
 
 #endif //PIS_UTILS_H
