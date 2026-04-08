@@ -15,11 +15,6 @@
 constexpr float PI = std::numbers::pi_v<float>;
 
 namespace mts {
-    /// Low-distortion concentric square to disk mapping by Peter Shirley
-    inline float lerp(const float v0, const float v1, const float t) {
-        return v0 + t * (v1 - v0);
-    }
-
     inline Point2f square_to_uniform_disk_concentric(const Point2f &sample) {
         const float x = 2.f * sample.x - 1.f;
         const float y = 2.f * sample.y - 1.f;
@@ -42,35 +37,17 @@ namespace mts {
     public:
         explicit MicrofacetDistribution(const float alpha)
             : m_alpha_u(alpha), m_alpha_v(alpha) {
-            configure();
+            m_alpha_u = std::max(m_alpha_u, 1e-4f);
+            m_alpha_v = std::max(m_alpha_v, 1e-4f);
         }
 
         MicrofacetDistribution(const float alpha_u, const float alpha_v)
             : m_alpha_u(alpha_u), m_alpha_v(alpha_v) {
-            configure();
+            m_alpha_u = std::max(m_alpha_u, 1e-4f);
+            m_alpha_v = std::max(m_alpha_v, 1e-4f);
         }
 
-        /// Return the roughness (isotropic case)
-        float alpha() const { return m_alpha_u; }
-
-        /// Return the roughness along the tangent direction
-        float alpha_u() const { return m_alpha_u; }
-
-        /// Return the roughness along the bitangent direction
-        float alpha_v() const { return m_alpha_v; }
-
-        /// Is this an isotropic microfacet distribution?
-        bool is_isotropic() const {
-            return m_alpha_u == m_alpha_v;
-        }
-
-        /// Scale the roughness values by some constant
-        void scale_alpha(const float value) {
-            m_alpha_u *= value;
-            m_alpha_v *= value;
-        }
-
-        float eval(const Vec3f &m) const {
+        [[nodiscard]] float eval(const Vec3f &m) const {
             const float alpha_uv = m_alpha_u * m_alpha_v;
             const float cos_theta = utils::cosTheta(m);
 
@@ -84,7 +61,7 @@ namespace mts {
             return result * cos_theta > 1e-20f ? result : 0.f;
         }
 
-        float pdf(const Vec3f &wi, const Vec3f &m) const {
+        [[nodiscard]] float pdf(const Vec3f &wi, const Vec3f &m) const {
             float result = eval(m);
 
             result *= smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
@@ -92,8 +69,8 @@ namespace mts {
             return result;
         }
 
-        std::pair<Normal3f, float> sample(const Vec3f &wi,
-                                          const Point2f &sample) const {
+        [[nodiscard]] std::pair<Normal3f, float> sample(const Vec3f &wi,
+                                                        const Point2f &sample) const {
             // Visible normal sampling.
 
             // Step 1: stretch wi
@@ -132,7 +109,7 @@ namespace mts {
          * \param m
          *     The microfacet normal
          */
-        float smith_g1(const Vec3f &v, const Vec3f &m) const {
+        [[nodiscard]] float smith_g1(const Vec3f &v, const Vec3f &m) const {
             const float xy_alpha_2 = std::pow(m_alpha_u * v.x, 2.0f) + std::pow(m_alpha_v * v.y, 2.0f);
             const float tan_theta_alpha_2 = xy_alpha_2 / std::pow(v.z, 2.0f);
 
@@ -156,7 +133,7 @@ namespace mts {
             Point2f p = square_to_uniform_disk_concentric(sample);
 
             const float s = 0.5f * (1.f + cos_theta_i);
-            p.y = lerp(utils::safeSqrt(1.f - std::pow(p.x, 2.0f)), p.y, s);
+            p.y = utils::lerp(utils::safeSqrt(1.f - std::pow(p.x, 2.0f)), p.y, s);
 
             const float x = p.x;
             // Project onto chosen side of the hemisphere
@@ -170,11 +147,6 @@ namespace mts {
         }
 
     protected:
-        void configure() {
-            m_alpha_u = std::max(m_alpha_u, 1e-4f);
-            m_alpha_v = std::max(m_alpha_v, 1e-4f);
-        }
-
         float m_alpha_u, m_alpha_v;
     };
 }

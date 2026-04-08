@@ -59,6 +59,10 @@ namespace utils {
     Vec3f toVec(const Spherical &);
 
     Vec3f hemisphereSample();
+
+    inline float lerp(const float v0, const float v1, const float t) {
+        return v0 + t * (v1 - v0);
+    }
 }
 
 #endif //PIS_UTILS_H
