@@ -147,8 +147,12 @@ Polar utils::normalize(const Polar &p) {
 }
 
 /// Spherical
-Vec3f utils::toVec(const Spherical &) {
-    throw std::runtime_error("Not implemented");
+Vec3f utils::toVec(const Spherical &s) {
+    return {
+        s.r * sin(s.theta) * cos(s.phi),
+        s.r * sin(s.theta) * sin(s.phi),
+        s.r * cos(s.theta)
+    };
 }
 
 Vec3f utils::hemisphereSample() {
