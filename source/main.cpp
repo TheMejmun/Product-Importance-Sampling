@@ -128,6 +128,13 @@ void testMicrofacet3D() {
     printf("avgWo=[%f, %f, %f], varWo=[%f, %f, %f]\n", avgWo.x, avgWo.y, avgWo.z, varWo.x, varWo.y, varWo.z);
 }
 
+// TODO change to MSE for error calculation
+// TODO calculate MSE/Variance per sample
+// TODO test whether Microfacet Normal Azimuth Perturbation changes PDF
+// TODO convert solid angle density to pdf
+// TODO reduce Microfacet Dimension to elevation only
+// TODO test brightness against Diffuse BRDF with full dome of light
+// TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
     testMicrofacet3D();
     return 0;
