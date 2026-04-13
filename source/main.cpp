@@ -160,11 +160,12 @@ void testAzimuthPerturbation() {
     }
     const float mse = utils::mse(pdf, samples);
     printf("MSE: %f\n", mse);
+
+    // Result: sometimes slightly changes pdf, but probably because of numerics only
 }
 
 // TODO change to MSE for error calculation
 // TODO calculate MSE/Variance per sample
-// TODO test whether Microfacet Normal Azimuth Perturbation changes PDF
 // TODO convert solid angle density to pdf
 // TODO reduce Microfacet Dimension to elevation only
 // TODO test brightness against Diffuse BRDF with full dome of light
