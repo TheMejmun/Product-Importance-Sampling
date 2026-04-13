@@ -29,12 +29,13 @@ namespace {
 constexpr float M_PI_F = M_PI;
 constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr float LIGHT_MAX_INTENSITY = 100.0f;
-constexpr uint32_t MS_TREE_SAMPLES = 1024;
+constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
 
 constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
-constexpr uint32_t BENCHMARK_SAMPLES = dpow(2, 10);
+constexpr uint32_t BENCHMARK_SAMPLES = dpow(2, 6);
 
 constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
+constexpr uint32_t PERTURBED_TEST_SAMPLE_COUNT = dpow(2, 20);
 
 void print_constants() {
     std::cout << "LIGHT_SOURCES                 " << LIGHT_SOURCES << std::endl;
@@ -42,6 +43,7 @@ void print_constants() {
     std::cout << "MS_TREE_SAMPLES               " << MS_TREE_SAMPLES << std::endl;
     std::cout << "REFERENCE_SAMPLES             " << REFERENCE_SAMPLES << std::endl;
     std::cout << "BENCHMARK_SAMPLES             " << BENCHMARK_SAMPLES << std::endl;
+    std::cout << "PERTURBED_TEST_SAMPLE_COUNT   " << PERTURBED_TEST_SAMPLE_COUNT << std::endl;
     std::cout << "MICROFACET_TEST_SAMPLE_COUNT  " << MICROFACET_TEST_SAMPLE_COUNT << "\n" << std::endl;
 }
 
@@ -58,14 +60,6 @@ LightSource generateLightSource() {
     const float endAngle = randDistr(randEng) * (M_PI_F - startAngle) + startAngle;
     const float intensity = randDistr(randEng);
     return {startAngle, endAngle, intensity};
-}
-
-float calculateAnalyticalIrradiance(const std::vector<LightSource> &lightSources) {
-    float irradiance = 0.f;
-    for (const auto &light: lightSources) {
-        irradiance += light.intensity * (light.end_angle - light.start_angle) / M_PI_F;
-    }
-    return irradiance;
 }
 
 MSTree setupIrradianceTree(const std::vector<LightSource> &lightSources) {
@@ -148,6 +142,26 @@ void testMicrofacet3D() {
     printf("avgWo=[%f, %f, %f], varWo=[%f, %f, %f]\n", avgWo.x, avgWo.y, avgWo.z, varWo.x, varWo.y, varWo.z);
 }
 
+void testAzimuthPerturbation() {
+    mts::MicrofacetDistribution distr{0.1f};
+    std::vector<float> samples(PERTURBED_TEST_SAMPLE_COUNT);
+    const Vec3f wi = utils::hemisphereSample();
+    const Vec3f m = utils::hemisphereSample();
+    const Spherical mSpherical = utils::toSpherical(m);
+    const float pdf = distr.pdf(wi, m);
+    if (pdf <= 0.f) {
+        testAzimuthPerturbation();
+        return;
+    }
+    for (uint32_t i = 0; i < PERTURBED_TEST_SAMPLE_COUNT; ++i) {
+        const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI_F * randDistr(randEng)};
+        const Vec3f perturbedM = utils::toVec(perturbedMSpherical);
+        samples[i] = distr.pdf(wi, perturbedM);
+    }
+    const float mse = utils::mse(pdf, samples);
+    printf("MSE: %f\n", mse);
+}
+
 // TODO change to MSE for error calculation
 // TODO calculate MSE/Variance per sample
 // TODO test whether Microfacet Normal Azimuth Perturbation changes PDF
@@ -157,8 +171,8 @@ void testMicrofacet3D() {
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
     print_constants();
-    // testMicrofacet3D();
-    // return 0;
+    testAzimuthPerturbation();
+    return 0;
 
     DiffuseBRDF diffuse{};
     std::vector<LightSource> lightSources(LIGHT_SOURCES);
@@ -172,9 +186,6 @@ int main() {
     const Polar wi{1.f, randDistr(randEng) * M_PI_F};
 
     printf("Reference:\n");
-    // TOOD only works for diffuse brdf
-    float analytical = calculateAnalyticalIrradiance(lightSources);
-    printf("\tAnalytical: %f\n", analytical);
     float brdfReference = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfReference);
     float mstReference = sampling::sample_mstree(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
