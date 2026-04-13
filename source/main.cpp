@@ -16,15 +16,34 @@
 #include "renderers/mis.h"
 #include "renderers/mstree_sampling.h"
 
+namespace {
+    constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
+        uint32_t result = 1;
+        for (uint32_t i = 0; i < exp; ++i) {
+            result *= base;
+        }
+        return result;
+    }
+}
+
 constexpr float M_PI_F = M_PI;
 constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr float LIGHT_MAX_INTENSITY = 100.0f;
 constexpr uint32_t MS_TREE_SAMPLES = 1024;
 
-constexpr uint32_t REFERENCE_SAMPLES = 1048576; // 2 ^ 20
-constexpr uint32_t BENCHMARK_SAMPLES = 64;
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 30);
+constexpr uint32_t BENCHMARK_SAMPLES = dpow(2, 10);
 
-constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = 1000000;
+constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
+
+void print_constants() {
+    std::cout << "LIGHT_SOURCES                 " << LIGHT_SOURCES << std::endl;
+    std::cout << "LIGHT_MAX_INTENSITY           " << LIGHT_MAX_INTENSITY << std::endl;
+    std::cout << "MS_TREE_SAMPLES               " << MS_TREE_SAMPLES << std::endl;
+    std::cout << "REFERENCE_SAMPLES             " << REFERENCE_SAMPLES << std::endl;
+    std::cout << "BENCHMARK_SAMPLES             " << BENCHMARK_SAMPLES << std::endl;
+    std::cout << "MICROFACET_TEST_SAMPLE_COUNT  " << MICROFACET_TEST_SAMPLE_COUNT << "\n" << std::endl;
+}
 
 // Anonymous namespace ensures internal linkage
 namespace {
@@ -136,8 +155,9 @@ void testMicrofacet3D() {
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
-    testMicrofacet3D();
-    return 0;
+    print_constants();
+    // testMicrofacet3D();
+    // return 0;
 
     DiffuseBRDF diffuse{};
     std::vector<LightSource> lightSources(LIGHT_SOURCES);
