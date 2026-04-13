@@ -62,15 +62,10 @@ namespace mts {
         }
 
         [[nodiscard]] float pdf(const Vec3f &wi, const Vec3f &m) const {
-            float result = eval(m);
-
-            result *= smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
-
-            return result;
+            return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
         }
 
-        [[nodiscard]] std::pair<Normal3f, float> sample(const Vec3f &wi,
-                                                        const Point2f &sample) const {
+        [[nodiscard]] Normal3f sample(const Vec3f &wi, const Point2f &sample) const {
             // Visible normal sampling.
 
             // Step 1: stretch wi
@@ -93,12 +88,8 @@ namespace mts {
                 (sin_phi * slope.x + cos_phi * slope.y) * m_alpha_v);
 
             // Step 4: compute normal & PDF
-            Normal3f m = utils::normalize(Vec3f(-slope.x, -slope.y, 1));
-
-            float pdf = eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) /
-                        utils::cosTheta(wi);
-
-            return {m, pdf};
+            const Normal3f m = utils::normalize(Vec3f(-slope.x, -slope.y, 1));
+            return m;
         }
 
         /**

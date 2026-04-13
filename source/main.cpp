@@ -102,7 +102,8 @@ struct Sample {
 
 Sample sampleMicrofacet3D(const mts::MicrofacetDistribution &distr, const Vec3f &wi) {
     const Point2f sample = {randDistr(randEng), randDistr(randEng)};
-    const auto [normal, pdf] = distr.sample(wi, sample);
+    const Normal3f normal = distr.sample(wi, sample);
+    const float pdf = distr.pdf(wi, normal);
     const Vec3f wo = utils::reflect(wi, normal);
     return {normal, wo, pdf};
 }
