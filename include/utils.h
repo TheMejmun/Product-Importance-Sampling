@@ -5,10 +5,25 @@
 #ifndef PIS_UTILS_H
 #define PIS_UTILS_H
 
+#include <iostream>
+#include <ostream>
+
 #include "coords.h"
+#include <stdio.h>
 
 namespace utils {
     float safeSqrt(float x);
+
+    template<typename T>
+    T mse(const T &mean, const std::vector<T> &samples) {
+        T sum{};
+        // std::cout << "Zero: " << sum << std::endl;
+        for (const T &sample: samples) {
+            // std::cout << "Sample: " << sample << std::endl;
+            sum += (sample - mean) * (sample - mean);
+        }
+        return sum / static_cast<float>(samples.size());
+    }
 
     /// Vec2f
     Polar toPolar(const Vec2f &);
