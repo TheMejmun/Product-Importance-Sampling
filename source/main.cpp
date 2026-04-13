@@ -31,7 +31,7 @@ constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr float LIGHT_MAX_INTENSITY = 100.0f;
 constexpr uint32_t MS_TREE_SAMPLES = 1024;
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 30);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
 constexpr uint32_t BENCHMARK_SAMPLES = dpow(2, 10);
 
 constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
