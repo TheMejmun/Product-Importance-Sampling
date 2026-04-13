@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <random>
+#include <stdexcept>
 
 namespace {
     std::random_device randDev;
