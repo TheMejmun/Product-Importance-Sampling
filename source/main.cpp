@@ -236,8 +236,6 @@ int main() {
     testPDF();
     printf("\n");
 
-    return 0;
-
     DiffuseBRDF diffuse{};
     std::vector<LightSource> lightSources(LIGHT_SOURCES);
     for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {

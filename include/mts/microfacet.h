@@ -169,11 +169,11 @@ namespace mts {
 //     using Normal3fP = Normal<FloatP, 3>;
 //     using Vector3fP = Vector<FloatP, 3>;
 //
-//     size_t packet_count = dr::width(wi) / FloatP::Size;
+//     uint32_t packet_count = dr::width(wi) / FloatP::Size;
 //
 //     Assert(dr::width(wi) % FloatP::Size == 0);
 //
-//     for (size_t i = 0; i < packet_count; ++i) {
+//     for (uint32_t i = 0; i < packet_count; ++i) {
 //         Vector3fP wi_p;
 //         wi_p.x() = dr::load<FloatP>(wi.x().data() + i * FloatP::Size);
 //         wi_p.y() = dr::load<FloatP>(wi.y().data() + i * FloatP::Size);
@@ -181,7 +181,7 @@ namespace mts {
 //
 //         FloatP result_p = 0.0;
 //
-//         for (size_t j = 0; j < dr::width(nodes_x); ++j) {
+//         for (uint32_t j = 0; j < dr::width(nodes_x); ++j) {
 //             ScalarVector2f node = { nodes_x[j], nodes_y[j] };
 //             ScalarVector2f weight = { weights_x[j], weights_y[j] };
 //             node = dr::fmadd(node, 0.5f, 0.5f);

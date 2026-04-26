@@ -54,7 +54,7 @@ public:
     void compile();
 
     // Get a random sample
-    [[nodiscard]] const MSTSample &sample() const;
+    [[nodiscard]] MSTSample sample() const;
 
     // Calculate the probability for a given sample
     [[nodiscard]] double pdf(const Node &node) const;
@@ -65,7 +65,7 @@ private:
     double mTotalFlux = 0.0;
     std::vector<Node> mNodes;
     std::vector<LightSample> mLightSamples;
-    std::discrete_distribution<size_t> mDistribution;
+    std::discrete_distribution<uint32_t> mDistribution;
     std::vector<double> pdfs;
 
     void compileRec(double leftBoundary, double rightBoundary);

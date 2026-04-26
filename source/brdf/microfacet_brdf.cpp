@@ -27,6 +27,13 @@ Vec3f upscale(const Polar &p) {
 }
 
 double MicrofacetBRDF::eval(const Polar &wi, const Polar &wo) const {
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
+    if (wi.phi > M_PI || wo.phi > M_PI) {
+        return 0.0;
+    }
+    // White
+    return 1.0 / M_PI;
 }
 
 double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
@@ -35,8 +42,12 @@ double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
     if (wi.phi > M_PI || wo.phi > M_PI) {
         return 0.0;
     }
-    // Equal pdf everywhere, since polar angle is uniformly distributed
-    return 1.0 / M_PI;
+
+    Polar m{1.0, (wi.phi + wo.phi) / 2.0};
+    Vec3f wi3 = upscale(wi);
+    Vec3f m3 = upscale(m);
+    double pdf3 = mDistribution.reflected_pdf(wi3, m3);
+    return pdf3 * 2.0; // Instead of hemsiphere (2pi), normalize to arc (pi)
 }
 
 Polar MicrofacetBRDF::sample(const Polar &wi) const {
@@ -44,6 +55,7 @@ Polar MicrofacetBRDF::sample(const Polar &wi) const {
 
     const Vec3f wi3 = upscale(wi);
     const Vec3f m3 = mDistribution.sample(wi3, {uniformDist(re), uniformDist(re)});
-    const Vec3f wo3 = utils::reflect(wi3, m3);
-    return truncate(wo3);
+    const Polar m = truncate(m3);
+    const Polar wo = utils::reflect(wi, m);
+    return wo;
 }

@@ -39,7 +39,7 @@ double sample_lights_additive(const std::vector<LightSource> &lightSources, cons
 
 double sample_lights_average(const std::vector<LightSource> &lightSources, const Polar &wo) {
     double intensity = 0.0;
-    size_t count = 0;
+    uint32_t count = 0;
     for (const auto &light: lightSources) {
         if (light.start_angle <= wo.phi && light.end_angle >= wo.phi) {
             intensity += light.intensity;
@@ -51,5 +51,7 @@ double sample_lights_average(const std::vector<LightSource> &lightSources, const
 
 double sampling::intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo) {
     // The additive method makes it easiest to calculate analytical irradiance
-    return sample_lights_additive(lightSources, wo);
+    // printf("wo: r:%f, phi:%f\n", wo.r, wo.phi);
+    double res = sample_lights_additive(lightSources, wo);
+    return res;
 }

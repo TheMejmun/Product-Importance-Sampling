@@ -24,7 +24,7 @@ void MSTree::add(const double position, const double value) {
 
 void MSTree::compileRec(double leftBoundary, double rightBoundary) {
     double flux = 0.0;
-    size_t count = 0;
+    uint32_t count = 0;
     for (const auto &sample: mLightSamples) {
         if (sample.position < leftBoundary)
             continue;
@@ -61,7 +61,7 @@ void MSTree::compile() {
     pdfs = std::vector<double>(mNodes.size());
     double newTotalFlux = 0.0;
     double pdfSum = 0.0;
-    for (size_t i = 0; i < mNodes.size(); ++i) {
+    for (uint32_t i = 0; i < mNodes.size(); ++i) {
         pdfs[i] = pdf(mNodes[i]);
         pdfSum += pdfs[i];
         newTotalFlux += mNodes[i].flux;
@@ -70,10 +70,10 @@ void MSTree::compile() {
     printf("PDF sum: %f\n", pdfSum);
 }
 
-const MSTSample &MSTree::sample() const {
+ MSTSample MSTree::sample() const {
     // Get a random Node weighted by its relative flux
     // TODO this would be faster in a binary tree
-    const size_t index = std::discrete_distribution<size_t>(pdfs.begin(), pdfs.end())(randEng);
+    const uint32_t index = std::discrete_distribution<uint32_t>(pdfs.begin(), pdfs.end())(randEng);
     const Node &sampleNode = mNodes[index];
 
     double position = sampleNode.leftBoundary + randDistr(randEng) * sampleNode.width();
@@ -94,7 +94,7 @@ void MSTree::exportToCsv(const std::string &filename) {
     std::ofstream csv;
     csv.open(filename);
     csv << "index,flux,width,leftBound,rightBound,\n";
-    for (size_t i = 0; i < mNodes.size(); ++i) {
+    for (uint32_t i = 0; i < mNodes.size(); ++i) {
         const Node &n = mNodes[i];
         csv << i << "," << n.flux << ",";
         csv << n.rightBoundary - n.leftBoundary << "," << n.leftBoundary << "," << n.rightBoundary << ",\n";
