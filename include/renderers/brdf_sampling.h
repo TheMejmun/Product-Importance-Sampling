@@ -11,14 +11,14 @@
 #include   <vector>
 
 namespace sampling {
-    float sample_brdf(
+    double sample_brdf(
         std::uint32_t iterations,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
         const Polar &wi
     );
 
-    float sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi);
+    double sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi);
 }
 
 #endif //PIS_BRDF_SAMPLING_H

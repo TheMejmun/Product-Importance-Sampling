@@ -12,18 +12,18 @@
 namespace {
     std::random_device randDev;
     std::default_random_engine randEng(randDev());
-    std::uniform_real_distribution<float> randDistr(0.f, 1.f);
+    std::uniform_real_distribution<double> randDistr(0.0, 1.0);
     std::uniform_int_distribution<uint32_t> randIntDistr(0, std::numeric_limits<uint32_t>::max());
 }
 
-void MSTree::add(const float position, const float value) {
-    assert(position >= 0.f && position <= M_PI);
+void MSTree::add(const double position, const double value) {
+    assert(position >= 0.0 && position <= M_PI);
     mTotalFlux += value;
     mLightSamples.emplace_back(value, position);
 }
 
-void MSTree::compileRec(float leftBoundary, float rightBoundary) {
-    float flux = 0.f;
+void MSTree::compileRec(double leftBoundary, double rightBoundary) {
+    double flux = 0.0;
     size_t count = 0;
     for (const auto &sample: mLightSamples) {
         if (sample.position < leftBoundary)
@@ -37,7 +37,7 @@ void MSTree::compileRec(float leftBoundary, float rightBoundary) {
 
     if (mTotalFlux > 0.0f && count > 1 && flux / mTotalFlux > SUBDIV_THRESHOLD) {
         assert(count > 1);
-        const float midPoint = leftBoundary + ((rightBoundary - leftBoundary) / 2.f);
+        const double midPoint = leftBoundary + ((rightBoundary - leftBoundary) / 2.0);
         //printf("subdividing [%f, %f] at %f\n", leftBoundary, rightBoundary, midPoint);
         compileRec(leftBoundary, midPoint);
         compileRec(midPoint, rightBoundary);
@@ -50,17 +50,17 @@ void MSTree::compileRec(float leftBoundary, float rightBoundary) {
 void MSTree::compile() {
     mNodes.clear();
     printf("Total flux in MSTree %f\n", mTotalFlux);
-    assert(mTotalFlux > 0.f);
+    assert(mTotalFlux > 0.0);
 
     std::sort(mLightSamples.begin(), mLightSamples.end());
-    compileRec(0.f, M_PI);
+    compileRec(0.0, M_PI);
 
     printf("Compiled %lu samples into %lu nodes\n", mLightSamples.size(), mNodes.size());
 
 
-    pdfs = std::vector<float>(mNodes.size());
-    float newTotalFlux = 0.f;
-    float pdfSum = 0.f;
+    pdfs = std::vector<double>(mNodes.size());
+    double newTotalFlux = 0.0;
+    double pdfSum = 0.0;
     for (size_t i = 0; i < mNodes.size(); ++i) {
         pdfs[i] = pdf(mNodes[i]);
         pdfSum += pdfs[i];
@@ -76,17 +76,17 @@ const MSTSample &MSTree::sample() const {
     const size_t index = std::discrete_distribution<size_t>(pdfs.begin(), pdfs.end())(randEng);
     const Node &sampleNode = mNodes[index];
 
-    float position = sampleNode.leftBoundary + randDistr(randEng) * sampleNode.width();
+    double position = sampleNode.leftBoundary + randDistr(randEng) * sampleNode.width();
     MSTSample result{
-        Polar{1.f, position},
+        Polar{1.0, position},
         pdfs[index] / sampleNode.width()
     };
     return {result};
 }
 
-float MSTree::pdf(const Node &node) const {
-    float relativeFlux = node.flux / mTotalFlux;
-    // float nodeAngle = node.width() / static_cast<float>(M_PI);
+double MSTree::pdf(const Node &node) const {
+    double relativeFlux = node.flux / mTotalFlux;
+    // double nodeAngle = node.width() / static_cast<double>(M_PI);
     return relativeFlux;
 }
 

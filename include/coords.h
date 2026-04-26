@@ -7,7 +7,7 @@
 #include <valarray>
 
 struct Vec2f {
-    float x, y;
+    double x, y;
 
     Vec2f operator+(const Vec2f &rhs) const {
         return {x + rhs.x, y + rhs.y};
@@ -17,7 +17,7 @@ struct Vec2f {
         return {x - rhs.x, y - rhs.y};
     }
 
-    Vec2f operator*(float rhs) const {
+    Vec2f operator*(double rhs) const {
         return {x * rhs, y * rhs};
     }
 };
@@ -27,7 +27,7 @@ typedef Vec2f Point2f;
 
 
 struct Vec3f {
-    float x, y, z;
+    double x, y, z;
 
     Vec3f operator+(const Vec3f &rhs) const {
         return {x + rhs.x, y + rhs.y, z + rhs.z};
@@ -37,7 +37,7 @@ struct Vec3f {
         return {x - rhs.x, y - rhs.y, z - rhs.z};
     }
 
-    Vec3f operator*(float rhs) const {
+    Vec3f operator*(double rhs) const {
         return {x * rhs, y * rhs, z * rhs};
     }
 
@@ -45,7 +45,7 @@ struct Vec3f {
         return {x * rhs.x, y * rhs.y, z * rhs.z};
     }
 
-    Vec3f operator/(float rhs) const {
+    Vec3f operator/(double rhs) const {
         return {x / rhs, y / rhs, z / rhs};
     }
 };
@@ -53,13 +53,13 @@ struct Vec3f {
 typedef Vec3f Normal3f;
 
 struct Polar {
-    float r, phi;
+    double r, phi;
 };
 
 // polar angle theta
 // azimuth angle phi
 struct Spherical {
-    float r, theta, phi;
+    double r, theta, phi;
 };
 
 

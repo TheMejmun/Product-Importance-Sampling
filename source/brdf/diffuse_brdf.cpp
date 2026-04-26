@@ -12,10 +12,10 @@
 namespace {
     std::random_device r;
     std::default_random_engine re(r());
-    std::uniform_real_distribution<float> hemisphereDist(0.f, M_PI);
+    std::uniform_real_distribution<double> hemisphereDist(0.0, M_PI);
 }
 
-float DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
+double DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
     assert(utils::cosTheta(wi) >= 0.0f);
     assert(utils::cosTheta(wo) >= 0.0f);
     if (wi.phi > M_PI || wo.phi > M_PI) {
@@ -25,7 +25,7 @@ float DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
     return 1.0f / M_PI;
 }
 
-float DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
+double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
     assert(utils::cosTheta(wi) >= 0.0f);
     assert(utils::cosTheta(wo) >= 0.0f);
     if (wi.phi > M_PI || wo.phi > M_PI) {
@@ -38,6 +38,6 @@ float DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
 Polar DiffuseBRDF::sample(const Polar &wi) const {
     assert(utils::cosTheta(wi) >= 0.0f);
 
-    const float phi = hemisphereDist(re);
+    const double phi = hemisphereDist(re);
     return {1.0f, phi};
 }

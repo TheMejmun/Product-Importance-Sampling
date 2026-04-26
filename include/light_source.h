@@ -10,13 +10,13 @@
 #include "coords.h"
 
 struct LightSource {
-    float start_angle;
-    float end_angle;
-    float intensity;
+    double start_angle;
+    double end_angle;
+    double intensity;
 };
 
 namespace sampling {
-    float intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo);
+    double intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo);
 }
 
 #endif //PIS_LIGHT_SOURCE_H

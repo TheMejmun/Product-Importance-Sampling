@@ -7,23 +7,23 @@
 #include "light_source.h"
 
 // TODO cosTheta wi
-float sampling::sample_brdf(
+double sampling::sample_brdf(
     std::uint32_t iterations,
     const BRDF &brdf,
     const std::vector<LightSource> &lightSources,
     const Polar &wi
 ) {
-    float color = 0.f;
+    double color = 0.0;
     for (int i = 0; i < iterations; ++i) {
         color += sample_brdf(brdf, lightSources, wi);
     }
-    color /= static_cast<float>(iterations);
+    color /= static_cast<double>(iterations);
     return color;
 }
 
 // TODO cosTheta wo
-float sampling::sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) {
+double sampling::sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) {
     const Polar wo = brdf.sample(wi);
-    const float incomingLight = intersect_lights(lightSources, wo);
+    const double incomingLight = intersect_lights(lightSources, wo);
     return incomingLight * brdf.eval(wi, wo) / brdf.pdf(wi, wo);
 }

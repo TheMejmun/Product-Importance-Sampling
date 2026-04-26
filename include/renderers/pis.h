@@ -12,7 +12,7 @@
 #include "brdf/brdf.h"
 
 namespace sampling {
-    float pis(
+    double pis(
         std::uint32_t iterations,
         const MSTree &msTree,
         const BRDF &brdf,
@@ -20,7 +20,7 @@ namespace sampling {
         const Polar &wi
     );
 
-    float pis(
+    double pis(
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,

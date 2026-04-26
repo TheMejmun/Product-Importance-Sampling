@@ -14,9 +14,9 @@ protected:
 
 public:
     // Should return the "color" -> in this case monochrome brightness
-    [[nodiscard]] virtual float eval(const Polar &wi, const Polar &wo)  const = 0;
+    [[nodiscard]] virtual double eval(const Polar &wi, const Polar &wo)  const = 0;
 
-    [[nodiscard]] virtual float pdf(const Polar &wi, const Polar &wo) const= 0;
+    [[nodiscard]] virtual double pdf(const Polar &wi, const Polar &wo) const= 0;
 
     [[nodiscard]] virtual Polar sample(const Polar &wi)const = 0;
 };

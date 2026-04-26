@@ -13,7 +13,7 @@ namespace {
     std::uniform_int_distribution<uint32_t> randIntDistr(0, std::numeric_limits<uint32_t>::max());
 }
 
-float sample_lights_random(const std::vector<LightSource> &lightSources, const Polar &wo) {
+double sample_lights_random(const std::vector<LightSource> &lightSources, const Polar &wo) {
     std::vector<LightSource const *> reachableLights;
     for (const auto &light: lightSources) {
         if (light.start_angle <= wo.phi && light.end_angle >= wo.phi) {
@@ -21,14 +21,14 @@ float sample_lights_random(const std::vector<LightSource> &lightSources, const P
         }
     }
     // Randomly take one of them for the intensity
-    float intensity = reachableLights.empty()
+    double intensity = reachableLights.empty()
                           ? 0
                           : reachableLights[randIntDistr(randEng) % reachableLights.size()]->intensity;
     return intensity;
 }
 
-float sample_lights_additive(const std::vector<LightSource> &lightSources, const Polar &wo) {
-    float intensity = 0.f;
+double sample_lights_additive(const std::vector<LightSource> &lightSources, const Polar &wo) {
+    double intensity = 0.0;
     for (const auto &light: lightSources) {
         if (light.start_angle <= wo.phi && light.end_angle >= wo.phi) {
             intensity += light.intensity;
@@ -37,8 +37,8 @@ float sample_lights_additive(const std::vector<LightSource> &lightSources, const
     return intensity;
 }
 
-float sample_lights_average(const std::vector<LightSource> &lightSources, const Polar &wo) {
-    float intensity = 0.f;
+double sample_lights_average(const std::vector<LightSource> &lightSources, const Polar &wo) {
+    double intensity = 0.0;
     size_t count = 0;
     for (const auto &light: lightSources) {
         if (light.start_angle <= wo.phi && light.end_angle >= wo.phi) {
@@ -46,10 +46,10 @@ float sample_lights_average(const std::vector<LightSource> &lightSources, const 
             ++count;
         }
     }
-    return intensity / static_cast<float>(count);
+    return intensity / static_cast<double>(count);
 }
 
-float sampling::intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo) {
+double sampling::intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo) {
     // The additive method makes it easiest to calculate analytical irradiance
     return sample_lights_additive(lightSources, wo);
 }

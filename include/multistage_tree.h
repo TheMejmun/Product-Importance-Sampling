@@ -15,22 +15,22 @@
 #define SUBDIV_THRESHOLD 0.1f
 
 struct Node {
-    float flux;
-    float leftBoundary;
-    float rightBoundary;
+    double flux;
+    double leftBoundary;
+    double rightBoundary;
 
     bool operator <(const Node &rhs) const {
         return this->leftBoundary < rhs.leftBoundary;
     }
 
-    [[nodiscard]] float width() const {
+    [[nodiscard]] double width() const {
         return rightBoundary - leftBoundary;
     }
 };
 
 struct LightSample {
-    float flux;
-    float position;
+    double flux;
+    double position;
 
     bool operator <(const LightSample &rhs) const {
         return this->position < rhs.position;
@@ -39,7 +39,7 @@ struct LightSample {
 
 struct MSTSample {
     Polar wo;
-    float pdf;
+    double pdf;
 };
 
 // TODO convert this to a binary tree
@@ -48,7 +48,7 @@ public:
     MSTree() = default;
 
     // Deposit a sample into the tree
-    void add(float position, float value);
+    void add(double position, double value);
 
     // Reconstruct the tree from all collected samples
     void compile();
@@ -57,18 +57,18 @@ public:
     [[nodiscard]] const MSTSample &sample() const;
 
     // Calculate the probability for a given sample
-    [[nodiscard]] float pdf(const Node &node) const;
+    [[nodiscard]] double pdf(const Node &node) const;
 
     void exportToCsv(const std::string &filename);
 
 private:
-    float mTotalFlux = 0.f;
+    double mTotalFlux = 0.0;
     std::vector<Node> mNodes;
     std::vector<LightSample> mLightSamples;
     std::discrete_distribution<size_t> mDistribution;
-    std::vector<float> pdfs;
+    std::vector<double> pdfs;
 
-    void compileRec(float leftBoundary, float rightBoundary);
+    void compileRec(double leftBoundary, double rightBoundary);
 };
 
 #endif //PIS_MULTISTAGE_TREE_H
