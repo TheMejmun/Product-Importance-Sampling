@@ -45,9 +45,9 @@ double utils::cosTheta(const Vec2f &v) {
 }
 
 double utils::sinTheta(const Vec2f &v) {
-    double sinTheta2 = 1.0f - v.y * v.y;
-    if (sinTheta2 <= 0.0f)
-        return 0.0f;
+    double sinTheta2 = 1.0 - v.y * v.y;
+    if (sinTheta2 <= 0.0)
+        return 0.0;
     return sqrt(sinTheta2);
 }
 
@@ -93,8 +93,8 @@ double utils::sinTheta(const Polar &p) {
  * description)
  */
 double utils::cosPhi(const Vec3f &v) {
-    double sin_theta_2 = std::pow(sinTheta(v), 2.0f),
-            inv_sin_theta = 1.0f / sinTheta(v);
+    double sin_theta_2 = std::pow(sinTheta(v), 2.0),
+            inv_sin_theta = 1.0 / sinTheta(v);
     return std::abs(sin_theta_2) <= 4.0 * 1e-4
                ? 1.0
                : std::min(std::max(v.x * inv_sin_theta, -1.0), 1.0);
@@ -105,8 +105,8 @@ double utils::cosPhi(const Vec3f &v) {
  * description)
  */
 double utils::sinPhi(const Vec3f &v) {
-    double sin_theta_2 = std::pow(sinTheta(v), 2.0f),
-            inv_sin_theta = 1.0f / sinTheta(v);
+    double sin_theta_2 = std::pow(sinTheta(v), 2.0),
+            inv_sin_theta = 1.0 / sinTheta(v);
     return std::abs(sin_theta_2) <= 4.0 * 1e-4
                ? 0.0
                : std::min(std::max(v.y * inv_sin_theta, -1.0), 1.0);
@@ -131,11 +131,11 @@ Polar utils::reflect(const Polar &p, const Polar &axis) {
 double utils::cosTheta(const Polar &p) {
     // Instead of calculating the cosine against the normal, we take the sine of the angle itself
     // https://en.wikipedia.org/wiki/Sine_and_cosine#/media/File:Sine_cosine_one_period.svg
-    return cos(p.phi - static_cast<double>(0.5 * M_PI));
+    return cos(p.phi - (0.5 * M_PI));
 }
 
 double utils::sinTheta(const Vec3f &v) {
-    return std::sqrt(std::pow(v.x, 2.0f) + std::pow(v.y, 2.0f));
+    return std::sqrt(std::pow(v.x, 2.0) + std::pow(v.y, 2.0));
 }
 
 double utils::tanTheta(const Polar &p) {
@@ -143,7 +143,7 @@ double utils::tanTheta(const Polar &p) {
 }
 
 Polar utils::normalize(const Polar &p) {
-    return {1.0f, p.phi};
+    return {1.0, p.phi};
 }
 
 /// Spherical
@@ -165,7 +165,7 @@ Vec3f utils::hemisphereSample() {
         const double mag2 = sampleUnnormalized.x * sampleUnnormalized.x +
                            sampleUnnormalized.y * sampleUnnormalized.y +
                            sampleUnnormalized.z * sampleUnnormalized.z;
-        if (mag2 <= 1.0f) {
+        if (mag2 <= 1.0) {
             return normalize(sampleUnnormalized);
         }
     }

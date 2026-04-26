@@ -28,7 +28,7 @@ namespace {
 
 constexpr double M_PI_F = M_PI;
 constexpr uint32_t LIGHT_SOURCES = 4;
-constexpr double LIGHT_MAX_INTENSITY = 100.0f;
+constexpr double LIGHT_MAX_INTENSITY = 100.0;
 constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
 
 constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
@@ -108,7 +108,7 @@ Sample sampleMicrofacet3D(const mts::MicrofacetDistribution &distr, const Vec3f 
 
 void testMicrofacet3D() {
     mts::MicrofacetDistribution test{0.1f};
-    const auto wi = utils::normalize(Vec3f{1.0f, 0.0f, 1.0f});
+    const auto wi = utils::normalize(Vec3f{1.0, 0.0, 1.0});
     printf("wi=[%f, %f, %f]\n", wi.x, wi.y, wi.z);
 
     std::vector<Sample> samples(MICROFACET_TEST_SAMPLE_COUNT);
@@ -171,7 +171,7 @@ void testAzimuthPerturbation() {
 
 void testSolidAngleDensity() {
     printf("Testing solid angle density accuracy\n");
-    mts::MicrofacetDistribution distr{0.2f};
+    mts::MicrofacetDistribution distr{0.1f};
     const double uniform_hemisphere_pdf = 1.0 / (2.0 * M_PI);
 
     for (double cos_i: {0.9f, 0.7f, 0.5f, 0.3f, 0.1f}) {
@@ -181,8 +181,36 @@ void testSolidAngleDensity() {
         double sum = 0.0;
         for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
             const Vec3f m = utils::hemisphereSample();
+            // if (utils::cosTheta(utils::reflect(wi, m)) < 0.0) {
+            //     --i;
+            //     continue;
+            // }
             const double pdf = distr.solid_angle_density(wi, m);
             sum += pdf / uniform_hemisphere_pdf;
+        }
+        printf("cos_i=%.1f: integral = %f\n", cos_i,
+               sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
+    }
+}
+
+void testPDF() {
+    printf("Testing PDF accuracy\n");
+    mts::MicrofacetDistribution distr{0.1f};
+    const double uniform_hemisphere_pdf = 1.0 / (2.0 * M_PI);
+
+    for (double cos_i: {0.9f, 0.7f, 0.5f, 0.3f, 0.1f}) {
+        const double sin_i = std::sqrt(1.f - cos_i * cos_i);
+        const Vec3f wi = {sin_i, 0.f, cos_i};
+
+        double sum = 0.0;
+        for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
+            const Vec3f m = distr.sample(wi, {randDistr(randEng), randDistr(randEng)});
+            if (utils::cosTheta(utils::reflect(wi, m)) < 0.0) {
+                --i;
+                continue;
+            }
+            const double pdf = distr.reflected_pdf(wi, m);
+            sum += 1.0 / (pdf / uniform_hemisphere_pdf);
         }
         printf("cos_i=%.1f: integral = %f\n", cos_i,
                sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
@@ -204,6 +232,10 @@ int main() {
 
     testSolidAngleDensity();
     printf("\n");
+
+    testPDF();
+    printf("\n");
+
     return 0;
 
     DiffuseBRDF diffuse{};

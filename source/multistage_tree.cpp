@@ -35,7 +35,7 @@ void MSTree::compileRec(double leftBoundary, double rightBoundary) {
         ++count;
     }
 
-    if (mTotalFlux > 0.0f && count > 1 && flux / mTotalFlux > SUBDIV_THRESHOLD) {
+    if (mTotalFlux > 0.0 && count > 1 && flux / mTotalFlux > SUBDIV_THRESHOLD) {
         assert(count > 1);
         const double midPoint = leftBoundary + ((rightBoundary - leftBoundary) / 2.0);
         //printf("subdividing [%f, %f] at %f\n", leftBoundary, rightBoundary, midPoint);

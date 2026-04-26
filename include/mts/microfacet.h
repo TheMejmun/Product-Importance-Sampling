@@ -51,10 +51,10 @@ namespace mts {
             const double alpha_uv = m_alpha_u * m_alpha_v;
             const double cos_theta = utils::cosTheta(m);
 
-            const double result = 1.0f / (PI * alpha_uv * std::pow(
-                                              std::pow(m.x / m_alpha_u, 2.0f) +
-                                              std::pow(m.y / m_alpha_v, 2.0f) +
-                                              std::pow(m.z, 2.0f), 2.0f)
+            const double result = 1.0 / (PI * alpha_uv * std::pow(
+                                              std::pow(m.x / m_alpha_u, 2.0) +
+                                              std::pow(m.y / m_alpha_v, 2.0) +
+                                              std::pow(m.z, 2.0), 2.0)
                                   );
 
             // Prevent potential numerical issues in other stages of the model
@@ -67,7 +67,7 @@ namespace mts {
         }
 
         [[nodiscard]] double reflected_pdf(const Vec3f &wi, const Vec3f &m) const {
-            return solid_angle_density(wi, m) / (4.0f * std::abs(utils::dot(wi, m)));
+            return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
         }
 
         [[nodiscard]] Normal3f sample(const Vec3f &wi, const Point2f &sample) const {
@@ -107,8 +107,8 @@ namespace mts {
          */
 
         [[nodiscard]] double smith_g1(const Vec3f &v, const Vec3f &m) const {
-            const double xy_alpha_2 = std::pow(m_alpha_u * v.x, 2.0f) + std::pow(m_alpha_v * v.y, 2.0f);
-            const double tan_theta_alpha_2 = xy_alpha_2 / std::pow(v.z, 2.0f);
+            const double xy_alpha_2 = std::pow(m_alpha_u * v.x, 2.0) + std::pow(m_alpha_v * v.y, 2.0);
+            const double tan_theta_alpha_2 = xy_alpha_2 / std::pow(v.z, 2.0);
 
             double result = 2.0 / (1.0 + std::sqrt(1.0 + tan_theta_alpha_2));
 
@@ -130,7 +130,7 @@ namespace mts {
             Point2f p = square_to_uniform_disk_concentric(sample);
 
             const double s = 0.5f * (1.0 + cos_theta_i);
-            p.y = utils::lerp(utils::safeSqrt(1.0 - std::pow(p.x, 2.0f)), p.y, s);
+            p.y = utils::lerp(utils::safeSqrt(1.0 - std::pow(p.x, 2.0)), p.y, s);
 
             const double x = p.x;
             // Project onto chosen side of the hemisphere
@@ -138,8 +138,8 @@ namespace mts {
             const double z = utils::safeSqrt(1.0 - utils::dot(p, p));
 
             // Convert to slope
-            const double sin_theta_i = utils::safeSqrt(1.0 - std::pow(cos_theta_i, 2.0f));
-            const double norm = 1.0f / (sin_theta_i * y + cos_theta_i * z);
+            const double sin_theta_i = utils::safeSqrt(1.0 - std::pow(cos_theta_i, 2.0));
+            const double norm = 1.0 / (sin_theta_i * y + cos_theta_i * z);
             return Vec2f(cos_theta_i * y - sin_theta_i * z, x) * norm;
         }
 

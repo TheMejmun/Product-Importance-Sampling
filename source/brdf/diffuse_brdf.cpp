@@ -16,28 +16,28 @@ namespace {
 }
 
 double DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0f);
-    assert(utils::cosTheta(wo) >= 0.0f);
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
     if (wi.phi > M_PI || wo.phi > M_PI) {
-        return 0.0f;
+        return 0.0;
     }
     // White diffuse
-    return 1.0f / M_PI;
+    return 1.0 / M_PI;
 }
 
 double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0f);
-    assert(utils::cosTheta(wo) >= 0.0f);
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
     if (wi.phi > M_PI || wo.phi > M_PI) {
-        return 0.0f;
+        return 0.0;
     }
     // Equal pdf everywhere, since polar angle is uniformly distributed
-    return 1.0f / M_PI;
+    return 1.0 / M_PI;
 }
 
 Polar DiffuseBRDF::sample(const Polar &wi) const {
-    assert(utils::cosTheta(wi) >= 0.0f);
+    assert(utils::cosTheta(wi) >= 0.0);
 
     const double phi = hemisphereDist(re);
-    return {1.0f, phi};
+    return {1.0, phi};
 }
