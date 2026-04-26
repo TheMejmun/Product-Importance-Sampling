@@ -169,46 +169,6 @@ void testAzimuthPerturbation() {
     // Result: sometimes slightly changes pdf, but probably because of numerics only
 }
 
-double testPDF(float alpha = 0.1f) {
-    // printf("Testing pdf accuracy, alpha: %f\n", alpha);
-    mts::MicrofacetDistribution distr{alpha};
-    const double uniform_hemisphere_pdf = 1.0 / (2.0 * M_PI);
-    double pdf_avg = 0.0;
-
-    for (int64_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
-    const Vec3f wi = utils::hemisphereSample();
-        const Vec3f m = distr.sample(wi, {randDistr(randEng), randDistr(randEng)});
-        const Vec3f wo = utils::reflect(wi, m);
-        const double pdf = distr.reflected_pdf(wi, m);
-        if (pdf <= 0.0 || utils::cosTheta(wo) < 0.0) {
-            --i;
-            continue;
-        }
-        pdf_avg += 1.0 / pdf;
-
-        // const Vec3f wo = utils::hemisphereSample();
-        // const Vec3f m = utils::normalize(wi + wo);
-        //
-        // const double pdf = distr.reflected_pdf(wi, m);
-        // // jacobian from wo to m: dwo/dm = 4|wi·m|
-        // pdf_avg += pdf * 4.0 * std::abs(utils::dot(wi, m)) / uniform_hemisphere_pdf;
-
-    }
-    pdf_avg = pdf_avg / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT);
-    // printf("pdf_avg: %f, expected: %f\n",
-    //        pdf_avg,
-    //        2.0 * M_PI);
-    return pdf_avg;
-}
-
-void testPDFMany() {
-    for (float alpha: {0.1f, 0.2f, 0.3f, 0.5f, 0.7f, 1.0f}) {
-        mts::MicrofacetDistribution distr{0.1f};
-        double res = testPDF(alpha);
-        printf("alpha=%.1f: integral = %f\n", alpha, res);
-    }
-}
-
 void testSolidAngleDensity() {
     printf("Testing solid angle density accuracy\n");
     mts::MicrofacetDistribution distr{0.2f};
@@ -237,11 +197,13 @@ void testSolidAngleDensity() {
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
     print_constants();
+    printf("\n");
 
     testAzimuthPerturbation();
-    testSolidAngleDensity();
-    testPDFMany();
+    printf("\n");
 
+    testSolidAngleDensity();
+    printf("\n");
     return 0;
 
     DiffuseBRDF diffuse{};
