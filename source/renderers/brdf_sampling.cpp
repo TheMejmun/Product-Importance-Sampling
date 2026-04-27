@@ -21,6 +21,28 @@ double sampling::sample_brdf(
     return color;
 }
 
+double sampling::sample_brdf(double seconds, const BRDF &brdf, const std::vector<LightSource> &lightSources,
+                             const Polar &wi) {
+    double color = 0.0;
+    int iterations = 0;
+    time_t start;
+    time(&start);
+    for (;;) {
+        const double res = sample_brdf(brdf, lightSources, wi);
+        time_t now;
+        time(&now);
+        const double duration = difftime(now, start);
+        if (duration > seconds) {
+            break;
+        }
+        color += res;
+        ++iterations;
+    }
+    printf("\t%d samples in %f seconds\n", iterations, seconds);
+    color /= static_cast<double>(iterations);
+    return color;
+}
+
 // TODO cosTheta wo
 double sampling::sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) {
     const Polar wo = brdf.sample(wi);

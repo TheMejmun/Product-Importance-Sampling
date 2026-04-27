@@ -18,6 +18,13 @@ namespace sampling {
         const Polar &wi
     );
 
+    double sample_brdf(
+        double seconds,
+        const BRDF &brdf,
+        const std::vector<LightSource> &lightSources,
+        const Polar &wi
+    );
+
     double sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi);
 }
 

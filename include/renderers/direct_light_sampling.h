@@ -12,7 +12,7 @@
 #include "brdf/brdf.h"
 
 namespace sampling {
-    double sample_mstree(
+    double sample_light(
         std::uint32_t iterations,
         const MSTree &msTree,
         const BRDF &brdf,
@@ -20,7 +20,15 @@ namespace sampling {
         const Polar &wi
     );
 
-    double sample_mstree(
+    double sample_light(
+        double seconds,
+        const MSTree &msTree,
+        const BRDF &brdf,
+        const std::vector<LightSource> &lightSources,
+        const Polar &wi
+    );
+
+    double sample_light(
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,

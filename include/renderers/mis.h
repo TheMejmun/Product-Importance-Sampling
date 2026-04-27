@@ -21,6 +21,14 @@ namespace sampling {
     );
 
     double mis(
+        double seconds,
+        const MSTree &msTree,
+        const BRDF &brdf,
+        const std::vector<LightSource> &lightSources,
+        const Polar &wi
+    );
+
+    double mis(
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,

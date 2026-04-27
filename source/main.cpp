@@ -14,7 +14,7 @@
 #include "utils.h"
 #include "mts/microfacet.h"
 #include "renderers/mis.h"
-#include "renderers/mstree_sampling.h"
+#include "renderers/direct_light_sampling.h"
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -31,8 +31,9 @@ constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr double LIGHT_MAX_INTENSITY = 100.0;
 constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
-constexpr uint32_t BENCHMARK_SAMPLES = dpow(2, 6);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 25);
+constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
+constexpr double ET_BENCHMARK_SECONDS = 0.001;
 
 constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
 constexpr uint32_t PERTURBED_TEST_SAMPLE_COUNT = dpow(2, 20);
@@ -44,7 +45,8 @@ void print_constants() {
     std::cout << "LIGHT_MAX_INTENSITY             " << LIGHT_MAX_INTENSITY << std::endl;
     std::cout << "MS_TREE_SAMPLES                 " << MS_TREE_SAMPLES << std::endl;
     std::cout << "REFERENCE_SAMPLES               " << REFERENCE_SAMPLES << std::endl;
-    std::cout << "BENCHMARK_SAMPLES               " << BENCHMARK_SAMPLES << std::endl;
+    std::cout << "ES_BENCHMARK_SAMPLES            " << ES_BENCHMARK_SAMPLES << std::endl;
+    std::cout << "ET_BENCHMARK_SECONDS            " << ET_BENCHMARK_SECONDS << std::endl;
     std::cout << "MICROFACET_TEST_SAMPLE_COUNT    " << MICROFACET_TEST_SAMPLE_COUNT << "\n" << std::endl;
     std::cout << "PERTURBED_TEST_SAMPLE_COUNT     " << PERTURBED_TEST_SAMPLE_COUNT << std::endl;
     std::cout << "REFLECTED_PDF_TEST_SAMPLE_COUNT " << REFLECTED_PDF_TEST_SAMPLE_COUNT << std::endl;
@@ -247,21 +249,23 @@ int main() {
 
     const Polar wi{1.0, randDistr(randEng) * M_PI_F};
 
-    printf("Reference:\n");
     double brdfReference = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
-    printf("\tBRDF: %f\n", brdfReference);
-    double mstReference = sampling::sample_mstree(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    printf("\tMST Sampling: %f\n", mstReference);
-    double misReference = sampling::mis(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    printf("\tMIS: %f\n", misReference);
+    printf("Reference: %f\n", brdfReference);
 
-    printf("Equal Samples %d:\n", BENCHMARK_SAMPLES);
-    double brdfBenchmarkES = sampling::sample_brdf(BENCHMARK_SAMPLES, diffuse, lightSources, wi);
+    printf("Equal Samples %d:\n", ES_BENCHMARK_SAMPLES);
+    double brdfBenchmarkES = sampling::sample_brdf(ES_BENCHMARK_SAMPLES, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkES);
-    double mstBenchmarkES = sampling::sample_mstree(BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    printf("\tMST Sampling: %f\n", mstBenchmarkES);
-    double misBenchmarkES = sampling::mis(BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    double mstBenchmarkES = sampling::sample_light(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tDirect Light: %f\n", mstBenchmarkES);
+    double misBenchmarkES = sampling::mis(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tMIS: %f\n", misBenchmarkES);
 
+    printf("Equal Time %f:\n", ET_BENCHMARK_SECONDS);
+    double brdfBenchmarkET = sampling::sample_brdf(ET_BENCHMARK_SECONDS, diffuse, lightSources, wi);
+    printf("\tBRDF: %f\n", brdfBenchmarkET);
+    double mstBenchmarkET = sampling::sample_light(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
+    printf("\tDirect Light: %f\n", mstBenchmarkET);
+    double misBenchmarkET = sampling::mis(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
+    printf("\tMIS: %f\n", misBenchmarkET);
     return 0;
 }
