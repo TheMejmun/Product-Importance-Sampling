@@ -22,7 +22,7 @@ Polar truncate(const Vec3f &v) {
 }
 
 Vec3f upscale(const Polar &p) {
-    const Spherical s{p.r, 0.0, p.phi};
+    const Spherical s{p.r, p.phi, 0.0};
     return utils::toVec(s);
 }
 
@@ -45,8 +45,11 @@ double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
 
     Polar m{1.0, (wi.phi + wo.phi) / 2.0};
     Vec3f wi3 = upscale(wi);
+    // Vec3f wo3 = upscale(wo);
     Vec3f m3 = upscale(m);
+    // printf("wi [%f, %f, %f]  m [%f, %f, %f]  wo [%f, %f, %f]\n", wi3.x, wi3.y, wi3.z, m3.x, m3.y, m3.z, wo3.x, wo3.y, wo3.z);
     double pdf3 = mDistribution.reflected_pdf(wi3, m3);
+    assert(pdf3 < 0.5);
     return pdf3 * 2.0; // Instead of hemsiphere (2pi), normalize to arc (pi)
 }
 
@@ -57,5 +60,11 @@ Polar MicrofacetBRDF::sample(const Polar &wi) const {
     const Vec3f m3 = mDistribution.sample(wi3, {uniformDist(re), uniformDist(re)});
     const Polar m = truncate(m3);
     const Polar wo = utils::reflect(wi, m);
+    const Polar wo2 = truncate(utils::reflect(wi3, m3));
+    // printf("wo [%f, %f]  wo2 [%f, %f]\n", wo.r, wo.phi, wo2.r, wo2.phi);
+
+    if (wo.phi > M_PI) {
+        return sample(wi);
+    }
     return wo;
 }

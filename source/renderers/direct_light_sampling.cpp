@@ -37,7 +37,7 @@ double sampling::sample_light(double seconds, const MSTree &msTree, const BRDF &
         color += res;
         ++iterations;
     }
-    printf("\t%d samples in %f seconds\n", iterations, seconds);
+    printf("\t%d samples in %f seconds\t", iterations, seconds);
     color /= static_cast<double>(iterations);
     return color;
 }

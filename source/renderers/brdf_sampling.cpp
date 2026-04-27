@@ -38,7 +38,7 @@ double sampling::sample_brdf(double seconds, const BRDF &brdf, const std::vector
         color += res;
         ++iterations;
     }
-    printf("\t%d samples in %f seconds\n", iterations, seconds);
+    printf("\t%d samples in %f seconds\t", iterations, seconds);
     color /= static_cast<double>(iterations);
     return color;
 }

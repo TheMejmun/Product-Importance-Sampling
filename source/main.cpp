@@ -12,6 +12,7 @@
 #include "light_source.h"
 #include "multistage_tree.h"
 #include "utils.h"
+#include "brdf/microfacet_brdf.h"
 #include "mts/microfacet.h"
 #include "renderers/mis.h"
 #include "renderers/direct_light_sampling.h"
@@ -31,9 +32,9 @@ constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr double LIGHT_MAX_INTENSITY = 100.0;
 constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 25);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
 constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
-constexpr double ET_BENCHMARK_SECONDS = 0.001;
+constexpr double ET_BENCHMARK_SECONDS = 0.0001;
 
 constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
 constexpr uint32_t PERTURBED_TEST_SAMPLE_COUNT = dpow(2, 20);
@@ -47,7 +48,7 @@ void print_constants() {
     std::cout << "REFERENCE_SAMPLES               " << REFERENCE_SAMPLES << std::endl;
     std::cout << "ES_BENCHMARK_SAMPLES            " << ES_BENCHMARK_SAMPLES << std::endl;
     std::cout << "ET_BENCHMARK_SECONDS            " << ET_BENCHMARK_SECONDS << std::endl;
-    std::cout << "MICROFACET_TEST_SAMPLE_COUNT    " << MICROFACET_TEST_SAMPLE_COUNT << "\n" << std::endl;
+    std::cout << "MICROFACET_TEST_SAMPLE_COUNT    " << MICROFACET_TEST_SAMPLE_COUNT << std::endl;
     std::cout << "PERTURBED_TEST_SAMPLE_COUNT     " << PERTURBED_TEST_SAMPLE_COUNT << std::endl;
     std::cout << "REFLECTED_PDF_TEST_SAMPLE_COUNT " << REFLECTED_PDF_TEST_SAMPLE_COUNT << std::endl;
     std::cout << "MANY_PDF_TEST_SAMPLE_COUNT      " << MANY_PDF_TEST_SAMPLE_COUNT << std::endl;
@@ -150,11 +151,17 @@ void testMicrofacet3D() {
 
 void testAzimuthPerturbation() {
     mts::MicrofacetDistribution distr{0.1f};
-    std::vector<double> samples(PERTURBED_TEST_SAMPLE_COUNT);
+    std::vector<double> samples_sa(PERTURBED_TEST_SAMPLE_COUNT);
+    std::vector<double> samples_pdf(PERTURBED_TEST_SAMPLE_COUNT);
     const Vec3f wi = utils::hemisphereSample();
     const Vec3f m = utils::hemisphereSample();
     const Spherical mSpherical = utils::toSpherical(m);
-    const double pdf = distr.solid_angle_density(wi, m);
+    const double sa = distr.solid_angle_density(wi, m);
+    if (sa <= 0.0) {
+        testAzimuthPerturbation();
+        return;
+    }
+    const double pdf = distr.reflected_pdf(wi, m);
     if (pdf <= 0.0) {
         testAzimuthPerturbation();
         return;
@@ -163,10 +170,13 @@ void testAzimuthPerturbation() {
     for (uint32_t i = 0; i < PERTURBED_TEST_SAMPLE_COUNT; ++i) {
         const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI_F * randDistr(randEng)};
         const Vec3f perturbedM = utils::toVec(perturbedMSpherical);
-        samples[i] = distr.solid_angle_density(wi, perturbedM);
+        samples_sa[i] = distr.solid_angle_density(wi, perturbedM);
+        samples_pdf[i] = distr.reflected_pdf(wi, perturbedM);
     }
-    const double mse = utils::mse(pdf, samples);
-    printf("MSE: %f\n", mse);
+    const double mse_sa = utils::mse(sa, samples_sa);
+    printf("MSE solid angle: %f\n", mse_sa);
+    const double mse_pdf = utils::mse(pdf, samples_pdf);
+    printf("MSE pdf: %f\n", mse_pdf);
 
     // Result: sometimes slightly changes pdf, but probably because of numerics only
 }
@@ -239,18 +249,24 @@ int main() {
     printf("\n");
 
     DiffuseBRDF diffuse{};
-    std::vector<LightSource> lightSources(LIGHT_SOURCES);
-    for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {
-        lightSources[i] = generateLightSource();
-        std::cout << lightSources[i].start_angle << ":" << lightSources[i].end_angle << " -> " << lightSources[i].
-                intensity << std::endl;
-    }
+    MicrofacetBRDF microfacet{};
+    // std::vector<LightSource> lightSources(LIGHT_SOURCES);
+    // for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {
+    //     lightSources[i] = generateLightSource();
+    //     std::cout << lightSources[i].start_angle << ":" << lightSources[i].end_angle << " -> " << lightSources[i].
+    //             intensity << std::endl;
+    // }
+
+    std::vector<LightSource> lightSources{};
+    lightSources.emplace_back(0.0,M_PI, 10.0);
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
     const Polar wi{1.0, randDistr(randEng) * M_PI_F};
 
     double brdfReference = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
     printf("Reference: %f\n", brdfReference);
+    double microfacetReference = sampling::sample_brdf(REFERENCE_SAMPLES, microfacet, lightSources, wi);
+    printf("Reference Microfacet: %f\n", microfacetReference);
 
     printf("Equal Samples %d:\n", ES_BENCHMARK_SAMPLES);
     double brdfBenchmarkES = sampling::sample_brdf(ES_BENCHMARK_SAMPLES, diffuse, lightSources, wi);

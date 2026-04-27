@@ -32,7 +32,7 @@ double sampling::pis(double seconds, const MSTree &msTree, const BRDF &brdf,
         color += res;
         ++iterations;
     }
-    printf("\t%d samples in %f seconds\n", iterations, seconds);
+    printf("\t%d samples in %f seconds\t", iterations, seconds);
     color /= static_cast<double>(iterations);
     return color;
 }
