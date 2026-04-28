@@ -15,6 +15,6 @@ double BRDFSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::ve
     if (pdf <= 0.0) {
         return sample(msTree, brdf, lightSources, wi);
     }
-    const double result = incomingLight * brdf.eval(wi, wo) / brdf.pdf(wi, wo);
+    const double result = incomingLight * brdf.eval(wi, wo) / pdf;
     return result;
 }

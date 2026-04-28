@@ -64,16 +64,18 @@ namespace mts {
         }
 
         [[nodiscard]] double solid_angle_density(const Vec3f &wi, const Vec3f &m) const {
-            print_zero(eval(m), eva)
-            print_zero(smith_g1(wi, m), smi)
-            print_zero(std::abs(utils::dot(wi, m)), dot)
-            print_zero(1.0 / utils::cosTheta(wi), cos)
+            // print_zero(eval(m), eva)
+            // print_zero(smith_g1(wi, m), smi)
+            // print_zero(std::abs(utils::dot(wi, m)), dot)
+            // print_zero(1.0 / utils::cosTheta(wi), cos)
             return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
         }
 
         [[nodiscard]] double reflected_pdf(const Vec3f &wi, const Vec3f &m) const {
-            print_zero(1.0 / (4.0 * std::abs(utils::dot(wi, m))), jac)
-            return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
+            // print_zero(1.0 / (4.0 * std::abs(utils::dot(wi, m))), jac)
+            // https://github.com/mitsuba-renderer/mitsuba3/blob/9067366f4e7d398a2971efd46ec63944264dfb27/src/bsdfs/roughconductor.cpp#L421
+            return eval(m) * smith_g1(wi, m) / (4.0 * utils::cosTheta(wi));
+            // return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
         }
 
         // [[nodiscard]] double solid_angle_density(const Polar &wi, const Polar &m) const {
@@ -134,8 +136,8 @@ namespace mts {
             /* Ensure consistent orientation (can't see the back
                of the microfacet from the front and vice versa) */
             if (utils::dot(v, m) * utils::cosTheta(v) <= 0.0) {
-                printf("misoriented %f, %f\n", utils::dot(v, m), utils::cosTheta(v));
-                printf("v: [%f,%f,%f]\tm: [%f,%f,%f]\n", v.x, v.y, v.z, m.x, m.y, m.z);
+                printf("misoriented %f, %f", utils::dot(v, m), utils::cosTheta(v));
+                printf("\tv: [%f,%f,%f]\tm: [%f,%f,%f]\n", v.x, v.y, v.z, m.x, m.y, m.z);
                 result = 0.0;
             }
 

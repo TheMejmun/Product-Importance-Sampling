@@ -18,6 +18,8 @@
 #include "renderers/direct_light_sampler.h"
 #include "renderers/pis_sampler.h"
 
+#define UNIFORM_LIGHT
+
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
         uint32_t result = 1;
@@ -28,12 +30,11 @@ namespace {
     }
 }
 
-constexpr double M_PI_F = M_PI;
 constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr double LIGHT_MAX_INTENSITY = 100.0;
-constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
+constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 20);
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 10);
 constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
 constexpr uint32_t MSE_BENCHMARK_SAMPLES = dpow(2, 15);
 constexpr double ET_BENCHMARK_SECONDS = 0.0001;
@@ -66,8 +67,8 @@ namespace {
 }
 
 LightSource generateLightSource() {
-    const double startAngle = randDistr(randEng) * M_PI_F;
-    const double endAngle = randDistr(randEng) * (M_PI_F - startAngle) + startAngle;
+    const double startAngle = randDistr(randEng) * M_PI;
+    const double endAngle = randDistr(randEng) * (M_PI - startAngle) + startAngle;
     const double intensity = randDistr(randEng);
     return {startAngle, endAngle, intensity};
 }
@@ -76,7 +77,7 @@ MSTree setupIrradianceTree(const std::vector<LightSource> &lightSources) {
     MSTree irradianceTree{};
 
     for (int i = 0; i < MS_TREE_SAMPLES; ++i) {
-        double angle = randDistr(randEng) * M_PI_F;
+        double angle = randDistr(randEng) * M_PI;
 
         // Get light sources that can be reached in that direction
         std::vector<LightSource const *> reachableLights;
@@ -171,65 +172,34 @@ void testAzimuthPerturbation() {
     }
     printf("Testing effects of azimuth perturbation on pdf\n");
     for (uint32_t i = 0; i < PERTURBED_TEST_SAMPLE_COUNT; ++i) {
-        const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI_F * randDistr(randEng)};
+        const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI * randDistr(randEng)};
         const Vec3f perturbedM = utils::toVec(perturbedMSpherical);
         samples_sa[i] = distr.solid_angle_density(wi, perturbedM);
         samples_pdf[i] = distr.reflected_pdf(wi, perturbedM);
     }
     const double mse_sa = utils::mse(sa, samples_sa);
-    printf("MSE solid angle: %f\n", mse_sa);
+    printf("\tMSE solid angle: %f\n", mse_sa);
     const double mse_pdf = utils::mse(pdf, samples_pdf);
-    printf("MSE pdf: %f\n", mse_pdf);
+    printf("\tMSE pdf: %f\n", mse_pdf);
 
     // Result: sometimes slightly changes pdf, but probably because of numerics only
-}
-
-void testSolidAngleDensity() {
-    printf("Testing solid angle density accuracy\n");
-    mts::MicrofacetDistribution distr{0.1f};
-    const double uniform_hemisphere_pdf = 1.0 / (2.0 * M_PI);
-
-    for (double cos_i: {0.9f, 0.7f, 0.5f, 0.3f, 0.1f}) {
-        const double sin_i = std::sqrt(1.f - cos_i * cos_i);
-        const Vec3f wi = {sin_i, 0.f, cos_i};
-
-        double sum = 0.0;
-        for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
-            const Vec3f m = utils::hemisphereSample();
-            // if (utils::cosTheta(utils::reflect(wi, m)) < 0.0) {
-            //     --i;
-            //     continue;
-            // }
-            const double pdf = distr.solid_angle_density(wi, m);
-            sum += pdf / uniform_hemisphere_pdf;
-        }
-        printf("cos_i=%.1f: integral = %f\n", cos_i,
-               sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
-    }
 }
 
 void testPDF() {
     printf("Testing PDF accuracy\n");
     mts::MicrofacetDistribution distr{0.1f};
+    const Vec3f wi = utils::hemisphereSample();
     const double uniform_hemisphere_pdf = 1.0 / (2.0 * M_PI);
 
-    for (double cos_i: {0.9f, 0.7f, 0.5f, 0.3f, 0.1f}) {
-        const double sin_i = std::sqrt(1.f - cos_i * cos_i);
-        const Vec3f wi = {sin_i, 0.f, cos_i};
-
-        double sum = 0.0;
-        for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
-            const Vec3f m = distr.sample(wi, {randDistr(randEng), randDistr(randEng)});
-            if (utils::cosTheta(utils::reflect(wi, m)) < 0.0) {
-                --i;
-                continue;
-            }
-            const double pdf = distr.reflected_pdf(wi, m);
-            sum += 1.0 / (pdf / uniform_hemisphere_pdf);
-        }
-        printf("cos_i=%.1f: integral = %f\n", cos_i,
-               sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
+    double sum = 0.0;
+    for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
+        const Vec3f wo = utils::hemisphereSample();
+        const Vec3f m = utils::normalize(wi + wo);
+        const double pdf = distr.reflected_pdf(wi, m);
+        sum += pdf / uniform_hemisphere_pdf;
     }
+    printf("\tintegral: %f\n",
+           sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
 }
 
 // TODO change to MSE for error calculation
@@ -239,36 +209,34 @@ void testPDF() {
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
-    // const Spherical testSpherical=utils::toSpherical({0.0, 0.0, 1.0});
-    // printf("testSpherical=[%f, %f, %f]\n", testSpherical.r, testSpherical.theta, testSpherical.phi);
-    // return 0;
+    print_constants();
+    printf("\n");
 
-    // print_constants();
-    // printf("\n");
-    //
-    // testAzimuthPerturbation();
-    // printf("\n");
-    //
-    // testSolidAngleDensity();
-    // printf("\n");
-    //
-    // testPDF();
-    // printf("\n");
+    testAzimuthPerturbation();
+    printf("\n");
+
+    testPDF();
+    printf("\n");
 
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};
-    // std::vector<LightSource> lightSources(LIGHT_SOURCES);
-    // for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {
-    //     lightSources[i] = generateLightSource();
-    //     std::cout << lightSources[i].start_angle << ":" << lightSources[i].end_angle << " -> " << lightSources[i].
-    //             intensity << std::endl;
-    // }
 
+#ifdef UNIFORM_LIGHT
     std::vector<LightSource> lightSources{};
     lightSources.emplace_back(0.0,M_PI, 10.0);
+#else
+    std::vector<LightSource> lightSources(LIGHT_SOURCES);
+    for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {
+        lightSources[i] = generateLightSource();
+        std::cout << lightSources[i].start_angle << ":" << lightSources[i].end_angle << " -> " << lightSources[i].
+                intensity << std::endl;
+    }
+#endif
+
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
-    const Polar wi{1.0, randDistr(randEng) * M_PI_F};
+    // const Polar wi{1.0, randDistr(randEng) * M_PI_F};
+    const Polar wi{1.0, M_PI / 4.0};
     const BRDFSampler brdf_sampler{};
     const DirectLightSampler direct_light_sampler{};
     const MISSampler mis_sampler{};
