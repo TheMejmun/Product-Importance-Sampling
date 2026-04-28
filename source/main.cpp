@@ -281,7 +281,7 @@ int main() {
             brdf_sampler.euqal_samples(REFERENCE_SAMPLES, irradianceTree, microfacet, lightSources, wi);
     printf("Reference Microfacet: %f\n", microfacetReference);
 
-    printf("MSE %d:\n", MSE_BENCHMARK_SAMPLES);
+    printf("MSE (%d samples):\n", MSE_BENCHMARK_SAMPLES);
     double brdfBenchmarkMSE =
             brdf_sampler.mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkMSE);
@@ -292,7 +292,7 @@ int main() {
             mis_sampler.mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tMIS: %f\n", misBenchmarkMSE);
 
-    printf("Equal Samples %d:\n", ES_BENCHMARK_SAMPLES);
+    printf("Equal Samples (%d samples):\n", ES_BENCHMARK_SAMPLES);
     double brdfBenchmarkES =
             brdf_sampler.euqal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkES);
@@ -303,7 +303,7 @@ int main() {
             mis_sampler.euqal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tMIS: %f\n", misBenchmarkES);
 
-    printf("Equal Time %f:\n", ET_BENCHMARK_SECONDS);
+    printf("Equal Time (%f s):\n", ET_BENCHMARK_SECONDS);
     double brdfBenchmarkET =
             brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkET);
