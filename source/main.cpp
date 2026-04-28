@@ -7,15 +7,16 @@
 #include <ostream>
 
 #include "brdf/brdf.h"
-#include "renderers/brdf_sampling.h"
+#include "renderers/brdf_sampler.h"
 #include "brdf/diffuse_brdf.h"
 #include "light_source.h"
 #include "multistage_tree.h"
 #include "utils.h"
 #include "brdf/microfacet_brdf.h"
 #include "mts/microfacet.h"
-#include "renderers/mis.h"
-#include "renderers/direct_light_sampling.h"
+#include "renderers/mis_sampler.h"
+#include "renderers/direct_light_sampler.h"
+#include "renderers/pis_sampler.h"
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -268,37 +269,49 @@ int main() {
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
     const Polar wi{1.0, randDistr(randEng) * M_PI_F};
+    const BRDFSampler brdf_sampler{};
+    const DirectLightSampler direct_light_sampler{};
+    const MISSampler mis_sampler{};
+    const PISSampler pis_sampler{};
 
-    double brdfReference = sampling::sample_brdf(REFERENCE_SAMPLES, diffuse, lightSources, wi);
+    double brdfReference =
+            brdf_sampler.euqal_samples(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("Reference: %f\n", brdfReference);
-    double microfacetReference = sampling::sample_brdf(REFERENCE_SAMPLES, microfacet, lightSources, wi);
+    double microfacetReference =
+            brdf_sampler.euqal_samples(REFERENCE_SAMPLES, irradianceTree, microfacet, lightSources, wi);
     printf("Reference Microfacet: %f\n", microfacetReference);
 
     printf("MSE %d:\n", MSE_BENCHMARK_SAMPLES);
     double brdfBenchmarkMSE =
-            sampling::sample_brdf_mse(brdfReference, MSE_BENCHMARK_SAMPLES, diffuse, lightSources, wi);
+            brdf_sampler.mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkMSE);
     double mstBenchmarkMSE =
-            sampling::sample_light_mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+            direct_light_sampler.mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tDirect Light: %f\n", mstBenchmarkMSE);
     double misBenchmarkMSE =
-            sampling::mis_mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+            mis_sampler.mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tMIS: %f\n", misBenchmarkMSE);
 
     printf("Equal Samples %d:\n", ES_BENCHMARK_SAMPLES);
-    double brdfBenchmarkES = sampling::sample_brdf(ES_BENCHMARK_SAMPLES, diffuse, lightSources, wi);
+    double brdfBenchmarkES =
+            brdf_sampler.euqal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkES);
-    double mstBenchmarkES = sampling::sample_light(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    double mstBenchmarkES =
+            direct_light_sampler.euqal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tDirect Light: %f\n", mstBenchmarkES);
-    double misBenchmarkES = sampling::mis(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    double misBenchmarkES =
+            mis_sampler.euqal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
     printf("\tMIS: %f\n", misBenchmarkES);
 
     printf("Equal Time %f:\n", ET_BENCHMARK_SECONDS);
-    double brdfBenchmarkET = sampling::sample_brdf(ET_BENCHMARK_SECONDS, diffuse, lightSources, wi);
+    double brdfBenchmarkET =
+            brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
     printf("\tBRDF: %f\n", brdfBenchmarkET);
-    double mstBenchmarkET = sampling::sample_light(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
+    double mstBenchmarkET =
+            direct_light_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
     printf("\tDirect Light: %f\n", mstBenchmarkET);
-    double misBenchmarkET = sampling::mis(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
+    double misBenchmarkET =
+            mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, diffuse, lightSources, wi);
     printf("\tMIS: %f\n", misBenchmarkET);
     return 0;
 }

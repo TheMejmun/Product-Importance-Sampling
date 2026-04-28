@@ -1,47 +1,54 @@
 //
-// Created by Saman on 07.02.26.
+// Created by Saman on 28.04.26.
 //
 
-#ifndef PIS_PI_SAMPLING_H
-#define PIS_PI_SAMPLING_H
+#ifndef PIS_ABSTRACT_SAMPLER_H
+#define PIS_ABSTRACT_SAMPLER_H
 
+#include "brdf/brdf.h"
 #include "light_source.h"
+#include "multistage_tree.h"
+#include <cstdint>
 #include   <vector>
 
-#include "multistage_tree.h"
-#include "brdf/brdf.h"
+class AbstractSampler {
+protected:
+    AbstractSampler() = default;
 
-namespace sampling {
-    double pis(
+    ~AbstractSampler() = default;
+
+public:
+    [[nodiscard]] double euqal_samples(
         std::uint32_t iterations,
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
         const Polar &wi
-    );
+    ) const;
 
-    double pis_mse(
+    [[nodiscard]] double mse(
         double reference,
         std::uint32_t iterations,
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
         const Polar &wi
-    );
+    ) const;
 
-    double pis(
+    [[nodiscard]] double equal_time(
         double seconds,
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
         const Polar &wi
-    );
+    ) const;
 
-    double pis(
+    [[nodiscard]] virtual double sample(
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
         const Polar &wi
-    );
-}
-#endif //PIS_PI_SAMPLING_H
+    ) const = 0;
+};
+
+#endif //PIS_ABSTRACT_SAMPLER_H
