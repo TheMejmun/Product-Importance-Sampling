@@ -4,6 +4,8 @@
 
 #include "renderers/direct_light_sampling.h"
 
+#include "utils.h"
+
 // TODO cosTheta wi
 double sampling::sample_light(
     std::uint32_t iterations,
@@ -18,6 +20,17 @@ double sampling::sample_light(
     }
     color /= static_cast<double>(iterations);
     return color;
+}
+
+double sampling::sample_light_mse(double reference, std::uint32_t iterations, const MSTree &msTree, const BRDF &brdf,
+                                  const std::vector<LightSource> &lightSources, const Polar &wi) {
+    double mse = 0.0;
+    for (int i = 0; i < iterations; ++i) {
+        const double color = sample_light(msTree, brdf, lightSources, wi);
+        mse += (color - reference) * (color - reference);
+    }
+    mse /= static_cast<double>(iterations);
+    return mse;
 }
 
 double sampling::sample_light(double seconds, const MSTree &msTree, const BRDF &brdf,

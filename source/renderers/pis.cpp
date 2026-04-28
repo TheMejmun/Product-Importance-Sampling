@@ -15,6 +15,17 @@ double sampling::pis(std::uint32_t iterations, const MSTree &msTree, const BRDF 
     return color;
 }
 
+double sampling::pis_mse(double reference, std::uint32_t iterations, const MSTree &msTree, const BRDF &brdf,
+                         const std::vector<LightSource> &lightSources, const Polar &wi) {
+    double mse = 0.0;
+    for (int i = 0; i < iterations; ++i) {
+        const double color = pis(msTree, brdf, lightSources, wi);
+        mse += (color - reference) * (color - reference);
+    }
+    mse /= static_cast<double>(iterations);
+    return mse;
+}
+
 double sampling::pis(double seconds, const MSTree &msTree, const BRDF &brdf,
                      const std::vector<LightSource> &lightSources, const Polar &wi) {
     double color = 0.0;

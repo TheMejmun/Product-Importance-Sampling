@@ -15,6 +15,17 @@ double sampling::mis(std::uint32_t iterations, const MSTree &msTree, const BRDF 
     return color;
 }
 
+double sampling::mis_mse(double reference, std::uint32_t iterations, const MSTree &msTree, const BRDF &brdf,
+                         const std::vector<LightSource> &lightSources, const Polar &wi) {
+    double mse = 0.0;
+    for (int i = 0; i < iterations; ++i) {
+        const double color = mis(msTree, brdf, lightSources, wi);
+        mse += (color - reference) * (color - reference);
+    }
+    mse /= static_cast<double>(iterations);
+    return mse;
+}
+
 double sampling::mis(double seconds, const MSTree &msTree, const BRDF &brdf,
                      const std::vector<LightSource> &lightSources, const Polar &wi) {
     double color = 0.0;

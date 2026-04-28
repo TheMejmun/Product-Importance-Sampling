@@ -21,6 +21,17 @@ double sampling::sample_brdf(
     return color;
 }
 
+double sampling::sample_brdf_mse(double reference, std::uint32_t iterations, const BRDF &brdf,
+                                 const std::vector<LightSource> &lightSources, const Polar &wi) {
+    double mse = 0.0;
+    for (int i = 0; i < iterations; ++i) {
+        const double color = sample_brdf(brdf, lightSources, wi);
+        mse += (color - reference) * (color - reference);
+    }
+    mse /= static_cast<double>(iterations);
+    return mse;
+}
+
 double sampling::sample_brdf(double seconds, const BRDF &brdf, const std::vector<LightSource> &lightSources,
                              const Polar &wi) {
     double color = 0.0;

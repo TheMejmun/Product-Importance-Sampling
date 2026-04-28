@@ -32,8 +32,9 @@ constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr double LIGHT_MAX_INTENSITY = 100.0;
 constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 25);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
 constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
+constexpr uint32_t MSE_BENCHMARK_SAMPLES = dpow(2, 15);
 constexpr double ET_BENCHMARK_SECONDS = 0.0001;
 
 constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
@@ -47,6 +48,7 @@ void print_constants() {
     std::cout << "MS_TREE_SAMPLES                 " << MS_TREE_SAMPLES << std::endl;
     std::cout << "REFERENCE_SAMPLES               " << REFERENCE_SAMPLES << std::endl;
     std::cout << "ES_BENCHMARK_SAMPLES            " << ES_BENCHMARK_SAMPLES << std::endl;
+    std::cout << "MSE_BENCHMARK_SAMPLES           " << MSE_BENCHMARK_SAMPLES << std::endl;
     std::cout << "ET_BENCHMARK_SECONDS            " << ET_BENCHMARK_SECONDS << std::endl;
     std::cout << "MICROFACET_TEST_SAMPLE_COUNT    " << MICROFACET_TEST_SAMPLE_COUNT << std::endl;
     std::cout << "PERTURBED_TEST_SAMPLE_COUNT     " << PERTURBED_TEST_SAMPLE_COUNT << std::endl;
@@ -271,6 +273,17 @@ int main() {
     printf("Reference: %f\n", brdfReference);
     double microfacetReference = sampling::sample_brdf(REFERENCE_SAMPLES, microfacet, lightSources, wi);
     printf("Reference Microfacet: %f\n", microfacetReference);
+
+    printf("MSE %d:\n", MSE_BENCHMARK_SAMPLES);
+    double brdfBenchmarkMSE =
+            sampling::sample_brdf_mse(brdfReference, MSE_BENCHMARK_SAMPLES, diffuse, lightSources, wi);
+    printf("\tBRDF: %f\n", brdfBenchmarkMSE);
+    double mstBenchmarkMSE =
+            sampling::sample_light_mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tDirect Light: %f\n", mstBenchmarkMSE);
+    double misBenchmarkMSE =
+            sampling::mis_mse(brdfReference, MSE_BENCHMARK_SAMPLES, irradianceTree, diffuse, lightSources, wi);
+    printf("\tMIS: %f\n", misBenchmarkMSE);
 
     printf("Equal Samples %d:\n", ES_BENCHMARK_SAMPLES);
     double brdfBenchmarkES = sampling::sample_brdf(ES_BENCHMARK_SAMPLES, diffuse, lightSources, wi);
