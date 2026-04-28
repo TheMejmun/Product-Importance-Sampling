@@ -14,6 +14,8 @@ public:
     [[nodiscard]] double pdf(const Polar &wi, const Polar &wo) const override;
 
     [[nodiscard]] Polar sample(const Polar &wi) const override;
+
+    [[nodiscard]] const char* name()const override;
 };
 
 #endif //PIS_DIFFUSE_BRDF_H

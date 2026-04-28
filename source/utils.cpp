@@ -61,8 +61,9 @@ Spherical utils::toSpherical(const Vec3f &vec) {
     const double theta = acos(vec.z / r);
     const double sign = vec.y < 0 ? -1 : 1;
     // undefined for x = 0 && y = 0
-    assert(sqrt(vec.x * vec.x + vec.y * vec.y) != 0);
-    const double phi = sign * acos(vec.x / sqrt(vec.x * vec.x + vec.y * vec.y));
+    assert(sqrt(vec.x * vec.x + vec.y * vec.y) != 0.0);
+    double phi = sign * acos(vec.x / sqrt(vec.x * vec.x + vec.y * vec.y));
+    if (std::isnan(phi)) phi = 0.0;
     return {r, theta, phi};
 }
 
@@ -163,8 +164,8 @@ Vec3f utils::hemisphereSample() {
             randDistr(randEng)
         );
         const double mag2 = sampleUnnormalized.x * sampleUnnormalized.x +
-                           sampleUnnormalized.y * sampleUnnormalized.y +
-                           sampleUnnormalized.z * sampleUnnormalized.z;
+                            sampleUnnormalized.y * sampleUnnormalized.y +
+                            sampleUnnormalized.z * sampleUnnormalized.z;
         if (mag2 <= 1.0) {
             return normalize(sampleUnnormalized);
         }

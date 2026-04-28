@@ -47,5 +47,12 @@ double sampling::sample_brdf(double seconds, const BRDF &brdf, const std::vector
 double sampling::sample_brdf(const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) {
     const Polar wo = brdf.sample(wi);
     const double incomingLight = intersect_lights(lightSources, wo);
-    return incomingLight * brdf.eval(wi, wo) / brdf.pdf(wi, wo);
+    const double pdf = brdf.pdf(wi, wo);
+    if (pdf <= 0.0) {
+        // printf("pdf <= 0.0\n");
+        return sample_brdf(brdf, lightSources, wi);
+    }
+    const double result = incomingLight * brdf.eval(wi, wo) / brdf.pdf(wi, wo);
+    // printf("%s color: %f\n", brdf.name(), result);
+    return result;
 }

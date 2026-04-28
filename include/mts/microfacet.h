@@ -14,6 +14,9 @@
 // sample_visible = True, type = GGX
 constexpr double PI = std::numbers::pi_v<double>;
 
+#define print_zero(x, name) const double x_##name = x; if(x_##name == 0.0) printf("%s: %f\n", #name, x_##name);
+#define print_n_zero(x, name) const double x_##name = x; if(x_##name != 0.0) printf("%s: %f\n", #name, x_##name);
+
 namespace mts {
     inline Point2f square_to_uniform_disk_concentric(const Point2f &sample) {
         const double x = 2.0 * sample.x - 1.0;
@@ -52,23 +55,34 @@ namespace mts {
             const double cos_theta = utils::cosTheta(m);
 
             const double result = 1.0 / (PI * alpha_uv * std::pow(
-                                              std::pow(m.x / m_alpha_u, 2.0) +
-                                              std::pow(m.y / m_alpha_v, 2.0) +
-                                              std::pow(m.z, 2.0), 2.0)
+                                             std::pow(m.x / m_alpha_u, 2.0) +
+                                             std::pow(m.y / m_alpha_v, 2.0) +
+                                             std::pow(m.z, 2.0), 2.0)
                                   );
-
-            // Prevent potential numerical issues in other stages of the model
 
             return result * cos_theta > 1e-20f ? result : 0.0;
         }
 
         [[nodiscard]] double solid_angle_density(const Vec3f &wi, const Vec3f &m) const {
+            print_zero(eval(m), eva)
+            print_zero(smith_g1(wi, m), smi)
+            print_zero(std::abs(utils::dot(wi, m)), dot)
+            print_zero(1.0 / utils::cosTheta(wi), cos)
             return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
         }
 
         [[nodiscard]] double reflected_pdf(const Vec3f &wi, const Vec3f &m) const {
+            print_zero(1.0 / (4.0 * std::abs(utils::dot(wi, m))), jac)
             return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
         }
+
+        // [[nodiscard]] double solid_angle_density(const Polar &wi, const Polar &m) const {
+        //     return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
+        // }
+        //
+        // [[nodiscard]] double reflected_pdf(const Polar &wi, const Polar &m) const {
+        //     return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
+        // }
 
         [[nodiscard]] Normal3f sample(const Vec3f &wi, const Point2f &sample) const {
             // Visible normal sampling.
@@ -113,13 +127,17 @@ namespace mts {
             double result = 2.0 / (1.0 + std::sqrt(1.0 + tan_theta_alpha_2));
 
             // Perpendicular incidence -- no shadowing/masking
-            if (xy_alpha_2 == 0.0)
+            if (xy_alpha_2 == 0.0) {
                 result = 1.0;
+            }
 
             /* Ensure consistent orientation (can't see the back
                of the microfacet from the front and vice versa) */
-            if (utils::dot(v, m) * utils::cosTheta(v) <= 0.0)
+            if (utils::dot(v, m) * utils::cosTheta(v) <= 0.0) {
+                printf("misoriented %f, %f\n", utils::dot(v, m), utils::cosTheta(v));
+                printf("v: [%f,%f,%f]\tm: [%f,%f,%f]\n", v.x, v.y, v.z, m.x, m.y, m.z);
                 result = 0.0;
+            }
 
             return result;
         }

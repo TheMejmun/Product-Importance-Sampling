@@ -32,7 +32,7 @@ constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr double LIGHT_MAX_INTENSITY = 100.0;
 constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 10);
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 25);
 constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
 constexpr double ET_BENCHMARK_SECONDS = 0.0001;
 
@@ -236,17 +236,21 @@ void testPDF() {
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
-    print_constants();
-    printf("\n");
+    // const Spherical testSpherical=utils::toSpherical({0.0, 0.0, 1.0});
+    // printf("testSpherical=[%f, %f, %f]\n", testSpherical.r, testSpherical.theta, testSpherical.phi);
+    // return 0;
 
-    testAzimuthPerturbation();
-    printf("\n");
-
-    testSolidAngleDensity();
-    printf("\n");
-
-    testPDF();
-    printf("\n");
+    // print_constants();
+    // printf("\n");
+    //
+    // testAzimuthPerturbation();
+    // printf("\n");
+    //
+    // testSolidAngleDensity();
+    // printf("\n");
+    //
+    // testPDF();
+    // printf("\n");
 
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};

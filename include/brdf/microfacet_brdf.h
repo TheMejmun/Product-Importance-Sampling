@@ -16,6 +16,8 @@ public:
 
     [[nodiscard]] Polar sample(const Polar &wi) const override;
 
+    [[nodiscard]] const char * name() const override;
+
 private:
     mts::MicrofacetDistribution mDistribution{0.1f};
 };

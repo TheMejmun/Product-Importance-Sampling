@@ -19,6 +19,8 @@ public:
     [[nodiscard]] virtual double pdf(const Polar &wi, const Polar &wo) const= 0;
 
     [[nodiscard]] virtual Polar sample(const Polar &wi)const = 0;
+
+    [[nodiscard]] virtual const char* name()const = 0;
 };
 
 #endif //PIS_BRDF_H

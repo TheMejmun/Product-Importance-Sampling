@@ -15,6 +15,10 @@ namespace {
     std::uniform_real_distribution<double> hemisphereDist(0.0, M_PI);
 }
 
+const char * DiffuseBRDF::name() const {
+    return "Diffuse";
+}
+
 double DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
     assert(utils::cosTheta(wi) >= 0.0);
     assert(utils::cosTheta(wo) >= 0.0);
