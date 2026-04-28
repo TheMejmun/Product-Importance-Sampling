@@ -19,6 +19,7 @@
 #include "renderers/pis_sampler.h"
 
 #define UNIFORM_LIGHT
+#define RANDOM_WI
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -229,8 +230,12 @@ int main() {
 
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
-    // const Polar wi{1.0, randDistr(randEng) * M_PI_F};
+#ifdef RANDOM_WI
+    const Polar wi{1.0, randDistr(randEng) * M_PI};
+#else
     const Polar wi{1.0, M_PI / 4.0};
+#endif
+
     const BRDFSampler brdf_sampler{};
     const DirectLightSampler direct_light_sampler{};
     const MISSampler mis_sampler{};
