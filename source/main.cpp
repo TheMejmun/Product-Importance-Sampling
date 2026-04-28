@@ -154,23 +154,17 @@ void testMicrofacet3D() {
 }
 
 void testAzimuthPerturbation() {
+    printf("Testing effects of azimuth perturbation on pdf\n");
     mts::MicrofacetDistribution distr{0.1f};
     std::vector<double> samples_sa(PERTURBED_TEST_SAMPLE_COUNT);
     std::vector<double> samples_pdf(PERTURBED_TEST_SAMPLE_COUNT);
     const Vec3f wi = utils::hemisphereSample();
-    const Vec3f m = utils::hemisphereSample();
+    const Vec3f wo = utils::hemisphereSample();
+    const Vec3f m = utils::normalize(wi + wo);
     const Spherical mSpherical = utils::toSpherical(m);
     const double sa = distr.solid_angle_density(wi, m);
-    if (sa <= 0.0) {
-        testAzimuthPerturbation();
-        return;
-    }
     const double pdf = distr.reflected_pdf(wi, m);
-    if (pdf <= 0.0) {
-        testAzimuthPerturbation();
-        return;
-    }
-    printf("Testing effects of azimuth perturbation on pdf\n");
+
     for (uint32_t i = 0; i < PERTURBED_TEST_SAMPLE_COUNT; ++i) {
         const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI * randDistr(randEng)};
         const Vec3f perturbedM = utils::toVec(perturbedMSpherical);
