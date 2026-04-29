@@ -37,9 +37,10 @@ double MicrofacetBRDF::eval(const Polar &wi, const Polar &wo) const {
         return 0.0;
     }
     // White
-    Polar m{1.0, (wi.phi + wo.phi) / 2.0};
-    Vec3f m3 = upscale(m);
-    return mDistribution.eval(m3);
+    // Polar m{1.0, (wi.phi + wo.phi) / 2.0};
+    // Vec3f m3 = upscale(m);
+    // return mDistribution.eval(m3);
+    return 1 / M_PI;
 }
 
 double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {

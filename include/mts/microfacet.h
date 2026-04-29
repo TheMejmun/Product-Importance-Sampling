@@ -78,14 +78,6 @@ namespace mts {
             // return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
         }
 
-        // [[nodiscard]] double solid_angle_density(const Polar &wi, const Polar &m) const {
-        //     return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
-        // }
-        //
-        // [[nodiscard]] double reflected_pdf(const Polar &wi, const Polar &m) const {
-        //     return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
-        // }
-
         [[nodiscard]] Normal3f sample(const Vec3f &wi, const Point2f &sample) const {
             // Visible normal sampling.
 
@@ -136,8 +128,8 @@ namespace mts {
             /* Ensure consistent orientation (can't see the back
                of the microfacet from the front and vice versa) */
             if (utils::dot(v, m) * utils::cosTheta(v) <= 0.0) {
-                printf("misoriented %f, %f", utils::dot(v, m), utils::cosTheta(v));
-                printf("\tv: [%f,%f,%f]\tm: [%f,%f,%f]\n", v.x, v.y, v.z, m.x, m.y, m.z);
+                // printf("misoriented %f, %f", utils::dot(v, m), utils::cosTheta(v));
+                // printf("\tv: [%f,%f,%f]\tm: [%f,%f,%f]\n", v.x, v.y, v.z, m.x, m.y, m.z);
                 result = 0.0;
             }
 

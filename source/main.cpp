@@ -169,8 +169,14 @@ void testAzimuthPerturbation() {
     for (uint32_t i = 0; i < PERTURBED_TEST_SAMPLE_COUNT; ++i) {
         const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI * randDistr(randEng)};
         const Vec3f perturbedM = utils::toVec(perturbedMSpherical);
-        samples_sa[i] = distr.solid_angle_density(wi, perturbedM);
-        samples_pdf[i] = distr.reflected_pdf(wi, perturbedM);
+        const double sad = distr.solid_angle_density(wi, perturbedM);
+        const double pdf = distr.reflected_pdf(wi, perturbedM);
+        if (sad <= 0.0 || pdf <= 0.0) {
+            --i;
+            continue;
+        }
+        samples_sa[i] = sad;
+        samples_pdf[i] = pdf;
     }
     const double mse_sa = utils::mse(sa, samples_sa);
     printf("\tMSE solid angle: %f\n", mse_sa);
@@ -193,14 +199,19 @@ void testPDF() {
         const double pdf = distr.reflected_pdf(wi, m);
         sum += pdf / uniform_hemisphere_pdf;
     }
-    printf("\tintegral: %f\n",
+    printf("\tintegral wo uniform sampled: %f\n",
+           sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
+
+    sum = 0.0;
+    for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
+        const Vec3f m = distr.sample(wi, {randDistr(randEng), randDistr(randEng)});
+        const double pdf = distr.reflected_pdf(wi, m);
+        sum += pdf;
+    }
+    printf("\tintegral m distr sampled: %f\n",
            sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
 }
 
-// TODO change to MSE for error calculation
-// TODO calculate MSE/Variance per sample
-// TODO convert solid angle density to pdf
-// TODO reduce Microfacet Dimension to elevation only
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
