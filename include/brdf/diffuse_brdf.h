@@ -15,6 +15,12 @@ public:
 
     [[nodiscard]] Polar sample(const Polar &wi) const override;
 
+    [[nodiscard]] double eval(const Vec3f &wi, const Vec3f &wo) const override;
+
+    [[nodiscard]] double pdf(const Vec3f &wi, const Vec3f &wo) const override;
+
+    [[nodiscard]] Vec3f sample(const Vec3f &wi) const override;
+
     [[nodiscard]] const char* name()const override;
 };
 

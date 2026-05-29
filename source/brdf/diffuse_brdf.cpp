@@ -15,7 +15,7 @@ namespace {
     std::uniform_real_distribution<double> hemisphereDist(0.0, M_PI);
 }
 
-const char * DiffuseBRDF::name() const {
+const char *DiffuseBRDF::name() const {
     return "Diffuse";
 }
 
@@ -44,4 +44,23 @@ Polar DiffuseBRDF::sample(const Polar &wi) const {
 
     const double phi = hemisphereDist(re);
     return {1.0, phi};
+}
+
+double DiffuseBRDF::eval(const Vec3f &wi, const Vec3f &wo) const {
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
+    // White diffuse
+    return 1.0 / M_PI;
+}
+
+double DiffuseBRDF::pdf(const Vec3f &wi, const Vec3f &wo) const {
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
+    // Equal pdf everywhere, since polar angle is uniformly distributed
+    return 1.0 / (2 * M_PI);
+}
+
+Vec3f DiffuseBRDF::sample(const Vec3f &wi) const {
+    assert(utils::cosTheta(wi) >= 0.0);
+    return utils::hemisphereSample();
 }

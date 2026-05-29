@@ -8,6 +8,7 @@
 #include "renderers/abstract_sampler.h"
 
 class MISSampler final : public AbstractSampler {
+public:
     [[nodiscard]] double sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,
                                 const Polar &wi) const override;
 };

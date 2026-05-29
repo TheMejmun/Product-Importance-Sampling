@@ -20,6 +20,12 @@ public:
 
     [[nodiscard]] virtual Polar sample(const Polar &wi) const = 0;
 
+    [[nodiscard]] virtual double eval(const Vec3f &wi, const Vec3f &wo) const = 0;
+
+    [[nodiscard]] virtual double pdf(const Vec3f &wi, const Vec3f &wo) const = 0;
+
+    [[nodiscard]] virtual Vec3f sample(const Vec3f &wi) const = 0;
+
     [[nodiscard]] virtual const char *name() const = 0;
 };
 
