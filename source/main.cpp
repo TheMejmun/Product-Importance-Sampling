@@ -20,7 +20,7 @@
 
 #define UNIFORM_LIGHT
 #define RANDOM_WI
-// #define CONSTANT_WI
+#define CONSTANT_WI // Causes stack overflow if disabled, atm
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -36,7 +36,7 @@ constexpr uint32_t LIGHT_SOURCES = 4;
 constexpr double LIGHT_MAX_INTENSITY = 100.0;
 constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 20);
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 10);
+constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
 constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
 constexpr uint32_t MSE_BENCHMARK_SAMPLES = dpow(2, 15);
 constexpr double ET_BENCHMARK_SECONDS = 0.0001;
