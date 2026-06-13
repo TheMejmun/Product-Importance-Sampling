@@ -64,23 +64,15 @@ namespace mts {
         }
 
         [[nodiscard]] double solid_angle_density(const Vec3f &wi, const Vec3f &m) const {
-            // print_zero(eval(m), eva)
-            // print_zero(smith_g1(wi, m), smi)
-            // print_zero(std::abs(utils::dot(wi, m)), dot)
-            // print_zero(1.0 / utils::cosTheta(wi), cos)
             return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
         }
 
         [[nodiscard]] double reflected_pdf(const Vec3f &wi, const Vec3f &m) const {
-            // print_zero(1.0 / (4.0 * std::abs(utils::dot(wi, m))), jac)
             // https://github.com/mitsuba-renderer/mitsuba3/blob/9067366f4e7d398a2971efd46ec63944264dfb27/src/bsdfs/roughconductor.cpp#L421
             return eval(m) * smith_g1(wi, m) / (4.0 * utils::cosTheta(wi));
-            // return solid_angle_density(wi, m) / (4.0 * std::abs(utils::dot(wi, m)));
         }
 
         [[nodiscard]] Normal3f sample(const Vec3f &wi, const Point2f &sample) const {
-            // Visible normal sampling.
-
             // Step 1: stretch wi
             const Vec3f wi_p = utils::normalize(Vec3f(
                 m_alpha_u * wi.x,
@@ -105,15 +97,7 @@ namespace mts {
             return m;
         }
 
-        /**
-         * \brief Smith's shadowing-masking function for a single direction
-         *
-         * \param v
-         *     An arbitrary direction
-         * \param m
-         *     The microfacet normal
-         */
-
+        /// \brief Smith's shadowing-masking function for a single direction
         [[nodiscard]] double smith_g1(const Vec3f &v, const Vec3f &m) const {
             const double xy_alpha_2 = std::pow(m_alpha_u * v.x, 2.0) + std::pow(m_alpha_v * v.y, 2.0);
             const double tan_theta_alpha_2 = xy_alpha_2 / std::pow(v.z, 2.0);
@@ -128,8 +112,6 @@ namespace mts {
             /* Ensure consistent orientation (can't see the back
                of the microfacet from the front and vice versa) */
             if (utils::dot(v, m) * utils::cosTheta(v) <= 0.0) {
-                // printf("misoriented %f, %f", utils::dot(v, m), utils::cosTheta(v));
-                // printf("\tv: [%f,%f,%f]\tm: [%f,%f,%f]\n", v.x, v.y, v.z, m.x, m.y, m.z);
                 result = 0.0;
             }
 
@@ -159,61 +141,5 @@ namespace mts {
         double m_alpha_u, m_alpha_v;
     };
 }
-
-
-// double eval_reflectance(const mts::MicrofacetDistribution &distr,
-//                        const Vec3f &wi,double eta) {
-//     MI_IMPORT_CORE_TYPES()
-//
-//     if (!distr.sample_visible())
-//         Throw("eval_reflectance(): requires visible normal sampling!");
-//
-//     int res = eta > 1 ? 32 : 128;
-//
-//     using FloatX = dr::DynamicArray<dr::scalar_t<double>>;
-//     auto [nodes, weights] = quad::gauss_legendre<FloatX>(res);
-//     double result = dr::zeros<double>(dr::width(wi));
-//
-//     auto [nodes_x, nodes_y]     = dr::meshgrid(nodes, nodes);
-//     auto [weights_x, weights_y] = dr::meshgrid(weights, weights);
-//
-//     using FloatP = dr::Packet<dr::scalar_t<double>>;
-//     using Normal3fP = Normal<FloatP, 3>;
-//     using Vector3fP = Vector<FloatP, 3>;
-//
-//     uint32_t packet_count = dr::width(wi) / FloatP::Size;
-//
-//     Assert(dr::width(wi) % FloatP::Size == 0);
-//
-//     for (uint32_t i = 0; i < packet_count; ++i) {
-//         Vector3fP wi_p;
-//         wi_p.x() = dr::load<FloatP>(wi.x().data() + i * FloatP::Size);
-//         wi_p.y() = dr::load<FloatP>(wi.y().data() + i * FloatP::Size);
-//         wi_p.z() = dr::load<FloatP>(wi.z().data() + i * FloatP::Size);
-//
-//         FloatP result_p = 0.0;
-//
-//         for (uint32_t j = 0; j < dr::width(nodes_x); ++j) {
-//             ScalarVector2f node = { nodes_x[j], nodes_y[j] };
-//             ScalarVector2f weight = { weights_x[j], weights_y[j] };
-//             node = dr::fmadd(node, 0.5f, 0.5f);
-//
-//             Normal3fP m = std::get<0>(distr.sample(wi_p, node));
-//             Vector3fP wo = reflect(wi_p, m);
-//             FloatP f = std::get<0>(fresnel(dr::dot(wi_p, m), FloatP(eta)));
-//             FloatP smith = distr.smith_g1(wo, m) * f;
-//             dr::masked(smith, wo.z() <= 0.0 || wi_p.z() <= 0.0) = 0.0;
-//             result_p += smith * dr::prod(weight) * 0.25f;
-//
-//
-//             // double pdf = eval(m) * smith_g1(wi, m) * dr::abs_dot(wi, m) /
-//             //             Frame3f::cos_theta(wi);
-//         }
-//
-//         dr::store(result.data() + i * FloatP::Size, result_p);
-//     }
-//
-//     return result;
-// }
 
 #endif //PIS_MICROFACET_H
