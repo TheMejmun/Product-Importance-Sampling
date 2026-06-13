@@ -11,6 +11,8 @@
 #include "coords.h"
 #include <stdio.h>
 
+#define guard_positive(v) if(v <= 0.0) return 0.0
+
 namespace utils {
     double safeSqrt(double x);
 

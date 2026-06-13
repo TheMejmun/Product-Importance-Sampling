@@ -68,16 +68,7 @@ Polar MicrofacetBRDF::sample(const Polar &wi) const {
     const Vec3f wi3 = upscale(wi);
     const Vec3f m3 = mDistribution.sample(wi3, {uniformDist(re), uniformDist(re)});
     const Polar m = truncate(m3);
-    const Polar wo = utils::reflect(wi, m);
-    if (wo.phi > M_PI || wo.phi < 0.0) {
-        // printf("wo.phi > M_PI\n");
-        return sample(wi);
-    }
-    // printf("Before: wi [%f, %f, %f] m [%f, %f, %f] pdf %f\n", wi3.x, wi3.y, wi3.z, m3.x, m3.y, m3.z,
-    //        mDistribution.reflected_pdf(wi3, m3));
-
-    // printf("sampled: %s\n", wo.toString().c_str());
-    return wo;
+    return utils::reflect(wi, m);
 }
 
 double MicrofacetBRDF::eval(const Vec3f &wi, const Vec3f &wo) const {
@@ -97,9 +88,5 @@ Vec3f MicrofacetBRDF::sample(const Vec3f &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
     const Vec3f m = mDistribution.sample(wi, {uniformDist(re), uniformDist(re)});
     const Vec3f wo = utils::reflect(wi, m);
-    if (utils::cosTheta(wo) < 0) {
-        // printf("wo.phi > M_PI\n");
-        return sample(wi);
-    }
     return wo;
 }
