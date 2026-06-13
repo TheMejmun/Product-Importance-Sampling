@@ -22,13 +22,13 @@ double BRDFSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::ve
 
 double BRDFSampler::sample3D(const BRDF &brdf, const Vec3f &wi) const {
     const Vec3f wo = brdf.sample(wi);
+    // Use constant uniform light for all directions.
     const double incomingLight = 10.0;
     const double pdf = brdf.pdf(wi, wo);
     if (pdf <= 0.0) {
         return sample3D(brdf, wi);
     }
-    // const double result = incomingLight * brdf.eval(wi, wo) / pdf;
-    const double result = incomingLight / pdf;
+    const double result = incomingLight * brdf.eval(wi, wo) / pdf;
     return result;
 }
 
