@@ -7,6 +7,7 @@
 
 #include "brdf.h"
 #include "mts/microfacet.h"
+#include "mts/microfacet_2d.h"
 
 class MicrofacetBRDF final : public BRDF {
 public:
@@ -25,7 +26,8 @@ public:
     [[nodiscard]] const char * name() const override;
 
 private:
-    mts::MicrofacetDistribution mDistribution{0.1f};
+    mts::MicrofacetDistribution m3DDistribution{0.1f};
+    mts::MicrofacetDistribution2D m2DDistribution{0.1f};
 };
 
 #endif //PIS_MICROFACET_BRDF_H
