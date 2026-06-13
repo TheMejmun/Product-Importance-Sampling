@@ -38,13 +38,13 @@ double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
     }
 
     Polar m{1.0, (wi.phi + wo.phi) / 2.0};
-    return m2DDistribution.reflected_pdf(utils::toVec(wi), utils::toVec(m));
+    return mDistribution2D.reflected_pdf(utils::toVec(wi), utils::toVec(m));
 }
 
 Polar MicrofacetBRDF::sample(const Polar &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
 
-    const Vec2f m = m2DDistribution.sample(utils::toVec(wi),  uniformDist(re));
+    const Vec2f m = mDistribution2D.sample(utils::toVec(wi),  uniformDist(re));
     return utils::reflect(wi, utils::toPolar(m));
 }
 
@@ -58,12 +58,12 @@ double MicrofacetBRDF::pdf(const Vec3f &wi, const Vec3f &wo) const {
     assert(utils::cosTheta(wi) >= 0.0);
     assert(utils::cosTheta(wo) >= 0.0);
     const Vec3f m = utils::normalize(wi + wo);
-    return m3DDistribution.reflected_pdf(wi, m);
+    return mDistribution3D.reflected_pdf(wi, m);
 }
 
 Vec3f MicrofacetBRDF::sample(const Vec3f &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
-    const Vec3f m = m3DDistribution.sample(wi, {uniformDist(re), uniformDist(re)});
+    const Vec3f m = mDistribution3D.sample(wi, {uniformDist(re), uniformDist(re)});
     const Vec3f wo = utils::reflect(wi, m);
     return wo;
 }

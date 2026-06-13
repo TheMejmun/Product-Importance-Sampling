@@ -26,8 +26,8 @@ public:
     [[nodiscard]] const char * name() const override;
 
 private:
-    mts::MicrofacetDistribution m3DDistribution{0.1f};
-    mts::MicrofacetDistribution2D m2DDistribution{0.1f};
+    mts::MicrofacetDistribution mDistribution3D{0.1f};
+    mts::MicrofacetDistribution2D mDistribution2D{0.1f};
 };
 
 #endif //PIS_MICROFACET_BRDF_H
