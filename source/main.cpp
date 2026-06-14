@@ -18,9 +18,9 @@
 #include "renderers/direct_light_sampler.h"
 #include "renderers/pis_sampler.h"
 
-#define UNIFORM_LIGHT
+// #define UNIFORM_LIGHT
 #define RANDOM_WI
-// #define MICROFACET_BRDF
+#define MICROFACET_BRDF
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -48,7 +48,7 @@ namespace {
 #define constant(name, value) const auto name = print_and_return(#name, value)
 
 constant(LIGHT_SOURCES, 4);
-constant(LIGHT_MAX_INTENSITY, 1.0);
+constant(LIGHT_MAX_INTENSITY, 10.0);
 constant(MS_TREE_SAMPLES, dpow(2, 20));
 constant(REFERENCE_SAMPLES, dpow(2, 22));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 6));
@@ -215,6 +215,8 @@ int main() {
     printf("\tLight Sampling: %f\n", mst_mse);
     double mis_mse = mis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
     printf("\tMIS: %f\n", mis_mse);
+    double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    printf("\tPIS: %f\n", pis_mse);
 
     printf("Equal Samples (%d samples):\n", ES_BENCHMARK_SAMPLES);
     double brdf_es = brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
@@ -223,6 +225,8 @@ int main() {
     printf("\tLight Sampling: %f\n", mst_es);
     double mis_es = mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
     printf("\tMIS: %f\n", mis_es);
+    double pis_es = pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    printf("\tPIS: %f\n", pis_es);
 
     printf("Equal Time (%f s):\n", ET_BENCHMARK_SECONDS);
     double brdf_et = brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
@@ -231,6 +235,8 @@ int main() {
     printf("\tLight Sampling: %f\n", mst_et);
     double mis_et = mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
     printf("\tMIS: %f\n", mis_et);
+    double pis_et = pis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
+    printf("\tPIS: %f\n", pis_et);
 
     return 0;
 }
