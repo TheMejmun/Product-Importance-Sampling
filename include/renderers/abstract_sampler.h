@@ -23,7 +23,7 @@ public:
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
-        const Polar *wi
+        const Polar &wi
     ) const;
 
     [[nodiscard]] double mse(
@@ -32,7 +32,7 @@ public:
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
-        const Polar *wi
+        const Polar &wi
     ) const;
 
     [[nodiscard]] double equal_time(
@@ -40,7 +40,7 @@ public:
         const MSTree &msTree,
         const BRDF &brdf,
         const std::vector<LightSource> &lightSources,
-        const Polar *wi
+        const Polar &wi
     ) const;
 
     [[nodiscard]] virtual double sample(

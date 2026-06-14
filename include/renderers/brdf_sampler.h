@@ -17,7 +17,7 @@ public:
     [[nodiscard]] double equal_samples3D(
         std::uint32_t iterations,
         const BRDF &brdf,
-        const Vec3f *wi
+        const Vec3f &wi
     ) const;
 };
 

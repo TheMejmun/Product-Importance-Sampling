@@ -12,15 +12,10 @@ namespace {
 }
 
 double AbstractSampler::equal_samples(std::uint32_t iterations, const MSTree &msTree, const BRDF &brdf,
-                                      const std::vector<LightSource> &lightSources, const Polar *wi) const {
+                                      const std::vector<LightSource> &lightSources, const Polar &wi) const {
     double color = 0.0;
     for (int i = 0; i < iterations; ++i) {
-        if (wi == nullptr) {
-            const Polar wi{1.0, randDistr(randEng) * M_PI};
-            color += sample(msTree, brdf, lightSources, wi);
-        } else {
-            color += sample(msTree, brdf, lightSources, *wi);
-        }
+        color += sample(msTree, brdf, lightSources, wi);
     }
     color /= static_cast<double>(iterations);
 
@@ -29,16 +24,10 @@ double AbstractSampler::equal_samples(std::uint32_t iterations, const MSTree &ms
 }
 
 double AbstractSampler::mse(double reference, std::uint32_t iterations, const MSTree &msTree, const BRDF &brdf,
-                            const std::vector<LightSource> &lightSources, const Polar *wi) const {
+                            const std::vector<LightSource> &lightSources, const Polar &wi) const {
     double mse = 0.0;
     for (int i = 0; i < iterations; ++i) {
-        double color;
-        if (wi == nullptr) {
-            const Polar wi{1.0, randDistr(randEng) * M_PI};
-            color = sample(msTree, brdf, lightSources, wi);
-        } else {
-            color = sample(msTree, brdf, lightSources, *wi);
-        }
+        const double color = sample(msTree, brdf, lightSources, wi);
         mse += (color - reference) * (color - reference);
     }
     mse /= static_cast<double>(iterations);
@@ -46,19 +35,13 @@ double AbstractSampler::mse(double reference, std::uint32_t iterations, const MS
 }
 
 double AbstractSampler::equal_time(double seconds, const MSTree &msTree, const BRDF &brdf,
-                                   const std::vector<LightSource> &lightSources, const Polar *wi) const {
+                                   const std::vector<LightSource> &lightSources, const Polar &wi) const {
     double color = 0.0;
     int iterations = 0;
     time_t start;
     time(&start);
     for (;;) {
-        double res;
-        if (wi == nullptr) {
-            const Polar wi{1.0, randDistr(randEng) * M_PI};
-            res = sample(msTree, brdf, lightSources, wi);
-        } else {
-            res = sample(msTree, brdf, lightSources, *wi);
-        }
+        const double res = sample(msTree, brdf, lightSources, wi);
         time_t now;
         time(&now);
         const double duration = difftime(now, start);

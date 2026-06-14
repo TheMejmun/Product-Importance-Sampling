@@ -30,15 +30,10 @@ double BRDFSampler::sample3D(const BRDF &brdf, const Vec3f &wi) const {
     return result;
 }
 
-double BRDFSampler::equal_samples3D(std::uint32_t iterations, const BRDF &brdf, const Vec3f *wi) const {
+double BRDFSampler::equal_samples3D(std::uint32_t iterations, const BRDF &brdf, const Vec3f &wi) const {
     double color = 0.0;
     for (int i = 0; i < iterations; ++i) {
-        if (wi == nullptr) {
-            const Vec3f wi = utils::hemisphereSample();
-            color += sample3D(brdf, wi);
-        } else {
-            color += sample3D(brdf, *wi);
-        }
+        color += sample3D(brdf, wi);
     }
     color /= static_cast<double>(iterations);
     return color;
