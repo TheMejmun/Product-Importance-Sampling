@@ -16,15 +16,15 @@
 
 struct Node {
     double flux;
-    double leftBoundary;
-    double rightBoundary;
+    double startBoundary;
+    double endBoundary;
 
     bool operator <(const Node &rhs) const {
-        return this->leftBoundary < rhs.leftBoundary;
+        return this->startBoundary < rhs.startBoundary;
     }
 
     [[nodiscard]] double width() const {
-        return rightBoundary - leftBoundary;
+        return endBoundary - startBoundary;
     }
 };
 
@@ -61,12 +61,17 @@ public:
 
     void exportToCsv(const std::string &filename);
 
+    std::vector<Node> &getNodes();
+
+    std::vector<double> & getPdfs();
+
+    MSTree copy() const;
+
 private:
     double mTotalFlux = 0.0;
     std::vector<Node> mNodes;
     std::vector<LightSample> mLightSamples;
-    std::discrete_distribution<uint32_t> mDistribution;
-    std::vector<double> pdfs;
+    std::vector<double> mPdfs;
 
     void compileRec(double leftBoundary, double rightBoundary);
 };

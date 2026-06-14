@@ -58,12 +58,12 @@ void MSTree::compile() {
     printf("Compiled %lu samples into %lu nodes\n", mLightSamples.size(), mNodes.size());
 
 
-    pdfs = std::vector<double>(mNodes.size());
+    mPdfs = std::vector<double>(mNodes.size());
     double newTotalFlux = 0.0;
     double pdfSum = 0.0;
     for (uint32_t i = 0; i < mNodes.size(); ++i) {
-        pdfs[i] = pdf(mNodes[i]);
-        pdfSum += pdfs[i];
+        mPdfs[i] = pdf(mNodes[i]);
+        pdfSum += mPdfs[i];
         newTotalFlux += mNodes[i].flux;
     }
     printf("mTotalFlux %f -> %f\n", mTotalFlux, newTotalFlux);
@@ -73,13 +73,13 @@ void MSTree::compile() {
  MSTSample MSTree::sample() const {
     // Get a random Node weighted by its relative flux
     // TODO this would be faster in a binary tree
-    const uint32_t index = std::discrete_distribution<uint32_t>(pdfs.begin(), pdfs.end())(randEng);
+    const uint32_t index = std::discrete_distribution<uint32_t>(mPdfs.begin(), mPdfs.end())(randEng);
     const Node &sampleNode = mNodes[index];
 
-    double position = sampleNode.leftBoundary + randDistr(randEng) * sampleNode.width();
+    double position = sampleNode.startBoundary + randDistr(randEng) * sampleNode.width();
     MSTSample result{
         Polar{1.0, position},
-        pdfs[index] / sampleNode.width()
+        mPdfs[index] / sampleNode.width()
     };
     return {result};
 }
@@ -97,7 +97,24 @@ void MSTree::exportToCsv(const std::string &filename) {
     for (uint32_t i = 0; i < mNodes.size(); ++i) {
         const Node &n = mNodes[i];
         csv << i << "," << n.flux << ",";
-        csv << n.rightBoundary - n.leftBoundary << "," << n.leftBoundary << "," << n.rightBoundary << ",\n";
+        csv << n.endBoundary - n.startBoundary << "," << n.startBoundary << "," << n.endBoundary << ",\n";
     }
     csv.close();
+}
+
+std::vector<Node> & MSTree::getNodes() {
+    return mNodes;
+}
+
+std::vector<double> &MSTree::getPdfs() {
+    return mPdfs;
+}
+
+MSTree MSTree::copy() const {
+    MSTree copy{};
+    copy.mTotalFlux = mTotalFlux;
+    copy.mNodes = mNodes;
+    copy.mLightSamples = mLightSamples;
+    copy.mPdfs = mPdfs;
+    return copy;
 }
