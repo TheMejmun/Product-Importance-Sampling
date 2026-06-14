@@ -25,8 +25,7 @@ double DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
     if (wi.phi > M_PI || wo.phi > M_PI) {
         return 0.0;
     }
-    // White diffuse
-    return 1.0 / M_PI;
+    return 0.5;
 }
 
 double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
@@ -49,7 +48,6 @@ Polar DiffuseBRDF::sample(const Polar &wi) const {
 double DiffuseBRDF::eval(const Vec3f &wi, const Vec3f &wo) const {
     assert(utils::cosTheta(wi) >= 0.0);
     assert(utils::cosTheta(wo) >= 0.0);
-    // White diffuse
     return 1.0 / M_PI;
 }
 

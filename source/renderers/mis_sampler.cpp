@@ -21,14 +21,14 @@ double MISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vec
         if (pdf > 0.0) {
             const double brdfIncoming = sampling::intersect_lights(lightSources, wo);
             brdfPdf = pdf;
-            brdfColor = brdfIncoming * brdf.eval(wi, wo) / pdf;
+            brdfColor = brdfIncoming * brdf.eval(wi, wo) * utils::cosTheta(wo) / pdf;
         }
     }
 
     const MSTSample sample = msTree.sample();
     const double mstIncoming = sampling::intersect_lights(lightSources, sample.wo);
     const double mstPdf = sample.pdf;
-    const double mstColor = mstIncoming * brdf.eval(wi, sample.wo) / mstPdf;
+    const double mstColor = mstIncoming * brdf.eval(wi, sample.wo) * utils::cosTheta(sample.wo) / mstPdf;
 
     // (
     //   (color0 / pdf0) * pdf0 +

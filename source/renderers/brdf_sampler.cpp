@@ -15,7 +15,7 @@ double BRDFSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::ve
     const double incomingLight = sampling::intersect_lights(lightSources, wo);
     const double pdf = brdf.pdf(wi, wo);
     guard_positive(pdf);
-    const double result = incomingLight * brdf.eval(wi, wo) / pdf;
+    const double result = incomingLight * brdf.eval(wi, wo) * utils::cosTheta(wo) / pdf;
     return result;
 }
 
@@ -27,7 +27,7 @@ double BRDFSampler::sample3D(const BRDF &brdf, const Vec3f &wi) const {
     const double incomingLight = 10.0;
     const double pdf = brdf.pdf(wi, wo);
     guard_positive(pdf);
-    const double result = incomingLight * brdf.eval(wi, wo) / pdf;
+    const double result = incomingLight * brdf.eval(wi, wo) * utils::cosTheta(wo) / pdf;
     return result;
 }
 

@@ -25,8 +25,7 @@ double MicrofacetBRDF::eval(const Polar &wi, const Polar &wo) const {
     if (wi.phi > M_PI || wo.phi > M_PI) {
         return 0.0;
     }
-    // TODO
-    return 1 / M_PI;
+    return 0.5;
 }
 
 double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
@@ -44,7 +43,7 @@ double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
 Polar MicrofacetBRDF::sample(const Polar &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
 
-    const Vec2f m = mDistribution2D.sample(utils::toVec(wi),  uniformDist(re));
+    const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniformDist(re));
     return utils::reflect(wi, utils::toPolar(m));
 }
 
