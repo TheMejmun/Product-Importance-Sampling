@@ -154,6 +154,8 @@ void testMicrofacet3D() {
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
+    printf("\n");
+
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};
 
@@ -171,6 +173,8 @@ int main() {
 
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
+    printf("\n");
+
 #ifdef RANDOM_WI
     const Polar wi{1.0, randDistr(randEng) * M_PI};
     const Vec3f wi3 = utils::hemisphereSample();
@@ -186,6 +190,8 @@ int main() {
     const DirectLightSampler direct_light_sampler{};
     const MISSampler mis_sampler{};
     const PISSampler pis_sampler{};
+
+    printf("\n");
 
     double brdfReference =
             brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
