@@ -50,7 +50,7 @@ namespace {
 constant(LIGHT_SOURCES, 4);
 constant(LIGHT_MAX_INTENSITY, 1.0);
 constant(MS_TREE_SAMPLES, dpow(2, 20));
-constant(REFERENCE_SAMPLES, dpow(2, 20));
+constant(REFERENCE_SAMPLES, dpow(2, 22));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 6));
 constant(MSE_BENCHMARK_SAMPLES, dpow(2, 15));
 constant(ET_BENCHMARK_SECONDS, 0.0001);
