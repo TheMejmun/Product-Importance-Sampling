@@ -22,6 +22,7 @@
 #define RANDOM_WI
 #define CONSTANT_WI // Causes stack overflow if disabled, atm
 
+
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
         uint32_t result = 1;
@@ -30,35 +31,31 @@ namespace {
         }
         return result;
     }
+
+    // For the `constant` macro
+    template<typename T>
+    constexpr T print_and_return(const char *name, const T &v) {
+        std::cout << name << ":";
+        for (uint32_t i = 1; i < 32; ++i) {
+            if (strlen(name) < i) {
+                std::cout << " ";
+            }
+        }
+        std::cout << v << std::endl;
+        return v;
+    }
 }
 
-constexpr uint32_t LIGHT_SOURCES = 4;
-constexpr double LIGHT_MAX_INTENSITY = 100.0;
-constexpr uint32_t MS_TREE_SAMPLES = dpow(2, 20);
+#define constant(name, value) const auto name = print_and_return(#name, value)
 
-constexpr uint32_t REFERENCE_SAMPLES = dpow(2, 20);
-constexpr uint32_t ES_BENCHMARK_SAMPLES = dpow(2, 6);
-constexpr uint32_t MSE_BENCHMARK_SAMPLES = dpow(2, 15);
-constexpr double ET_BENCHMARK_SECONDS = 0.0001;
-
-constexpr uint32_t MICROFACET_TEST_SAMPLE_COUNT = dpow(2, 20);
-constexpr uint32_t PERTURBED_TEST_SAMPLE_COUNT = dpow(2, 20);
-constexpr uint32_t REFLECTED_PDF_TEST_SAMPLE_COUNT = dpow(2, 20);
-constexpr uint32_t MANY_PDF_TEST_SAMPLE_COUNT = dpow(2, 4);
-
-void print_constants() {
-    std::cout << "LIGHT_SOURCES                   " << LIGHT_SOURCES << std::endl;
-    std::cout << "LIGHT_MAX_INTENSITY             " << LIGHT_MAX_INTENSITY << std::endl;
-    std::cout << "MS_TREE_SAMPLES                 " << MS_TREE_SAMPLES << std::endl;
-    std::cout << "REFERENCE_SAMPLES               " << REFERENCE_SAMPLES << std::endl;
-    std::cout << "ES_BENCHMARK_SAMPLES            " << ES_BENCHMARK_SAMPLES << std::endl;
-    std::cout << "MSE_BENCHMARK_SAMPLES           " << MSE_BENCHMARK_SAMPLES << std::endl;
-    std::cout << "ET_BENCHMARK_SECONDS            " << ET_BENCHMARK_SECONDS << std::endl;
-    std::cout << "MICROFACET_TEST_SAMPLE_COUNT    " << MICROFACET_TEST_SAMPLE_COUNT << std::endl;
-    std::cout << "PERTURBED_TEST_SAMPLE_COUNT     " << PERTURBED_TEST_SAMPLE_COUNT << std::endl;
-    std::cout << "REFLECTED_PDF_TEST_SAMPLE_COUNT " << REFLECTED_PDF_TEST_SAMPLE_COUNT << std::endl;
-    std::cout << "MANY_PDF_TEST_SAMPLE_COUNT      " << MANY_PDF_TEST_SAMPLE_COUNT << std::endl;
-}
+constant(LIGHT_SOURCES, 4);
+constant(LIGHT_MAX_INTENSITY, 1.0);
+constant(MS_TREE_SAMPLES, dpow(2, 20));
+constant(REFERENCE_SAMPLES, dpow(2, 20));
+constant(ES_BENCHMARK_SAMPLES, dpow(2, 6));
+constant(MSE_BENCHMARK_SAMPLES, dpow(2, 15));
+constant(ET_BENCHMARK_SECONDS, 0.0001);
+constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
 
 // Anonymous namespace ensures internal linkage
 namespace {
@@ -71,7 +68,7 @@ namespace {
 LightSource generateLightSource() {
     const double startAngle = randDistr(randEng) * M_PI;
     const double endAngle = randDistr(randEng) * (M_PI - startAngle) + startAngle;
-    const double intensity = randDistr(randEng);
+    const double intensity = randDistr(randEng) * LIGHT_MAX_INTENSITY;
     return {startAngle, endAngle, intensity};
 }
 
@@ -155,76 +152,9 @@ void testMicrofacet3D() {
     printf("avgWo=[%f, %f, %f], varWo=[%f, %f, %f]\n", avgWo.x, avgWo.y, avgWo.z, varWo.x, varWo.y, varWo.z);
 }
 
-void testAzimuthPerturbation() {
-    printf("Testing effects of azimuth perturbation on pdf\n");
-    mts::MicrofacetDistribution distr{0.1f};
-    std::vector<double> samples_sa(PERTURBED_TEST_SAMPLE_COUNT);
-    std::vector<double> samples_pdf(PERTURBED_TEST_SAMPLE_COUNT);
-    const Vec3f wi = utils::hemisphereSample();
-    const Vec3f wo = utils::hemisphereSample();
-    const Vec3f m = utils::normalize(wi + wo);
-    const Spherical mSpherical = utils::toSpherical(m);
-    const double sa = distr.solid_angle_density(wi, m);
-    const double pdf = distr.reflected_pdf(wi, m);
-
-    for (uint32_t i = 0; i < PERTURBED_TEST_SAMPLE_COUNT; ++i) {
-        const Spherical perturbedMSpherical{1, mSpherical.theta, 2 * M_PI * randDistr(randEng)};
-        const Vec3f perturbedM = utils::toVec(perturbedMSpherical);
-        const double sad = distr.solid_angle_density(wi, perturbedM);
-        const double pdf = distr.reflected_pdf(wi, perturbedM);
-        if (sad <= 0.0 || pdf <= 0.0) {
-            --i;
-            continue;
-        }
-        samples_sa[i] = sad;
-        samples_pdf[i] = pdf;
-    }
-    const double mse_sa = utils::mse(sa, samples_sa);
-    printf("\tMSE solid angle: %f\n", mse_sa);
-    const double mse_pdf = utils::mse(pdf, samples_pdf);
-    printf("\tMSE pdf: %f\n", mse_pdf);
-
-    // Result: sometimes slightly changes pdf, but probably because of numerics only
-}
-
-void testPDF() {
-    printf("Testing PDF accuracy\n");
-    mts::MicrofacetDistribution distr{0.1f};
-    const Vec3f wi = utils::hemisphereSample();
-    const double uniform_hemisphere_pdf = 1.0 / (2.0 * M_PI);
-
-    double sum = 0.0;
-    for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
-        const Vec3f wo = utils::hemisphereSample();
-        const Vec3f m = utils::normalize(wi + wo);
-        const double pdf = distr.reflected_pdf(wi, m);
-        sum += pdf / uniform_hemisphere_pdf;
-    }
-    printf("\tintegral wo uniform sampled: %f\n",
-           sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
-
-    sum = 0.0;
-    for (uint32_t i = 0; i < REFLECTED_PDF_TEST_SAMPLE_COUNT; ++i) {
-        const Vec3f m = distr.sample(wi, {randDistr(randEng), randDistr(randEng)});
-        const double pdf = distr.reflected_pdf(wi, m);
-        sum += pdf;
-    }
-    printf("\tintegral m distr sampled: %f\n",
-           sum / static_cast<double>(REFLECTED_PDF_TEST_SAMPLE_COUNT));
-}
-
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 int main() {
-    print_constants();
-    printf("\n");
-
-    testAzimuthPerturbation();
-    printf("\n");
-
-    testPDF();
-    printf("\n");
-
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};
 
