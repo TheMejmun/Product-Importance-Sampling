@@ -7,7 +7,7 @@
 
 #include "renderers/abstract_sampler.h"
 
-#define MONTECARLO_DEFAULT 4
+#define MONTECARLO_DEFAULT 16
 
 class PISSampler final : public AbstractSampler {
 public:
