@@ -80,6 +80,10 @@ namespace utils {
     inline double lerp(const double v0, const double v1, const double t) {
         return v0 + t * (v1 - v0);
     }
+
+    inline double mix(double val0, double w0, double val1, double w1) {
+        return (val0 * w0 + val1 * w1) / (w0 + w1);
+    }
 }
 
 #endif //PIS_UTILS_H

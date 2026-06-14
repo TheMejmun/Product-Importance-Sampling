@@ -6,11 +6,6 @@
 
 #include "utils.h"
 
-double mix(double val0, double w0, double val1, double w1) {
-    return (val0 * w0 + val1 * w1) / (w0 + w1);
-}
-
-// TODO cosTheta wi, wo
 double MISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,
                           const Polar &wi) const {
     const Polar wo = brdf.sample(wi);
@@ -34,5 +29,5 @@ double MISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vec
     //   (color0 / pdf0) * pdf0 +
     //   (color1 / pdf1) * pdf1
     // ) / (pdf0 + pdf1)
-    return mix(brdfColor, brdfPdf, mstColor, mstPdf);
+    return utils::mix(brdfColor, brdfPdf, mstColor, mstPdf);
 }
