@@ -17,14 +17,14 @@ namespace {
 // TODO cache msTreeCopy 
 double PISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,
                           const Polar &wi) const {
-    MSTree msTreeCopy = msTree.copy();
-
+    // MSTree msTreeCopy = msTree.copy();
+    std::vector<double> msTreePdfs = msTree.getPdfs(); // Copy
     // Estimate pdf integral
-    std::vector<double> brdfPdfs(msTree.getPdfs().size());
+    std::vector<double> brdfPdfs(msTreePdfs.size());
     double totalBrdfPdf = 0.0;
     double totalProductPdf = 0.0;
-    for (uint32_t i = 0; i < msTreeCopy.getNodes().size(); ++i) {
-        const Node &node = msTreeCopy.getNodes()[i];
+    for (uint32_t i = 0; i < msTree.getNodes().size(); ++i) {
+        const Node &node = msTree.getNodes()[i];
 
         double brdfPdf = 0.0;
         for (int j = 0; j < mMontecarloSamples; ++j) {
@@ -36,12 +36,12 @@ double PISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vec
 
         // Combine direct light data structure pdf
         // with brdf pdf integral
-        msTreeCopy.getPdfs()[i] *= brdfPdfs[i];
-        totalProductPdf += msTreeCopy.getPdfs()[i];
+        msTreePdfs[i] *= brdfPdfs[i];
+        totalProductPdf += msTreePdfs[i];
     }
     // Normalize -> integrate to 1
-    for (uint32_t i = 0; i < msTreeCopy.getNodes().size(); ++i) {
-        msTreeCopy.getPdfs()[i] /= totalProductPdf;
+    for (uint32_t i = 0; i < msTreePdfs.size(); ++i) {
+        msTreePdfs[i] /= totalProductPdf;
         brdfPdfs[i] /= totalBrdfPdf;
     }
 
@@ -49,15 +49,15 @@ double PISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vec
     // for (const auto &pdf: msTree.getPdfs()) { msTreePdfTotal += pdf; }
     // printf("msTreePdfTotal\t%f\n", msTreePdfTotal);
     // double msTreeCopyPdfTotal = 0.0;
-    // for (const auto &pdf: msTreeCopy.getPdfs()) { msTreeCopyPdfTotal += pdf; }
+    // for (const auto &pdf: msTreePdfs) { msTreeCopyPdfTotal += pdf; }
     // printf("msTreeCopyPdfTotal\t%f\n", msTreeCopyPdfTotal);
     // double brdfPdfTotal = 0.0;
     // for (const auto &pdf: brdfPdfs) { brdfPdfTotal += pdf; }
     // printf("brdfPdfTotal\t%f\n", brdfPdfTotal);
 
     // Get a sampling region
-    const uint32_t nodeIndex = msTreeCopy.sampleNodes(); // region from the data structure according to distribution
-    const double nodePdf = msTreeCopy.getPdfs()[nodeIndex]; // combined light + brdf pdf
+    const uint32_t nodeIndex = std::discrete_distribution<uint32_t>(msTreePdfs.begin(), msTreePdfs.end())(randEng);
+    const double nodePdf = msTreePdfs[nodeIndex]; // combined light + brdf pdf
     const double brdfPdf = brdfPdfs[nodeIndex]; // brdf pdf integral
 
     if (nodePdf == 0.0) { return 0.0; }
@@ -70,5 +70,6 @@ double PISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vec
     if (pdf == 0.0) { return 0.0; }
 
     const double incoming = sampling::intersect_lights(lightSources, wo);
-    return incoming * brdf.eval(wi, wo) * utils::cosTheta(wo) / pdf;
+    const double out = incoming * brdf.eval(wi, wo) * utils::cosTheta(wo) / pdf;
+    return out;
 }
