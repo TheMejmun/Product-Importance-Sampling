@@ -28,6 +28,10 @@ public:
 
     [[nodiscard]] virtual Polar sample(const Polar &wi) const = 0;
 
+    [[nodiscard]] virtual double pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const = 0;
+
+    [[nodiscard]] virtual Polar sample(const Polar &wi, uint32_t nodeIndex) const = 0;
+
     [[nodiscard]] virtual double eval(const Vec3f &wi, const Vec3f &wo) const = 0;
 
     [[nodiscard]] virtual double pdf(const Vec3f &wi, const Vec3f &wo) const = 0;

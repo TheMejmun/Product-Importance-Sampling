@@ -70,16 +70,20 @@ void MSTree::compile() {
     printf("PDF sum: %f\n", pdfSum);
 }
 
-MSTSample MSTree::sample() const {
+uint32_t MSTree::sampleNodes() const {
     // Get a random Node weighted by its relative flux
     // TODO this would be faster in a binary tree
     const uint32_t index = std::discrete_distribution<uint32_t>(mPdfs.begin(), mPdfs.end())(randEng);
-    const Node &sampleNode = mNodes[index];
+    return index;
+}
 
+MSTSample MSTree::sample() const {
+    const uint32_t nodeIndex = sampleNodes();
+    const Node &sampleNode = mNodes[nodeIndex];
     double position = sampleNode.startBoundary + randDistr(randEng) * sampleNode.width();
     MSTSample result{
         Polar{1.0, position},
-        mPdfs[index] / sampleNode.width()
+        mPdfs[nodeIndex] / sampleNode.width()
     };
     return {result};
 }

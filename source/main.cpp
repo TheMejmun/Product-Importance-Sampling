@@ -20,7 +20,7 @@
 
 // #define UNIFORM_LIGHT
 #define RANDOM_WI
-#define MICROFACET_BRDF
+// #define MICROFACET_BRDF
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -206,7 +206,7 @@ int main() {
     BRDF &brdf = microfacet;
     const double reference = microfacetReference;
 #else
-    const BRDF &brdf = diffuse;
+    BRDF &brdf = diffuse;
     const double reference = diffuseReference;
 #endif
 

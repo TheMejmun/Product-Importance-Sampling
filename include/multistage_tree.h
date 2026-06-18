@@ -56,6 +56,9 @@ public:
     // Get a random sample
     [[nodiscard]] MSTSample sample() const;
 
+    // Get a random sample
+    [[nodiscard]] uint32_t sampleNodes() const;
+
     // Calculate the probability for a given sample
     [[nodiscard]] double pdf(const Node &node) const;
 
@@ -65,11 +68,11 @@ public:
 
     std::vector<double> &getPdfs();
 
-    const std::vector<Node> &getNodes() const;
+    [[nodiscard]] const std::vector<Node> &getNodes() const;
 
-    const std::vector<double> &getPdfs() const;
+    [[nodiscard]] const std::vector<double> &getPdfs() const;
 
-    MSTree copy() const;
+    [[nodiscard]] MSTree copy() const;
 
 private:
     double mTotalFlux = 0.0;

@@ -12,7 +12,8 @@
 namespace {
     std::random_device r;
     std::default_random_engine re(r());
-    std::uniform_real_distribution<double> hemisphereDist(0.0, M_PI);
+    std::uniform_real_distribution hemisphereDist(0.0, M_PI);
+    std::uniform_real_distribution uniformDist(0.0, 1.0);
 }
 
 const char *DiffuseBRDF::name() const {
@@ -34,7 +35,6 @@ double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
     if (wi.phi > M_PI || wo.phi > M_PI) {
         return 0.0;
     }
-    // Equal pdf everywhere, since polar angle is uniformly distributed
     return 1.0 / M_PI;
 }
 
@@ -43,6 +43,28 @@ Polar DiffuseBRDF::sample(const Polar &wi) const {
 
     const double phi = hemisphereDist(re);
     return {1.0, phi};
+}
+
+double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const {
+    throw std::runtime_error("Not implemented");
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
+    if (wi.phi > M_PI || wo.phi > M_PI) {
+        return 0.0;
+    }
+    const Range &range = mRangeMappings[nodeIndex];
+    const double rangeWidth = range.end - range.start;
+    if (rangeWidth <= 0.0) { return 0.0; }
+    return 1.0 / (rangeWidth * M_PI);
+}
+
+Polar DiffuseBRDF::sample(const Polar &wi, uint32_t nodeIndex) const {
+    assert(utils::cosTheta(wi) >= 0.0);
+
+    const Range &range = mRangeMappings[nodeIndex];
+    const double rangeWidth = range.end - range.start;
+    const double uniform = range.start + rangeWidth * uniformDist(re);
+    return {1.0, uniform * M_PI};
 }
 
 double DiffuseBRDF::eval(const Vec3f &wi, const Vec3f &wo) const {

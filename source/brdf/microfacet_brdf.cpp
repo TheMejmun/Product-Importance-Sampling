@@ -34,7 +34,6 @@ double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
     assert(utils::cosTheta(wi) >= 0.0);
     assert(utils::cosTheta(wo) >= 0.0);
     if (wi.phi > M_PI || wo.phi > M_PI) {
-        printf("Not in hemisphere\n");
         return 0.0;
     }
 
@@ -46,6 +45,31 @@ Polar MicrofacetBRDF::sample(const Polar &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
 
     const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniformDist(re));
+    return utils::reflect(wi, utils::toPolar(m));
+}
+
+double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const {
+    throw std::runtime_error("Not implemented");
+    assert(utils::cosTheta(wi) >= 0.0);
+    assert(utils::cosTheta(wo) >= 0.0);
+    if (wi.phi > M_PI || wo.phi > M_PI) {
+        return 0.0;
+    }
+    const Range &range = mRangeMappings[nodeIndex];
+    const double rangeWidth = range.end - range.start;
+    if (rangeWidth <= 0.0) { return 0.0; }
+    // TODO
+    Polar m{1.0, (wi.phi + wo.phi) / 2.0};
+    return mDistribution2D.reflected_pdf(utils::toVec(wi), utils::toVec(m));
+}
+
+Polar MicrofacetBRDF::sample(const Polar &wi, uint32_t nodeIndex) const {
+    assert(utils::cosTheta(wi) >= 0.0);
+
+    const Range &range = mRangeMappings[nodeIndex];
+    const double rangeWidth = range.end - range.start;
+    const double uniform = range.start + rangeWidth * uniformDist(re);
+    const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniform);
     return utils::reflect(wi, utils::toPolar(m));
 }
 
