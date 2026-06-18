@@ -156,9 +156,6 @@ void testMicrofacet3D() {
 int main() {
     printf("\n");
 
-    DiffuseBRDF diffuse{};
-    MicrofacetBRDF microfacet{};
-
 #ifdef UNIFORM_LIGHT
     std::vector<LightSource> lightSources{};
     lightSources.emplace_back(0.0,M_PI, 10.0);
@@ -185,6 +182,10 @@ int main() {
 
     printf("wi: %s\n", wi.toString().c_str());
     printf("wi3: %s\n", wi3.toString().c_str());
+
+    DiffuseBRDF diffuse{};
+    MicrofacetBRDF microfacet{};
+    std::vector<Range> ranges = microfacet.calculateMapping(irradianceTree, wi);
 
     const BRDFSampler brdf_sampler{};
     const DirectLightSampler direct_light_sampler{};

@@ -63,7 +63,11 @@ public:
 
     std::vector<Node> &getNodes();
 
-    std::vector<double> & getPdfs();
+    std::vector<double> &getPdfs();
+
+    const std::vector<Node> &getNodes() const;
+
+    const std::vector<double> &getPdfs() const;
 
     MSTree copy() const;
 

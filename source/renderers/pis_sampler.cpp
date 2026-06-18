@@ -22,6 +22,7 @@ double PISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vec
         const Node &node = msTreeCopy.getNodes()[i];
 
         double brdfPdf = 0.0;
+        // TODO analytical integral
         for (int j = 0; j < mMontecarloSamples; ++j) {
             const Polar wo{1.0, node.startBoundary + randDistr(randEng) * node.width()};
             brdfPdf += brdf.pdf(wi, wo);

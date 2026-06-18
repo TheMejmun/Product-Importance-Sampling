@@ -8,6 +8,8 @@
 
 #include "utils.h"
 
+#define MAPPING_SAMPLES 1048576 // 2^20
+
 namespace {
     std::random_device r;
     std::default_random_engine re(r());
@@ -65,4 +67,24 @@ Vec3f MicrofacetBRDF::sample(const Vec3f &wi) const {
     const Vec3f m = mDistribution3D.sample(wi, {uniformDist(re), uniformDist(re)});
     const Vec3f wo = utils::reflect(wi, m);
     return wo;
+}
+
+std::vector<Range> MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) const {
+    const auto &nodes = msTree.getNodes();
+    std::vector<Range> out(nodes.size());
+
+    for (uint32_t i = 0; i < MAPPING_SAMPLES; ++i) {
+        const double uniform = static_cast<double>(i) / static_cast<double>(MAPPING_SAMPLES);
+        const Vec2f woVec = mDistribution2D.sample(utils::toVec(wi), uniform);
+        const Polar wo = utils::toPolar(woVec);
+        for (uint32_t j = 0; j < nodes.size(); ++j) {
+            if (wo.phi >= nodes[j].startBoundary && wo.phi <= nodes[j].endBoundary) {
+                out[j].start = std::min(out[j].start, uniform);
+                out[j].end = std::max(out[j].end, uniform);
+                break;
+            }
+        }
+    }
+
+    return out;
 }

@@ -6,8 +6,14 @@
 #define PIS_MICROFACET_BRDF_H
 
 #include "brdf.h"
+#include "multistage_tree.h"
 #include "mts/microfacet.h"
 #include "mts/microfacet_2d.h"
+
+struct Range {
+    double start = 1.0;
+    double end = 0.0;
+};
 
 class MicrofacetBRDF final : public BRDF {
 public:
@@ -23,7 +29,9 @@ public:
 
     [[nodiscard]] Vec3f sample(const Vec3f &wi) const override;
 
-    [[nodiscard]] const char * name() const override;
+    [[nodiscard]] const char *name() const override;
+
+    [[nodiscard]] std::vector<Range> calculateMapping(const MSTree &msTree, const Polar &wi) const;
 
 private:
     mts::MicrofacetDistribution mDistribution3D{0.1f};
