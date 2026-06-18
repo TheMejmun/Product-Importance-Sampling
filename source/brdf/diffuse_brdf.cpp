@@ -62,3 +62,12 @@ Vec3f DiffuseBRDF::sample(const Vec3f &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
     return utils::hemisphereSample();
 }
+
+void DiffuseBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
+    const auto &nodes = msTree.getNodes();
+    mRangeMappings = std::vector<Range>(nodes.size());
+    for (uint32_t i = 0; i < nodes.size(); ++i) {
+        mRangeMappings[i].start = nodes[i].startBoundary / M_PI;
+        mRangeMappings[i].end = nodes[i].endBoundary / M_PI;
+    }
+}

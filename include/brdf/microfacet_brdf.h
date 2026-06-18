@@ -10,11 +10,6 @@
 #include "mts/microfacet.h"
 #include "mts/microfacet_2d.h"
 
-struct Range {
-    double start = 1.0;
-    double end = 0.0;
-};
-
 class MicrofacetBRDF final : public BRDF {
 public:
     [[nodiscard]] double eval(const Polar &wi, const Polar &wo) const override;
@@ -31,7 +26,7 @@ public:
 
     [[nodiscard]] const char *name() const override;
 
-    [[nodiscard]] std::vector<Range> calculateMapping(const MSTree &msTree, const Polar &wi) const;
+    void calculateMapping(const MSTree &msTree, const Polar &wi) override;
 
 private:
     mts::MicrofacetDistribution mDistribution3D{0.1f};

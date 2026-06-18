@@ -8,7 +8,7 @@
 
 #include "utils.h"
 
-#define MAPPING_SAMPLES 1048576 // 2^20
+#define MAPPING_SAMPLES 33554432 // 2^25
 
 namespace {
     std::random_device r;
@@ -69,22 +69,28 @@ Vec3f MicrofacetBRDF::sample(const Vec3f &wi) const {
     return wo;
 }
 
-std::vector<Range> MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) const {
+void MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
     const auto &nodes = msTree.getNodes();
-    std::vector<Range> out(nodes.size());
+    mRangeMappings = std::vector<Range>(nodes.size());
 
-    for (uint32_t i = 0; i < MAPPING_SAMPLES; ++i) {
+    for (uint32_t i = 0; i <= MAPPING_SAMPLES; ++i) {
         const double uniform = static_cast<double>(i) / static_cast<double>(MAPPING_SAMPLES);
         const Vec2f woVec = mDistribution2D.sample(utils::toVec(wi), uniform);
         const Polar wo = utils::toPolar(woVec);
         for (uint32_t j = 0; j < nodes.size(); ++j) {
             if (wo.phi >= nodes[j].startBoundary && wo.phi <= nodes[j].endBoundary) {
-                out[j].start = std::min(out[j].start, uniform);
-                out[j].end = std::max(out[j].end, uniform);
+                mRangeMappings[j].start = std::min(mRangeMappings[j].start, uniform);
+                mRangeMappings[j].end = std::max(mRangeMappings[j].end, uniform);
                 break;
             }
         }
     }
 
-    return out;
+    for (uint32_t i = 0; i < nodes.size(); ++i) {
+        printf("uniform [%f, %f] -> wo [%f, %f]\n",
+               mRangeMappings[i].start,
+               mRangeMappings[i].end,
+               nodes[i].startBoundary,
+               nodes[i].endBoundary);
+    }
 }

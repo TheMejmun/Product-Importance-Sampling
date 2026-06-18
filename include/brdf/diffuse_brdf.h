@@ -22,6 +22,8 @@ public:
     [[nodiscard]] Vec3f sample(const Vec3f &wi) const override;
 
     [[nodiscard]] const char* name()const override;
+
+    void calculateMapping(const MSTree &msTree, const Polar &wi) override;
 };
 
 #endif //PIS_DIFFUSE_BRDF_H

@@ -47,12 +47,12 @@ namespace {
 
 #define constant(name, value) const auto name = print_and_return(#name, value)
 
-constant(LIGHT_SOURCES, 4);
-constant(LIGHT_MAX_INTENSITY, 10.0);
+constant(LIGHT_SOURCES, 8);
+constant(LIGHT_MAX_INTENSITY, 1.0);
 constant(MS_TREE_SAMPLES, dpow(2, 20));
 constant(REFERENCE_SAMPLES, dpow(2, 22));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 6));
-constant(MSE_BENCHMARK_SAMPLES, dpow(2, 15));
+constant(MSE_BENCHMARK_SAMPLES, dpow(2, 10));
 constant(ET_BENCHMARK_SECONDS, 0.0001);
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
 
@@ -185,7 +185,6 @@ int main() {
 
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};
-    std::vector<Range> ranges = microfacet.calculateMapping(irradianceTree, wi);
 
     const BRDFSampler brdf_sampler{};
     const DirectLightSampler direct_light_sampler{};
@@ -201,13 +200,20 @@ int main() {
             brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, microfacet, lightSources, wi);
     printf("Reference Microfacet: %f\n", microfacetReference);
 
+    printf("\n");
+
 #ifdef MICROFACET_BRDF
-    const BRDF &brdf = microfacet;
+    BRDF &brdf = microfacet;
     const double reference = microfacetReference;
 #else
     const BRDF &brdf = diffuse;
     const double reference = diffuseReference;
 #endif
+
+    printf("Calculating uniform sample mapping\n");
+    brdf.calculateMapping(irradianceTree, wi);
+
+    printf("\n");
 
     printf("MSE (%d samples):\n", MSE_BENCHMARK_SAMPLES);
     double brdf_mse = brdf_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
