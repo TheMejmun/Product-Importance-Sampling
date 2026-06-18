@@ -20,7 +20,7 @@
 
 // #define UNIFORM_LIGHT
 #define RANDOM_WI
-// #define MICROFACET_BRDF
+#define MICROFACET_BRDF
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -48,10 +48,10 @@ namespace {
 #define constant(name, value) const auto name = print_and_return(#name, value)
 
 constant(LIGHT_SOURCES, 8);
-constant(LIGHT_MAX_INTENSITY, 1.0);
+constant(LIGHT_MAX_INTENSITY, 10.0);
 constant(MS_TREE_SAMPLES, dpow(2, 20));
 constant(REFERENCE_SAMPLES, dpow(2, 22));
-constant(ES_BENCHMARK_SAMPLES, dpow(2, 6));
+constant(ES_BENCHMARK_SAMPLES, dpow(2, 5));
 constant(MSE_BENCHMARK_SAMPLES, dpow(2, 15));
 constant(ET_BENCHMARK_SECONDS, 0.0001);
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
@@ -225,25 +225,25 @@ int main() {
     double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
     printf("\tPIS: %f\n", pis_mse);
 
-    printf("Equal Samples (%d samples):\n", ES_BENCHMARK_SAMPLES);
+    printf("Equal Samples (Squared error after %d samples):\n", ES_BENCHMARK_SAMPLES);
     double brdf_es = brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tBRDF Sampling: %f\n", brdf_es);
+    printf("\tBRDF Sampling: %f\n", std::pow(brdf_es - reference, 2));
     double mst_es = direct_light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tLight Sampling: %f\n", mst_es);
+    printf("\tLight Sampling: %f\n", std::pow(mst_es - reference, 2));
     double mis_es = mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tMIS: %f\n", mis_es);
+    printf("\tMIS: %f\n", std::pow(mis_es - reference, 2));
     double pis_es = pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tPIS: %f\n", pis_es);
+    printf("\tPIS: %f\n", std::pow(pis_es - reference, 2));
 
-    printf("Equal Time (%f s):\n", ET_BENCHMARK_SECONDS);
+    printf("Equal Time (Squared error after %fs):\n", ET_BENCHMARK_SECONDS);
     double brdf_et = brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
-    printf("\tBRDF Sampling: %f\n", brdf_et);
+    printf("\tBRDF Sampling: %f\n", std::pow(brdf_et - reference, 2));
     double mst_et = direct_light_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
-    printf("\tLight Sampling: %f\n", mst_et);
+    printf("\tLight Sampling: %f\n", std::pow(mst_et - reference, 2));
     double mis_et = mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
-    printf("\tMIS: %f\n", mis_et);
+    printf("\tMIS: %f\n", std::pow(mis_et - reference, 2));
     double pis_et = pis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi);
-    printf("\tPIS: %f\n", pis_et);
+    printf("\tPIS: %f\n", std::pow(pis_et - reference, 2));
 
     return 0;
 }
