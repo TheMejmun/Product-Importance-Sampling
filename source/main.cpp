@@ -194,9 +194,9 @@ int main() {
 
     printf("\n");
 
-    double brdfReference =
+    double diffuseReference =
             brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    printf("Reference: %f\n", brdfReference);
+    printf("Reference Diffuse: %f\n", diffuseReference);
     double microfacetReference =
             brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, microfacet, lightSources, wi);
     printf("Reference Microfacet: %f\n", microfacetReference);
@@ -206,7 +206,7 @@ int main() {
     const double reference = microfacetReference;
 #else
     const BRDF &brdf = diffuse;
-    const double reference = brdfReference;
+    const double reference = diffuseReference;
 #endif
 
     printf("MSE (%d samples):\n", MSE_BENCHMARK_SAMPLES);
