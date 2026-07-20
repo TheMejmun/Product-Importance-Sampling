@@ -62,6 +62,9 @@ public:
     // Calculate the probability for a given sample
     [[nodiscard]] double pdf(const Node &node) const;
 
+    // Calculate the probability for a given direction
+    [[nodiscard]] double pdf(const Polar &wo) const;
+
     void exportToCsv(const std::string &filename);
 
     std::vector<Node> &getNodes();

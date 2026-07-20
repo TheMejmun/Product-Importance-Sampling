@@ -94,6 +94,17 @@ double MSTree::pdf(const Node &node) const {
     return relativeFlux;
 }
 
+double MSTree::pdf(const Polar &wo) const {
+    if (wo.phi < 0.0 || wo.phi > M_PI) { return 0.0; }
+    // TODO this would be faster in a binary tree
+    for (uint32_t i = 0; i < mNodes.size(); ++i) {
+        if (wo.phi <= mNodes[i].endBoundary) {
+            return mPdfs[i] / mNodes[i].width();
+        }
+    }
+    return 0.0;
+}
+
 void MSTree::exportToCsv(const std::string &filename) {
     std::ofstream csv;
     csv.open(filename);
