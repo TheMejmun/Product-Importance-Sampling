@@ -4,6 +4,8 @@
 
 #include "renderers/abstract_sampler.h"
 
+#include <chrono>
+
 // Anonymous namespace ensures internal linkage
 namespace {
     std::random_device randDev;
@@ -38,14 +40,11 @@ double AbstractSampler::equal_time(double seconds, const MSTree &msTree, const B
                                    const std::vector<LightSource> &lightSources, const Polar &wi) const {
     double color = 0.0;
     int iterations = 0;
-    time_t start;
-    time(&start);
+    const auto start = std::chrono::steady_clock::now();
     for (;;) {
         const double res = sample(msTree, brdf, lightSources, wi);
-        time_t now;
-        time(&now);
-        const double duration = difftime(now, start);
-        if (duration > seconds) {
+        const std::chrono::duration<double> duration = std::chrono::steady_clock::now() - start;
+        if (duration.count() > seconds) {
             break;
         }
         color += res;
