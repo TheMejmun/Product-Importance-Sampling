@@ -97,14 +97,20 @@ void MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
 
     for (uint32_t i = 0; i <= MAPPING_SAMPLES; ++i) {
         const double uniform = static_cast<double>(i) / static_cast<double>(MAPPING_SAMPLES);
-        const Vec2f woVec = mDistribution2D.sample(utils::toVec(wi), uniform);
-        const Polar wo = utils::toPolar(woVec);
+        const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniform);
+        const Polar wo = utils::reflect(wi, utils::toPolar(m));
         for (uint32_t j = 0; j < nodes.size(); ++j) {
             if (wo.phi >= nodes[j].startBoundary && wo.phi <= nodes[j].endBoundary) {
                 mRangeMappings[j].start = std::min(mRangeMappings[j].start, uniform);
                 mRangeMappings[j].end = std::max(mRangeMappings[j].end, uniform);
                 break;
             }
+        }
+    }
+
+    for (auto &range: mRangeMappings) {
+        if (range.end < range.start) {
+            range = {0.0, 0.0};
         }
     }
 
