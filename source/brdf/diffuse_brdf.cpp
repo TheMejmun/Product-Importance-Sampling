@@ -46,7 +46,6 @@ Polar DiffuseBRDF::sample(const Polar &wi) const {
 }
 
 double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const {
-    throw std::runtime_error("Not implemented");
     assert(utils::cosTheta(wi) >= 0.0);
     assert(utils::cosTheta(wo) >= 0.0);
     if (wi.phi > M_PI || wo.phi > M_PI) {
