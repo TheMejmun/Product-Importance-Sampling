@@ -49,7 +49,6 @@ Polar MicrofacetBRDF::sample(const Polar &wi) const {
 }
 
 double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const {
-    throw std::runtime_error("Not implemented");
     assert(utils::cosTheta(wi) >= 0.0);
     assert(utils::cosTheta(wo) >= 0.0);
     if (wi.phi > M_PI || wo.phi > M_PI) {
@@ -58,9 +57,8 @@ double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex)
     const Range &range = mRangeMappings[nodeIndex];
     const double rangeWidth = range.end - range.start;
     if (rangeWidth <= 0.0) { return 0.0; }
-    // TODO
-    Polar m{1.0, (wi.phi + wo.phi) / 2.0};
-    return mDistribution2D.reflected_pdf(utils::toVec(wi), utils::toVec(m));
+    // Full-domain pdf divided by the probability mass of the node's range
+    return pdf(wi, wo) / rangeWidth;
 }
 
 Polar MicrofacetBRDF::sample(const Polar &wi, uint32_t nodeIndex) const {
