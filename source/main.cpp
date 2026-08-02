@@ -20,6 +20,7 @@
 
 // #define UNIFORM_LIGHT
 // #define RANDOM_WI
+// #define RANDOM_LIGHTS
 #define MICROFACET_BRDF
 
 namespace {
@@ -157,15 +158,24 @@ int main() {
     printf("\n");
 
 #ifdef UNIFORM_LIGHT
+    // One uniform light source
     std::vector<LightSource> lightSources{};
-    lightSources.emplace_back(0.0,M_PI, 10.0);
-#else
+    lightSources.emplace_back(0.0, M_PI, 10.0);
+#elif defined RANDOM_LIGHTS
+    // Randomly generated lights
     std::vector<LightSource> lightSources(LIGHT_SOURCES);
     for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {
         lightSources[i] = generateLightSource();
         std::cout << lightSources[i].start_angle << ":" << lightSources[i].end_angle << " -> " << lightSources[i].
                 intensity << std::endl;
     }
+#else
+    // Statically generated lights
+    std::vector<LightSource> lightSources(4);
+    lightSources.emplace_back(M_PI * 0.1, M_PI * 0.9, 1.0); // 80% hemisphere coverage
+    lightSources.emplace_back(M_PI * 0.33, M_PI * 0.66, 2.0); // 33% hemisphere coverage
+    lightSources.emplace_back(M_PI * 0.45, M_PI * 0.55, 4.0); // 10% hemisphere coverage
+    lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, 8.0); // 2% hemisphere coverage
 #endif
 
     MSTree irradianceTree = setupIrradianceTree(lightSources);
