@@ -4,6 +4,8 @@
 
 #ifndef PIS_BRDF_H
 #define PIS_BRDF_H
+#include <algorithm>
+
 #include "multistage_tree.h"
 #include "../coords.h"
 
@@ -41,6 +43,13 @@ public:
     [[nodiscard]] virtual const char *name() const = 0;
 
     virtual void calculateMapping(const MSTree &msTree, const Polar &wi) = 0;
+
+    // Probability that sample(wi) produces a direction inside the given node
+    // Analytically correct, as mRangeMappings divides uniform sample space [0; 1)
+    [[nodiscard]] double nodeSamplingProbability(const uint32_t nodeIndex) const {
+        const Range &range = mRangeMappings[nodeIndex];
+        return std::max(range.end - range.start, 0.0);
+    }
 };
 
 #endif //PIS_BRDF_H
