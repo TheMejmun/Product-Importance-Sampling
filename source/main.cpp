@@ -19,7 +19,7 @@
 #include "renderers/pis_sampler.h"
 
 // #define UNIFORM_LIGHT
-#define RANDOM_WI
+// #define RANDOM_WI
 #define MICROFACET_BRDF
 
 namespace {
