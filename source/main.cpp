@@ -18,9 +18,14 @@
 #include "renderers/direct_light_sampler.h"
 #include "renderers/pis_sampler.h"
 
-// #define UNIFORM_LIGHT
 // #define RANDOM_WI
-// #define RANDOM_LIGHTS
+
+// Combine any of these light sources to create different test scenarios
+// #define UNIFORM_LIGHT // uniform light source
+#define ZENITH_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
+#define FRONT_LIGHT // strong light from behind wi, 2% area
+#define BACK_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
+
 #define MICROFACET_BRDF
 
 namespace {
@@ -54,7 +59,11 @@ constant(MS_TREE_SAMPLES, dpow(2, 20));
 constant(REFERENCE_SAMPLES, dpow(2, 22));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 5));
 constant(MSE_BENCHMARK_SAMPLES, dpow(2, 15));
+#ifdef NDEBUG
+constant(ET_BENCHMARK_SECONDS, 0.001);
+#else
 constant(ET_BENCHMARK_SECONDS, 0.01);
+#endif
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
 
 // Anonymous namespace ensures internal linkage
@@ -157,31 +166,6 @@ void testMicrofacet3D() {
 int main() {
     printf("\n");
 
-#ifdef UNIFORM_LIGHT
-    // One uniform light source
-    std::vector<LightSource> lightSources{};
-    lightSources.emplace_back(0.0, M_PI, 10.0);
-#elif defined RANDOM_LIGHTS
-    // Randomly generated lights
-    std::vector<LightSource> lightSources(LIGHT_SOURCES);
-    for (uint32_t i = 0; i < LIGHT_SOURCES; ++i) {
-        lightSources[i] = generateLightSource();
-        std::cout << lightSources[i].start_angle << ":" << lightSources[i].end_angle << " -> " << lightSources[i].
-                intensity << std::endl;
-    }
-#else
-    // Statically generated lights
-    std::vector<LightSource> lightSources(4);
-    lightSources.emplace_back(M_PI * 0.1, M_PI * 0.9, 1.0); // 80% hemisphere coverage
-    lightSources.emplace_back(M_PI * 0.33, M_PI * 0.66, 2.0); // 33% hemisphere coverage
-    lightSources.emplace_back(M_PI * 0.45, M_PI * 0.55, 4.0); // 10% hemisphere coverage
-    lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, 8.0); // 2% hemisphere coverage
-#endif
-
-    MSTree irradianceTree = setupIrradianceTree(lightSources);
-
-    printf("\n");
-
 #ifdef RANDOM_WI
     const Polar wi{1.0, randDistr(randEng) * M_PI};
     const Vec3f wi3 = utils::hemisphereSample();
@@ -192,6 +176,29 @@ int main() {
 
     printf("wi: %s\n", wi.toString().c_str());
     printf("wi3: %s\n", wi3.toString().c_str());
+
+    printf("\n");
+
+    // Should be fine for light sources to go below the horizontal plane.
+    // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
+    std::vector<LightSource> lightSources{};
+#ifdef UNIFORM_LIGHT
+    lightSources.emplace_back(0.0, M_PI, 10.0); // 100% hemisphere coverage
+#endif
+#ifdef ZENITH_LIGHT
+    lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, 1000.0); // 2% hemisphere coverage
+#endif
+#ifdef FRONT_LIGHT
+    double directionFront = wi.phi;
+    lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, 1000.0); // 2% hemisphere coverage
+#endif
+#ifdef BACK_LIGHT
+    double directionBack = utils::reflect(wi, Polar(1.0, M_PI / 2)).phi; // reflect wi around vertical axis
+    lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, 1000.0); // 2% hemisphere coverage
+#endif
+    MSTree irradianceTree = setupIrradianceTree(lightSources);
+
+    printf("\n");
 
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};
