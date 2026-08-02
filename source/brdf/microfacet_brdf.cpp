@@ -27,7 +27,24 @@ double MicrofacetBRDF::eval(const Polar &wi, const Polar &wo) const {
     if (wi.phi > M_PI || wo.phi > M_PI) {
         return 0.0;
     }
-    return 0.5;
+    // return 0.5;
+    const double cosI = utils::cosTheta(wi);
+    const double cosO = utils::cosTheta(wo);
+    guard_positive(cosI);
+    guard_positive(cosO);
+
+    const Vec2f wiVec = utils::toVec(wi);
+    const Vec2f woVec = utils::toVec(wo);
+    const Vec2f m = utils::toVec(Polar{1.0, (wi.phi + wo.phi) / 2.0});
+
+    // 2D Torrance-Sparrow with Smith shadowing-masking:
+    // D(m) G1(wi, m) G1(wo, m) <wi, m> / (2 cosI cosO)
+    // Unlike in 3D, the 2D half-vector Jacobian (1/2) does not cancel <wi, m>
+    return mDistribution2D.eval(m)
+           * mDistribution2D.smith_g1(wiVec, m)
+           * mDistribution2D.smith_g1(woVec, m)
+           * std::abs(utils::dot(wiVec, m))
+           / (2.0 * cosI * cosO);
 }
 
 double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
