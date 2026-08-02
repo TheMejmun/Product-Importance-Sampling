@@ -53,8 +53,7 @@ namespace {
 
 #define constant(name, value) const auto name = print_and_return(#name, value)
 
-constant(LIGHT_SOURCES, 16);
-constant(LIGHT_MAX_INTENSITY, 10.0);
+constant(LIGHT_MAX_INTENSITY, 1000.0);
 constant(MS_TREE_SAMPLES, dpow(2, 20));
 constant(REFERENCE_SAMPLES, dpow(2, 22));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 5));
@@ -183,18 +182,18 @@ int main() {
     // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
     std::vector<LightSource> lightSources{};
 #ifdef UNIFORM_LIGHT
-    lightSources.emplace_back(0.0, M_PI, 10.0); // 100% hemisphere coverage
+    lightSources.emplace_back(0.0, M_PI, LIGHT_MAX_INTENSITY / 100.0); // 100% hemisphere coverage
 #endif
 #ifdef ZENITH_LIGHT
-    lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, 1000.0); // 2% hemisphere coverage
+    lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
 #endif
 #ifdef FRONT_LIGHT
     double directionFront = wi.phi;
-    lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, 1000.0); // 2% hemisphere coverage
+    lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
 #endif
 #ifdef BACK_LIGHT
     double directionBack = utils::reflect(wi, Polar(1.0, M_PI / 2)).phi; // reflect wi around vertical axis
-    lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, 1000.0); // 2% hemisphere coverage
+    lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
 #endif
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
