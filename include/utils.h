@@ -27,6 +27,16 @@ namespace utils {
         return sum / static_cast<double>(samples.size());
     }
 
+    template<typename T>
+    T mse(const T &mean, const uint32_t runCount, const std::function<T()> lambda) {
+        T sum{};
+        for (uint32_t i = 0; i < runCount; ++i) {
+            const T sample = lambda();
+            sum += (sample - mean) * (sample - mean);
+        }
+        return sum / static_cast<double>(runCount);
+    }
+
     /// Vec2f
     Polar toPolar(const Vec2f &);
 

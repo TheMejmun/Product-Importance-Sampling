@@ -21,7 +21,6 @@ double AbstractSampler::equal_samples(std::uint32_t iterations, const MSTree &ms
     }
     color /= static_cast<double>(iterations);
 
-
     return color;
 }
 
@@ -50,7 +49,7 @@ double AbstractSampler::equal_time(double seconds, const MSTree &msTree, const B
         color += res;
         ++iterations;
     }
-    printf("\t%d samples in %f seconds\t", iterations, seconds);
+    // printf("\t%d samples in %f seconds\t", iterations, seconds);
     color /= static_cast<double>(iterations);
     return color;
 }
