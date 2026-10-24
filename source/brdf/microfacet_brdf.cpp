@@ -131,11 +131,11 @@ void MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
         }
     }
 
-    for (uint32_t i = 0; i < nodes.size(); ++i) {
-        printf("uniform [%f, %f] -> wo [%f, %f]\n",
-               mRangeMappings[i].start,
-               mRangeMappings[i].end,
-               nodes[i].startBoundary,
-               nodes[i].endBoundary);
-    }
+    // for (uint32_t i = 0; i < nodes.size(); ++i) {
+    //     printf("uniform [%f, %f] -> wo [%f, %f]\n",
+    //            mRangeMappings[i].start,
+    //            mRangeMappings[i].end,
+    //            nodes[i].startBoundary,
+    //            nodes[i].endBoundary);
+    // }
 }
