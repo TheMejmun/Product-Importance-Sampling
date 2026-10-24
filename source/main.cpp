@@ -164,9 +164,13 @@ void testMicrofacet3D() {
 
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
-int main() {
-    printf("\n");
 
+struct Wi {
+    Polar polar;
+    Vec3f vec3;
+};
+
+static Wi calculateWi() {
 #ifdef RANDOM_WI
     const Polar wi{1.0, randDistr(randEng) * M_PI};
     const Vec3f wi3 = utils::hemisphereSample();
@@ -178,11 +182,11 @@ int main() {
     printf("wi: %s\n", wi.toString().c_str());
     printf("wi3: %s\n", wi3.toString().c_str());
 
-    printf("\n");
+    return {wi, wi3};
+}
 
-    // Should be fine for light sources to go below the horizontal plane.
-    // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
-    std::vector<LightSource> lightSources{};
+void setupLights(std::vector<LightSource> &lightSources, const Polar wi) {
+    lightSources.clear();
 #ifdef UNIFORM_LIGHT
     lightSources.emplace_back(0.0, M_PI, LIGHT_MAX_INTENSITY / 100.0); // 100% hemisphere coverage
 #endif
@@ -191,12 +195,40 @@ int main() {
 #endif
 #ifdef FRONT_LIGHT
     double directionFront = wi.phi;
-    lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
+    lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, LIGHT_MAX_INTENSITY);
+    // 2% hemisphere coverage
 #endif
 #ifdef BACK_LIGHT
     double directionBack = utils::reflect(wi, Polar(1.0, M_PI / 2)).phi; // reflect wi around vertical axis
-    lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
+    lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, LIGHT_MAX_INTENSITY);
+    // 2% hemisphere coverage
 #endif
+}
+
+struct TestSetup {
+    uint32_t samples;
+    double time;
+
+    Polar wi;
+    BRDF& brdf;
+    double reference;
+
+    MSTree& irradianceTree;
+    std::vector<LightSource>& lightSources;
+};
+
+int main() {
+    printf("\n");
+
+    auto [wi, wi3] = calculateWi();
+
+    printf("\n");
+
+    // Should be fine for light sources to go below the horizontal plane.
+    // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
+    std::vector<LightSource> lightSources{};
+    setupLights(lightSources, wi);
+
     MSTree irradianceTree = setupIrradianceTree(lightSources);
 
     printf("\n");
@@ -211,22 +243,13 @@ int main() {
 
     printf("\n");
 
-    double diffuseReference =
-            brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, diffuse, lightSources, wi);
-    printf("Reference Diffuse: %f\n", diffuseReference);
-    double microfacetReference =
-            brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, microfacet, lightSources, wi);
-    printf("Reference Microfacet: %f\n", microfacetReference);
-
-    printf("\n");
-
 #ifdef MICROFACET_BRDF
     BRDF &brdf = microfacet;
-    const double reference = microfacetReference;
 #else
     BRDF &brdf = diffuse;
-    const double reference = diffuseReference;
 #endif
+
+    const double reference = brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, brdf, lightSources, wi);
 
     printf("Calculating uniform sample mapping\n");
     brdf.calculateMapping(irradianceTree, wi);
@@ -243,7 +266,7 @@ int main() {
     double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
     printf("\tPIS: %f\n", pis_mse);
 
-    printf("Equal Samples (MSE of %d renders, %d samples each):\n",MSE_COUNT, ES_BENCHMARK_SAMPLES);
+    printf("Equal Samples (MSE of %d renders, %d samples each):\n", MSE_COUNT, ES_BENCHMARK_SAMPLES);
     double brdf_es = _mse(brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
     printf("\tBRDF Sampling: %f\n", brdf_es);
     double mst_es = _mse(light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
