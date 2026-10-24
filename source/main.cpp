@@ -187,6 +187,9 @@ static Wi calculateWi() {
 
 void setupLights(std::vector<LightSource> &lightSources, const Polar wi) {
     lightSources.clear();
+
+    // Should be fine for light sources to go below the horizontal plane.
+    // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
 #ifdef UNIFORM_LIGHT
     lightSources.emplace_back(0.0, M_PI, LIGHT_MAX_INTENSITY / 100.0); // 100% hemisphere coverage
 #endif
@@ -210,49 +213,57 @@ struct TestSetup {
     double time;
 
     Polar wi;
-    BRDF& brdf;
+    BRDF &brdf;
     double reference;
 
-    MSTree& irradianceTree;
-    std::vector<LightSource>& lightSources;
+    MSTree &irradianceTree;
+    std::vector<LightSource> &lightSources;
 };
 
-int main() {
-    printf("\n");
+void calculateTestSetup(
+    Polar &wi,
+    std::vector<LightSource> &lightSources,
+    MSTree &irradianceTree,
+    double &reference,
+    BRDF &brdf
+) {
+    printf("\nGenerating wi\n");
+    wi = calculateWi().polar;
 
-    auto [wi, wi3] = calculateWi();
-
-    printf("\n");
-
-    // Should be fine for light sources to go below the horizontal plane.
-    // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
-    std::vector<LightSource> lightSources{};
+    printf("\nSetting up light sources\n");
     setupLights(lightSources, wi);
 
-    MSTree irradianceTree = setupIrradianceTree(lightSources);
+    printf("\nSetting up irradiance tree\n");
+    irradianceTree = setupIrradianceTree(lightSources);
 
-    printf("\n");
+    printf("\nCalculating reference\n");
+    const BRDFSampler brdf_sampler{};
+    reference = brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, brdf, lightSources, wi);
+
+    printf("\nCalculating uniform sample mapping\n");
+    brdf.calculateMapping(irradianceTree, wi);
+}
+
+int main() {
+    Polar wi{};
+    std::vector<LightSource> lightSources{};
+    MSTree irradianceTree{};
+    double reference;
 
     DiffuseBRDF diffuse{};
     MicrofacetBRDF microfacet{};
-
-    const BRDFSampler brdf_sampler{};
-    const DirectLightSampler light_sampler{};
-    const MISSampler mis_sampler{};
-    const PISSampler pis_sampler{};
-
-    printf("\n");
-
 #ifdef MICROFACET_BRDF
     BRDF &brdf = microfacet;
 #else
     BRDF &brdf = diffuse;
 #endif
 
-    const double reference = brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    const BRDFSampler brdf_sampler{};
+    const DirectLightSampler light_sampler{};
+    const MISSampler mis_sampler{};
+    const PISSampler pis_sampler{};
 
-    printf("Calculating uniform sample mapping\n");
-    brdf.calculateMapping(irradianceTree, wi);
+    calculateTestSetup(wi, lightSources, irradianceTree, reference, brdf);
 
     printf("\n");
 
