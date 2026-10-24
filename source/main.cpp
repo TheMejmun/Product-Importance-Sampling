@@ -65,7 +65,7 @@ constant(ET_BENCHMARK_SECONDS, 0.01);
 #endif
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
 constant(MSE_COUNT, dpow(2, 10));
-#define _mse(func) utils::mse<double>(reference, MSE_COUNT, [&]{return func;})
+#define _mse(func) utils::mse<double>(reference, MSE_COUNT, [&]{calculateTestSetup(wi, lightSources, irradianceTree, reference, brdf); return func;})
 
 // Anonymous namespace ensures internal linkage
 namespace {
@@ -179,8 +179,8 @@ static Wi calculateWi() {
     const Vec3f wi3 = utils::normalize(Vec3f{1.0, 0.0, 1.0});
 #endif
 
-    printf("wi: %s\n", wi.toString().c_str());
-    printf("wi3: %s\n", wi3.toString().c_str());
+    // printf("wi: %s\n", wi.toString().c_str());
+    // printf("wi3: %s\n", wi3.toString().c_str());
 
     return {wi, wi3};
 }
@@ -227,20 +227,20 @@ void calculateTestSetup(
     double &reference,
     BRDF &brdf
 ) {
-    printf("\nGenerating wi\n");
+    // printf("\nGenerating wi\n");
     wi = calculateWi().polar;
 
-    printf("\nSetting up light sources\n");
+    // printf("\nSetting up light sources\n");
     setupLights(lightSources, wi);
 
-    printf("\nSetting up irradiance tree\n");
+    // printf("\nSetting up irradiance tree\n");
     irradianceTree = setupIrradianceTree(lightSources);
 
-    printf("\nCalculating reference\n");
+    // printf("\nCalculating reference\n");
     const BRDFSampler brdf_sampler{};
     reference = brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, brdf, lightSources, wi);
 
-    printf("\nCalculating uniform sample mapping\n");
+    // printf("\nCalculating uniform sample mapping\n");
     brdf.calculateMapping(irradianceTree, wi);
 }
 

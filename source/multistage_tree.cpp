@@ -49,13 +49,13 @@ void MSTree::compileRec(double leftBoundary, double rightBoundary) {
 
 void MSTree::compile() {
     mNodes.clear();
-    printf("Total flux in MSTree %f\n", mTotalFlux);
+    // printf("Total flux in MSTree %f\n", mTotalFlux);
     assert(mTotalFlux > 0.0);
 
     std::sort(mLightSamples.begin(), mLightSamples.end());
     compileRec(0.0, M_PI);
 
-    printf("Compiled %lu samples into %lu nodes\n", mLightSamples.size(), mNodes.size());
+    // printf("Compiled %lu samples into %lu nodes\n", mLightSamples.size(), mNodes.size());
 
 
     mPdfs = std::vector<double>(mNodes.size());
@@ -66,8 +66,8 @@ void MSTree::compile() {
         pdfSum += mPdfs[i];
         newTotalFlux += mNodes[i].flux;
     }
-    printf("mTotalFlux %f -> %f\n", mTotalFlux, newTotalFlux);
-    printf("PDF sum: %f\n", pdfSum);
+    // printf("mTotalFlux %f -> %f\n", mTotalFlux, newTotalFlux);
+    // printf("PDF sum: %f\n", pdfSum);
 }
 
 uint32_t MSTree::sampleNodes() const {
