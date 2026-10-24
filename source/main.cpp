@@ -53,7 +53,7 @@ namespace {
 
 #define constant(name, value) const auto name = print_and_return(#name, value)
 
-constant(LIGHT_MAX_INTENSITY, 1000.0);
+constant(LIGHT_MAX_INTENSITY, 100.0);
 constant(MS_TREE_SAMPLES, dpow(2, 20));
 constant(REFERENCE_SAMPLES, dpow(2, 20));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 10));
