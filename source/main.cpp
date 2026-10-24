@@ -18,7 +18,7 @@
 #include "renderers/direct_light_sampler.h"
 #include "renderers/pis_sampler.h"
 
-// #define RANDOM_WI
+#define RANDOM_WI
 
 // Combine any of these light sources to create different test scenarios
 // #define UNIFORM_LIGHT // uniform light source
