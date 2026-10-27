@@ -22,9 +22,10 @@
 
 // Combine any of these light sources to create different test scenarios
 // #define UNIFORM_LIGHT // uniform light source
-#define ZENITH_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
-#define FRONT_LIGHT // strong light from behind wi, 2% area
-#define BACK_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
+// #define ZENITH_POINT_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
+// #define FRONT_POINT_LIGHT // strong light from behind wi, 2% area
+// #define BACK_POINT_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
+#define RANDOM_POINT_LIGHT // strong light from random direction
 
 #define MICROFACET_BRDF
 
@@ -193,17 +194,22 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wi) {
 #ifdef UNIFORM_LIGHT
     lightSources.emplace_back(0.0, M_PI, LIGHT_MAX_INTENSITY / 100.0); // 100% hemisphere coverage
 #endif
-#ifdef ZENITH_LIGHT
+#ifdef ZENITH_POINT_LIGHT
     lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
 #endif
-#ifdef FRONT_LIGHT
+#ifdef FRONT_POINT_LIGHT
     double directionFront = wi.phi;
     lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
-#ifdef BACK_LIGHT
+#ifdef BACK_POINT_LIGHT
     double directionBack = utils::reflect(wi, Polar(1.0, M_PI / 2)).phi; // reflect wi around vertical axis
     lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, LIGHT_MAX_INTENSITY);
+    // 2% hemisphere coverage
+#endif
+#ifdef RANDOM_POINT_LIGHT
+    double direction = randDistr(randEng) * M_PI;
+    lightSources.emplace_back(direction - M_PI * 0.01, direction + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
 }
