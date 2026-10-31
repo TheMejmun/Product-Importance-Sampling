@@ -3,13 +3,13 @@
 The primary goal of path tracing is to quickly and accurately approximate the rendering equation. In particular, we are interested in the integral over the hemisphere $\Omega$, as $L_e$ is usually a constant.
 
 $$
-L_o(x \rightarrow v) = L_e(x \rightarrow v) + \int_{\Omega} f_r(x,\omega \rightarrow v) \cdot L_i(x \leftarrow \omega) \cdot cos(\theta) \cdot d\omega
+L_o(x \rightarrow \omega_o) = L_e(x \rightarrow \omega_o) + \int_{\Omega} f_r(x, \omega_i \rightarrow \omega_o) \, L_i(x \leftarrow \omega_i) \, \cos\theta \, d\omega_i
 $$
 
 For this approximation, Monte Carlo Integration is commonly used. This method allows us to estimate the integral by calculating a weighted average of many random samples.
 
 $$
-L_o(x \rightarrow v) \approx L_e(x \rightarrow v) + \frac{1}{N} \sum_{n=1}^N \frac{f_r(x,\omega_n \rightarrow v) \cdot L_i(x \leftarrow \omega_n) \cdot cos(\theta_n)}{p(x \leftarrow \omega_n)}
+L_o(x \rightarrow \omega_o) \approx L_e(x \rightarrow \omega_o) + \frac{1}{N} \sum_{n=1}^{N} \frac{f_r(x, \omega_{i,n} \rightarrow \omega_o) \, L_i(x \leftarrow \omega_{i,n}) \, \cos\theta_n}{p(\omega_{i,n})}
 $$
 
 TODO: Explain Monte Carlo Integration, ray intersection, the choice of sampling direction,
@@ -33,6 +33,7 @@ TODO: Product should be optimal
 - Problems encountered
   - Integral calculation
   - Mapping of uniform samples (to limit sampling area)
+- w_i and w_o swapped
 
 # Results
 
