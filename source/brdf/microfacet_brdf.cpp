@@ -8,7 +8,7 @@
 
 #include "utils.h"
 
-#define MAPPING_SAMPLES 1048576 // 2^20
+#define MAPPING_SAMPLES 262144 // 2^18
 
 namespace {
     std::random_device r;

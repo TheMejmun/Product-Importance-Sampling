@@ -21,13 +21,13 @@
 #define RANDOM_WI
 
 // Combine any of these light sources to create different test scenarios
-// #define UNIFORM_LIGHT // uniform light source
+#define UNIFORM_LIGHT // uniform light source
 // #define ZENITH_POINT_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
 // #define FRONT_POINT_LIGHT // strong light from behind wi, 2% area
 // #define BACK_POINT_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
-#define RANDOM_POINT_LIGHT // strong light from random direction
+// #define RANDOM_POINT_LIGHT // strong light from random direction
 
-#define MICROFACET_BRDF
+// #define MICROFACET_BRDF
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {
@@ -55,8 +55,8 @@ namespace {
 #define constant(name, value) const auto name = print_and_return(#name, value)
 
 constant(LIGHT_MAX_INTENSITY, 100.0);
-constant(MS_TREE_SAMPLES, dpow(2, 20));
-constant(REFERENCE_SAMPLES, dpow(2, 20));
+constant(MS_TREE_SAMPLES, dpow(2, 18));
+constant(REFERENCE_SAMPLES, dpow(2, 18));
 constant(ES_BENCHMARK_SAMPLES, dpow(2, 10));
 constant(MSE_BENCHMARK_SAMPLES, dpow(2, 20));
 #ifdef NDEBUG
@@ -273,15 +273,15 @@ int main() {
 
     printf("\n");
 
-    printf("Per-Sample MSE (%d samples, same wi):\n", MSE_BENCHMARK_SAMPLES);
-    double brdf_mse = brdf_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tBRDF Sampling: %f\n", brdf_mse);
-    double mst_mse = light_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tLight Sampling: %f\n", mst_mse);
-    double mis_mse = mis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tMIS: %f\n", mis_mse);
-    double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
-    printf("\tPIS: %f\n", pis_mse);
+    // printf("Per-Sample MSE (%d samples, same wi):\n", MSE_BENCHMARK_SAMPLES);
+    // double brdf_mse = brdf_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // printf("\tBRDF Sampling: %f\n", brdf_mse);
+    // double mst_mse = light_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // printf("\tLight Sampling: %f\n", mst_mse);
+    // double mis_mse = mis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // printf("\tMIS: %f\n", mis_mse);
+    // double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // printf("\tPIS: %f\n", pis_mse);
 
     printf("Equal Samples (MSE of %d renders, new wi and %d samples each):\n", MSE_COUNT, ES_BENCHMARK_SAMPLES);
     double brdf_es = _mse(brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
