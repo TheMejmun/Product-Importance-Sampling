@@ -40,7 +40,7 @@ TODO: Product should be optimal
   - Mapping of uniform samples (to limit sampling area)
 - w_i and w_o swapped
 
-# Results
+# Benchmarks
 
 All the following benchmarks follow the same structure. 
 In the _Equal Samples_ section, we compute the integral of the rendering equation with 1024 samples. 
@@ -97,22 +97,31 @@ TODO
 
 ### Microfacet Back light
 
+TODO
 
 |Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
 |---|---:|---:|
-|BRDF Sampling|||
-|Light Sampling|||
-|MIS|||
-|PIS|||
+|BRDF Sampling|1.164458|0.290111|
+|Light Sampling|0.175121|0.031702|
+|MIS|0.060111|0.029806|
+|PIS|0.095535|0.034527|
+
+TODO
 
 ### Microfacet Random light
 
+TODO
+
 |Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
 |---|---:|---:|
 |BRDF Sampling|||
 |Light Sampling|||
 |MIS|||
 |PIS|||
+
+TODO
+
+# Conclusion
 
 - Good in limited experiment
 - Explain strengths and weaknesses of PIS
