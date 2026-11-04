@@ -55,12 +55,12 @@ From that, we calculate the Mean Squared Error.
 The first benchmark is a sanity check for the implementation. 
 We render with a diffuse material and a single uniform light source. 
 
-|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
-|---|---:|---:|
-|BRDF Sampling|0.000230|0.000010|
-|Light Sampling|0.000221|0.000030|
-|MIS|0.000110|0.000018|
-|PIS|0.000226|0.000036|
+| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                  0.000230 |                 0.000010 |
+| Light Sampling |                  0.000221 |                 0.000030 |
+| MIS            |                  0.000110 |                 0.000018 |
+| PIS            |                  0.000226 |                 0.000036 |
 
 As expected, all except MIS deliver similar results in the Equal Samples benchmark.
 The score of MIS is half that, because it combines two samples, one for BRDF and one for light sampling, per resulting MIS sample.
@@ -72,12 +72,12 @@ The following benchmarks all use the microfacet model instead of a diffuse mater
 The light sources from here on are all high-intensity light sources covering 2% of the hemicircle.
 In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle of $90&deg;$.
 
-|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
-|---|---:|---:|
-|BRDF Sampling|0.208543|0.055958|
-|Light Sampling|0.004186|0.001341|
-|MIS|0.005747|0.002155|
-|PIS|0.005727|0.002426|
+| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                  0.208543 |                 0.055958 |
+| Light Sampling |                  0.004186 |                 0.001341 |
+| MIS            |                  0.005747 |                 0.002155 |
+| PIS            |                  0.005727 |                 0.002426 |
 
 TODO
 
@@ -86,12 +86,12 @@ TODO
 In this benchmark, the same light source is placed in the direction $\omega_o$, behind the camera.
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
 
-|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
-|---|---:|---:|
-|BRDF Sampling|0.110784|0.024245|
-|Light Sampling|0.010034|0.004485|
-|MIS|0.003876|0.001846|
-|PIS|0.004911|0.001772|
+| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                  0.110784 |                 0.024245 |
+| Light Sampling |                  0.010034 |                 0.004485 |
+| MIS            |                  0.003876 |                 0.001846 |
+| PIS            |                  0.004911 |                 0.001772 |
 
 TODO
 
@@ -99,12 +99,12 @@ TODO
 
 TODO
 
-|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
-|---|---:|---:|
-|BRDF Sampling|1.164458|0.290111|
-|Light Sampling|0.175121|0.031702|
-|MIS|0.060111|0.029806|
-|PIS|0.095535|0.034527|
+| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                  1.164458 |                 0.290111 |
+| Light Sampling |                  0.175121 |                 0.031702 |
+| MIS            |                  0.060111 |                 0.029806 |
+| PIS            |                  0.095535 |                 0.034527 |
 
 TODO
 
@@ -112,12 +112,12 @@ TODO
 
 TODO
 
-|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
-|---|---:|---:|
-|BRDF Sampling|||
-|Light Sampling|||
-|MIS|||
-|PIS|||
+| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                           |                          |
+| Light Sampling |                           |                          |
+| MIS            |                           |                          |
+| PIS            |                           |                          |
 
 TODO
 
