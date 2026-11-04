@@ -252,6 +252,40 @@ void calculateTestSetup(
     brdf.calculateMapping(irradianceTree, wi);
 }
 
+// MSE of `render` over MSE_COUNT runs, each against a fresh wi, light setup and reference.
+// Setups are always built in parallel. renderThreads decides whether the renders run in parallel too:
+// pass 1 for equal-time renders, so they are timed with no other threads competing for the CPU.
+template<typename Render>
+double benchmarkMse(const uint32_t renderThreads, const Render &render) {
+    double squaredErrorSum = 0.0;
+    for (uint32_t first = 0; first < MSE_COUNT; first += SETUP_BATCH_SIZE) {
+        const uint32_t batchSize = std::min(SETUP_BATCH_SIZE, MSE_COUNT - first);
+
+        std::vector<TestSetup> setups(batchSize);
+        utils::parallelFor(batchSize, THREAD_COUNT, [&](const uint32_t i) {
+            TestSetup &s = setups[i];
+            calculateTestSetup(s.wi, s.lightSources, s.irradianceTree, s.reference, s.brdf);
+        });
+
+        std::vector<double> squaredErrors(batchSize);
+        utils::parallelFor(batchSize, renderThreads, [&](const uint32_t i) {
+            const TestSetup &s = setups[i];
+            const double error = render(s.irradianceTree, s.brdf, s.lightSources, s.wi) - s.reference;
+            squaredErrors[i] = error * error;
+        });
+        for (const double squaredError: squaredErrors) {
+            squaredErrorSum += squaredError;
+        }
+    }
+    return squaredErrorSum / static_cast<double>(MSE_COUNT);
+}
+
+// `func` is evaluated once per run and may use irradianceTree, brdf, lightSources and wi of that run
+#define _mse(renderThreads, func) benchmarkMse(renderThreads, \
+    [&](const MSTree &irradianceTree, const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) { \
+        return func; \
+    })
+
 int main() {
     Polar wi{};
     std::vector<LightSource> lightSources{};

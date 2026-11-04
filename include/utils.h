@@ -5,8 +5,13 @@
 #ifndef PIS_UTILS_H
 #define PIS_UTILS_H
 
+#include <algorithm>
+#include <atomic>
+#include <functional>
 #include <iostream>
 #include <ostream>
+#include <thread>
+#include <vector>
 
 #include "coords.h"
 #include <stdio.h>
@@ -35,6 +40,33 @@ namespace utils {
             sum += (sample - mean) * (sample - mean);
         }
         return sum / static_cast<double>(runCount);
+    }
+
+    inline void parallelFor(const uint32_t count, const uint32_t threadCount, const std::function<void(uint32_t)> &fn) {
+        if (threadCount <= 1 || count <= 1) {
+            for (uint32_t i = 0; i < count; ++i) {
+                fn(i);
+            }
+            return;
+        }
+
+        std::atomic<uint32_t> next{0};
+        const auto worker = [&] {
+            for (uint32_t i = next++; i < count; i = next++) {
+                fn(i);
+            }
+        };
+
+        std::vector<std::thread> threads;
+        const uint32_t extraThreads = std::min(threadCount, count) - 1;
+        threads.reserve(extraThreads);
+        for (uint32_t t = 0; t < extraThreads; ++t) {
+            threads.emplace_back(worker);
+        }
+        worker(); // Run one on this thread as well, do not sit idle.
+        for (auto &thread: threads) {
+            thread.join();
+        }
     }
 
     /// Vec2f
