@@ -8,9 +8,9 @@
 
 // Anonymous namespace ensures internal linkage
 namespace {
-    std::random_device randDev;
-    std::default_random_engine randEng(randDev());
-    std::uniform_int_distribution<uint32_t> randIntDistr(0, std::numeric_limits<uint32_t>::max());
+    thread_local std::random_device randDev;
+    thread_local std::default_random_engine randEng(randDev());
+    thread_local std::uniform_int_distribution<uint32_t> randIntDistr(0, std::numeric_limits<uint32_t>::max());
 }
 
 double sample_lights_random(const std::vector<LightSource> &lightSources, const Polar &wo) {

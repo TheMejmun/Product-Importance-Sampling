@@ -8,9 +8,9 @@
 
 // Anonymous namespace ensures internal linkage
 namespace {
-    std::random_device randDev;
-    std::default_random_engine randEng(randDev());
-    std::uniform_real_distribution randDistr(0.0, 1.0);
+    thread_local std::random_device randDev;
+    thread_local std::default_random_engine randEng(randDev());
+    thread_local std::uniform_real_distribution randDistr(0.0, 1.0);
 }
 
 double AbstractSampler::equal_samples(std::uint32_t iterations, const MSTree &msTree, const BRDF &brdf,

@@ -9,8 +9,8 @@
 
 // Anonymous namespace ensures internal linkage
 namespace {
-    std::random_device randDev;
-    std::default_random_engine randEng(randDev());
+    thread_local std::random_device randDev;
+    thread_local std::default_random_engine randEng(randDev());
 }
 
 double PISSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,

@@ -9,9 +9,9 @@
 #include <stdexcept>
 
 namespace {
-    std::random_device randDev;
-    std::default_random_engine randEng(randDev());
-    std::uniform_real_distribution<double> randDistr(0.0, 1.0);
+    thread_local std::random_device randDev;
+    thread_local std::default_random_engine randEng(randDev());
+    thread_local std::uniform_real_distribution<double> randDistr(0.0, 1.0);
 }
 
 double utils::safeSqrt(double x) {

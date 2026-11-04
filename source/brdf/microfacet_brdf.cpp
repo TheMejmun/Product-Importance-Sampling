@@ -11,10 +11,10 @@
 #define MAPPING_SAMPLES 262144 // 2^18
 
 namespace {
-    std::random_device r;
-    std::default_random_engine re(r());
-    std::uniform_real_distribution<double> hemisphereDist(0.0, M_PI);
-    std::uniform_real_distribution<double> uniformDist(0.0, 1.0);
+    thread_local std::random_device r;
+    thread_local std::default_random_engine re(r());
+    thread_local std::uniform_real_distribution<double> hemisphereDist(0.0, M_PI);
+    thread_local std::uniform_real_distribution<double> uniformDist(0.0, 1.0);
 }
 
 const char *MicrofacetBRDF::name() const {
