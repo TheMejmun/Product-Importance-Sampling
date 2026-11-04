@@ -65,7 +65,7 @@ constant(ET_BENCHMARK_SECONDS, 0.001);
 constant(ET_BENCHMARK_SECONDS, 0.01);
 #endif
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
-constant(MSE_COUNT, dpow(2, 10));
+constant(MSE_COUNT, dpow(2, 14));
 #define _mse(func) utils::mse<double>(reference, MSE_COUNT, [&]{calculateTestSetup(wi, lightSources, irradianceTree, reference, brdf); return func;})
 
 // Anonymous namespace ensures internal linkage
