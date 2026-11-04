@@ -104,8 +104,6 @@ MSTree setupIrradianceTree(const std::vector<LightSource> &lightSources) {
         irradianceTree.add(angle, intensity);
     }
     irradianceTree.compile();
-    // Export to csv
-    irradianceTree.exportToCsv("mstree.csv");
     return irradianceTree;
 }
 
