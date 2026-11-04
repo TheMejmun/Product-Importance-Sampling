@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <iostream>
 #include <ostream>
+#include <thread>
 
 #include "brdf/brdf.h"
 #include "renderers/brdf_sampler.h"
@@ -66,7 +67,8 @@ constant(ET_BENCHMARK_SECONDS, 0.01);
 #endif
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
 constant(MSE_COUNT, dpow(2, 14));
-#define _mse(func) utils::mse<double>(reference, MSE_COUNT, [&]{calculateTestSetup(wi, lightSources, irradianceTree, reference, brdf); return func;})
+constant(THREAD_COUNT, std::max(1u, std::thread::hardware_concurrency()));
+constant(SETUP_BATCH_SIZE, 4 * THREAD_COUNT);
 
 // Anonymous namespace ensures internal linkage
 namespace {
@@ -212,16 +214,18 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wi) {
 #endif
 }
 
+#ifdef MICROFACET_BRDF
+using TestBRDF = MicrofacetBRDF;
+#else
+using TestBRDF = DiffuseBRDF;
+#endif
+
 struct TestSetup {
-    uint32_t samples;
-    double time;
-
-    Polar wi;
-    BRDF &brdf;
-    double reference;
-
-    MSTree &irradianceTree;
-    std::vector<LightSource> &lightSources;
+    Polar wi{};
+    std::vector<LightSource> lightSources{};
+    MSTree irradianceTree{};
+    double reference = 0.0;
+    TestBRDF brdf{}; // holds the sample mapping for this setup's wi and irradiance tree
 };
 
 void calculateTestSetup(
@@ -253,14 +257,7 @@ int main() {
     std::vector<LightSource> lightSources{};
     MSTree irradianceTree{};
     double reference;
-
-    DiffuseBRDF diffuse{};
-    MicrofacetBRDF microfacet{};
-#ifdef MICROFACET_BRDF
-    BRDF &brdf = microfacet;
-#else
-    BRDF &brdf = diffuse;
-#endif
+    TestBRDF brdf{};
 
     const BRDFSampler brdf_sampler{};
     const DirectLightSampler light_sampler{};
@@ -282,23 +279,23 @@ int main() {
     // printf("\tPIS: %f\n", pis_mse);
 
     printf("Equal Samples (MSE of %d renders, new wi and %d samples each):\n", MSE_COUNT, ES_BENCHMARK_SAMPLES);
-    double brdf_es = _mse(brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double brdf_es = _mse(THREAD_COUNT, brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
     printf("\tBRDF Sampling: %f\n", brdf_es);
-    double mst_es = _mse(light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double mst_es = _mse(THREAD_COUNT, light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
     printf("\tLight Sampling: %f\n", mst_es);
-    double mis_es = _mse(mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double mis_es = _mse(THREAD_COUNT, mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
     printf("\tMIS: %f\n", mis_es);
-    double pis_es = _mse(pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double pis_es = _mse(THREAD_COUNT, pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
     printf("\tPIS: %f\n", pis_es);
 
     printf("Equal Time (MSE of %d renders, new wi and %fs each)\n", MSE_COUNT, ET_BENCHMARK_SECONDS);
-    double brdf_et = _mse(brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double brdf_et = _mse(1, brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
     printf("\tBRDF Sampling: %f\n", brdf_et);
-    double mst_et = _mse(light_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double mst_et = _mse(1, light_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
     printf("\tLight Sampling: %f\n", mst_et);
-    double mis_et = _mse(mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double mis_et = _mse(1, mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
     printf("\tMIS: %f\n", mis_et);
-    double pis_et = _mse(pis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double pis_et = _mse(1, pis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
     printf("\tPIS: %f\n", pis_et);
 
     return 0;
