@@ -112,12 +112,12 @@ TODO
 
 TODO
 
-| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
+| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
-| BRDF Sampling  |                           |                          |
-| Light Sampling |                           |                          |
-| MIS            |                           |                          |
-| PIS            |                           |                          |
+| BRDF Sampling  |                  0.181180 |                 0.040210 |
+| Light Sampling |                  0.010775 |                 0.002564 |
+| MIS            |                  0.006222 |                 0.003048 |
+| PIS            |                  0.009125 |                 0.004268 |
 
 TODO
 
