@@ -21,13 +21,13 @@
 #define RANDOM_WI
 
 // Combine any of these light sources to create different test scenarios
-#define UNIFORM_LIGHT // uniform light source
+// #define UNIFORM_LIGHT // uniform light source
 // #define ZENITH_POINT_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
 // #define FRONT_POINT_LIGHT // strong light from behind wi, 2% area
-// #define BACK_POINT_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
+#define BACK_POINT_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
 // #define RANDOM_POINT_LIGHT // strong light from random direction
 
-// #define MICROFACET_BRDF
+#define MICROFACET_BRDF
 
 namespace {
     constexpr uint32_t dpow(uint32_t base, uint32_t exp) {

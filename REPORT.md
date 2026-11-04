@@ -42,7 +42,77 @@ TODO: Product should be optimal
 
 # Results
 
+All the following benchmarks follow the same structure. 
+In the _Equal Samples_ section, we compute the integral of the rendering equation with 1024 samples. 
+In other words: We render a single pixel with a sample count of 1024. 
+In the _Equal Time_ section, we limit the integral calculation not by sample count, but by a time of 0.001 seconds.
+
+These _renders_ are performed 1024 times, with a new $\omega_o$ viewing direction each. 
+For each of those 1024 renders, we calculate the error with a high-sample-count reference value.
+From that, we calculate the Mean Squared Error.
+
+### Diffuse + single uniform light
+The first benchmark is a sanity check for the implementation. 
+We render with a diffuse material and a single uniform light source. 
+
+|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
+|---|---:|---:|
+|BRDF Sampling|0.000230|0.000010|
+|Light Sampling|0.000221|0.000030|
+|MIS|0.000110|0.000018|
+|PIS|0.000226|0.000036|
+
+As expected, all except MIS deliver similar results in the Equal Samples benchmark.
+The score of MIS is half that, because it combines two samples, one for BRDF and one for light sampling, per resulting MIS sample.
+The equal time benchmark is indirectly proportional to the calculation speed of each algorithm.
+
+### Microfacet + zenith light
+
+The following benchmarks all use the microfacet model instead of a diffuse material to better represent the state-of-the-art use cases.
+The light sources from here on are all high-intensity light sources covering 2% of the hemicircle.
+In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle of $90&deg;$.
+
+|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
+|---|---:|---:|
+|BRDF Sampling|0.208543|0.055958|
+|Light Sampling|0.004186|0.001341|
+|MIS|0.005747|0.002155|
+|PIS|0.005727|0.002426|
+
+TODO
+
+### Microfacet + front light
+
+In this benchmark, the same light source is placed in the direction $\omega_o$, behind the camera.
+The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
+
+|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
+|---|---:|---:|
+|BRDF Sampling|0.110784|0.024245|
+|Light Sampling|0.010034|0.004485|
+|MIS|0.003876|0.001846|
+|PIS|0.004911|0.001772|
+
+TODO
+
+### Microfacet Back light
+
+
+|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
+|---|---:|---:|
+|BRDF Sampling|||
+|Light Sampling|||
+|MIS|||
+|PIS|||
+
+### Microfacet Random light
+
+|Method|Equal Samples 1024 x 1024|Equal Time 1024 x 0.001s|
+|---|---:|---:|
+|BRDF Sampling|||
+|Light Sampling|||
+|MIS|||
+|PIS|||
+
 - Good in limited experiment
 - Explain strengths and weaknesses of PIS
-
-TODO: PDF, Results in Tables & Plots, with different cases shown
