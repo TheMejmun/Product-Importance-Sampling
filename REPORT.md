@@ -73,8 +73,6 @@ These _renders_ are performed 1024 times, with a new $\omega_o$ viewing directio
 For each of those 1024 renders, we calculate the error with a high-sample-count reference value.
 From that, we calculate the Mean Squared Error.
 
-TODO diagrams, maybe move more benchmars to appendix
-
 ### Diffuse + single uniform light
 
 The first benchmark is a sanity check for the implementation.
@@ -92,7 +90,11 @@ The score of MIS is half that, because it combines two samples, one for BRDF and
 MIS sample.
 The equal time benchmark is indirectly proportional to the calculation speed of each algorithm.
 
-### Microfacet + zenith light
+### Microfacet + 2% zenith light
+
+| ![TODO](light_setup_zenith.png) |
+|:-------------------------------:|
+|        _Figure 2: TODO_         |
 
 The following benchmarks all use the microfacet model instead of a diffuse material to better represent the
 state-of-the-art use cases.
@@ -107,9 +109,11 @@ of $90&deg;$.
 | MIS            |                  0.005747 |                 0.002155 |
 | PIS            |                  0.005727 |                 0.002426 |
 
-TODO
+### Microfacet + 2% front light
 
-### Microfacet + front light
+| ![TODO](light_setup_front.png) |
+|:------------------------------:|
+|        _Figure 3: TODO_        |
 
 In this benchmark, the same light source is placed in the direction $\omega_o$, behind the camera.
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
@@ -121,11 +125,11 @@ The term front light is borrowed from photography, referring to a subject lit fr
 | MIS            |                  0.003876 |                 0.001846 |
 | PIS            |                  0.004911 |                 0.001772 |
 
-TODO
+### Microfacet + 2% back light
 
-### Microfacet + back light
-
-TODO
+| ![TODO](light_setup_back.png) |
+|:-----------------------------:|
+|       _Figure 4: TODO_        |
 
 | Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
@@ -134,11 +138,7 @@ TODO
 | MIS            |                  0.060111 |                 0.029806 |
 | PIS            |                  0.095535 |                 0.034527 |
 
-TODO
-
 ### Microfacet + front, back, and zenith light
-
-TODO
 
 | Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
@@ -147,11 +147,14 @@ TODO
 | MIS            |                  0.424944 |                 0.221453 |
 | PIS            |                  0.244756 |                 0.101233 |
 
-TODO
+# Conclusion
 
-### Microfacet + 3 random lights
+- Good in limited experiment
+- Explain strengths and weaknesses of PIS
 
-TODO
+# Appendix
+
+### Microfacet + 3 random 2% lights
 
 | Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
@@ -159,12 +162,3 @@ TODO
 | Light Sampling |                  0.271002 |                 0.069114 |
 | MIS            |                  0.109378 |                 0.055997 |
 | PIS            |                  0.075543 |                 0.025742 |
-
-TODO
-
-# Conclusion
-
-- Good in limited experiment
-- Explain strengths and weaknesses of PIS
-
-# Appendix
