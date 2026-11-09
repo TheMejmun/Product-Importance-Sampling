@@ -16,7 +16,7 @@ struct LightSource {
 };
 
 namespace sampling {
-    double intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wo);
+    double intersect_lights(const std::vector<LightSource> &lightSources, const Polar &wi);
 }
 
 #endif //PIS_LIGHT_SOURCE_H

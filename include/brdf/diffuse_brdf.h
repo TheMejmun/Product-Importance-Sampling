@@ -9,25 +9,25 @@
 
 class DiffuseBRDF final : public BRDF {
 public:
-    [[nodiscard]] double eval(const Polar &wi, const Polar &wo) const override;
+    [[nodiscard]] double eval(const Polar &wo, const Polar &wi) const override;
 
-    [[nodiscard]] double pdf(const Polar &wi, const Polar &wo) const override;
+    [[nodiscard]] double pdf(const Polar &wo, const Polar &wi) const override;
 
-    [[nodiscard]] Polar sample(const Polar &wi) const override;
+    [[nodiscard]] Polar sample(const Polar &wo) const override;
 
-    [[nodiscard]] double pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const override;
+    [[nodiscard]] double pdf(const Polar &wo, const Polar &wi, uint32_t nodeIndex) const override;
 
-    [[nodiscard]] Polar sample(const Polar &wi, uint32_t nodeIndex) const override;
+    [[nodiscard]] Polar sample(const Polar &wo, uint32_t nodeIndex) const override;
 
-    [[nodiscard]] double eval(const Vec3f &wi, const Vec3f &wo) const override;
+    [[nodiscard]] double eval(const Vec3f &wo, const Vec3f &wi) const override;
 
-    [[nodiscard]] double pdf(const Vec3f &wi, const Vec3f &wo) const override;
+    [[nodiscard]] double pdf(const Vec3f &wo, const Vec3f &wi) const override;
 
-    [[nodiscard]] Vec3f sample(const Vec3f &wi) const override;
+    [[nodiscard]] Vec3f sample(const Vec3f &wo) const override;
 
     [[nodiscard]] const char* name()const override;
 
-    void calculateMapping(const MSTree &msTree, const Polar &wi) override;
+    void calculateMapping(const MSTree &msTree, const Polar &wo) override;
 };
 
 #endif //PIS_DIFFUSE_BRDF_H

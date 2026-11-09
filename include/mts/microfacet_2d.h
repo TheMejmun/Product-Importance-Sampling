@@ -28,26 +28,26 @@ namespace mts {
             return result * cos_theta > 1e-20f ? result : 0.0;
         }
 
-        [[nodiscard]] double solid_angle_density(const Vec2f &wi, const Vec2f &m) const {
-            return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
+        [[nodiscard]] double solid_angle_density(const Vec2f &wo, const Vec2f &m) const {
+            return eval(m) * smith_g1(wo, m) * std::abs(utils::dot(wo, m)) / utils::cosTheta(wo);
         }
 
-        [[nodiscard]] double reflected_pdf(const Vec2f &wi, const Vec2f &m) const {
+        [[nodiscard]] double reflected_pdf(const Vec2f &wo, const Vec2f &m) const {
             // uses 2D half-vector Jacobian
-            return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / (2.0 * utils::cosTheta(wi));
+            return eval(m) * smith_g1(wo, m) * std::abs(utils::dot(wo, m)) / (2.0 * utils::cosTheta(wo));
         }
 
-        [[nodiscard]] Normal2f sample(const Vec2f &wi, const double sample) const {
-            // Step 1: stretch wi
-            const Vec2f wi_p = utils::normalize(Vec2f(
-                m_alpha * wi.x,
-                wi.y
+        [[nodiscard]] Normal2f sample(const Vec2f &wo, const double sample) const {
+            // Step 1: stretch wo
+            const Vec2f wo_p = utils::normalize(Vec2f(
+                m_alpha * wo.x,
+                wo.y
             ));
 
-            const double cos_theta = utils::cosTheta(wi_p);
-            const double sign = wi_p.x < 0.0 ? -1.0 : 1.0;
+            const double cos_theta = utils::cosTheta(wo_p);
+            const double sign = wo_p.x < 0.0 ? -1.0 : 1.0;
 
-            // Step 2: simulate P11_{wi}(slope, 1) for the alpha = 1 case
+            // Step 2: simulate P11_{wo}(slope, 1) for the alpha = 1 case
             double slope = sample_visible_11(cos_theta, sample);
 
             // Step 3: rotate & unstretch
@@ -82,15 +82,15 @@ namespace mts {
         }
 
         /// \brief Visible normal sampling code for the alpha=1 case
-        static double sample_visible_11(const double cos_theta_i, const double sample) {
-            const double sin_theta_i = utils::safeSqrt(1.0 - cos_theta_i * cos_theta_i);
+        static double sample_visible_11(const double cos_theta_o, const double sample) {
+            const double sin_theta_o = utils::safeSqrt(1.0 - cos_theta_o * cos_theta_o);
 
-            const double sin_delta = sample * (1.0 + cos_theta_i) - 1.0;
+            const double sin_delta = sample * (1.0 + cos_theta_o) - 1.0;
             const double cos_delta = utils::safeSqrt(1.0 - sin_delta * sin_delta);
 
             // Convert to slope
-            const double sin_theta_m = sin_theta_i * cos_delta + cos_theta_i * sin_delta;
-            const double cos_theta_m = cos_theta_i * cos_delta - sin_theta_i * sin_delta;
+            const double sin_theta_m = sin_theta_o * cos_delta + cos_theta_o * sin_delta;
+            const double cos_theta_m = cos_theta_o * cos_delta - sin_theta_o * sin_delta;
             return -sin_theta_m / cos_theta_m;
         }
 

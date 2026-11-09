@@ -24,27 +24,27 @@ protected:
 
 public:
     // Should return the "color" -> in this case monochrome brightness
-    [[nodiscard]] virtual double eval(const Polar &wi, const Polar &wo) const = 0;
+    [[nodiscard]] virtual double eval(const Polar &wo, const Polar &wi) const = 0;
 
-    [[nodiscard]] virtual double pdf(const Polar &wi, const Polar &wo) const = 0;
+    [[nodiscard]] virtual double pdf(const Polar &wo, const Polar &wi) const = 0;
 
-    [[nodiscard]] virtual Polar sample(const Polar &wi) const = 0;
+    [[nodiscard]] virtual Polar sample(const Polar &wo) const = 0;
 
-    [[nodiscard]] virtual double pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const = 0;
+    [[nodiscard]] virtual double pdf(const Polar &wo, const Polar &wi, uint32_t nodeIndex) const = 0;
 
-    [[nodiscard]] virtual Polar sample(const Polar &wi, uint32_t nodeIndex) const = 0;
+    [[nodiscard]] virtual Polar sample(const Polar &wo, uint32_t nodeIndex) const = 0;
 
-    [[nodiscard]] virtual double eval(const Vec3f &wi, const Vec3f &wo) const = 0;
+    [[nodiscard]] virtual double eval(const Vec3f &wo, const Vec3f &wi) const = 0;
 
-    [[nodiscard]] virtual double pdf(const Vec3f &wi, const Vec3f &wo) const = 0;
+    [[nodiscard]] virtual double pdf(const Vec3f &wo, const Vec3f &wi) const = 0;
 
-    [[nodiscard]] virtual Vec3f sample(const Vec3f &wi) const = 0;
+    [[nodiscard]] virtual Vec3f sample(const Vec3f &wo) const = 0;
 
     [[nodiscard]] virtual const char *name() const = 0;
 
-    virtual void calculateMapping(const MSTree &msTree, const Polar &wi) = 0;
+    virtual void calculateMapping(const MSTree &msTree, const Polar &wo) = 0;
 
-    // Probability that sample(wi) produces a direction inside the given node
+    // Probability that sample(wo) produces a direction inside the given node
     // Analytically correct, as mRangeMappings divides uniform sample space [0; 1)
     [[nodiscard]] double nodeSamplingProbability(const uint32_t nodeIndex) const {
         const Range &range = mRangeMappings[nodeIndex];

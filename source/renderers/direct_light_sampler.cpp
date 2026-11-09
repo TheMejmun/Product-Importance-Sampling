@@ -7,8 +7,8 @@
 #include "utils.h"
 
 double DirectLightSampler::sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,
-                                  const Polar &wi) const {
+                                  const Polar &wo) const {
     const MSTSample sample = msTree.sample();
-    const double incomingLight = sampling::intersect_lights(lightSources, sample.wo);
-    return incomingLight * brdf.eval(wi, sample.wo) * utils::cosTheta(sample.wo) / sample.pdf;
+    const double incomingLight = sampling::intersect_lights(lightSources, sample.wi);
+    return incomingLight * brdf.eval(wo, sample.wi) * utils::cosTheta(sample.wi) / sample.pdf;
 }

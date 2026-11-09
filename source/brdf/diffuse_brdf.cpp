@@ -20,35 +20,35 @@ const char *DiffuseBRDF::name() const {
     return "Diffuse";
 }
 
-double DiffuseBRDF::eval(const Polar &wi, const Polar &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double DiffuseBRDF::eval(const Polar &wo, const Polar &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    if (wi.phi > M_PI || wo.phi > M_PI) {
+    assert(utils::cosTheta(wi) >= 0.0);
+    if (wo.phi > M_PI || wi.phi > M_PI) {
         return 0.0;
     }
     return 0.5;
 }
 
-double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double DiffuseBRDF::pdf(const Polar &wo, const Polar &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    if (wi.phi > M_PI || wo.phi > M_PI) {
+    assert(utils::cosTheta(wi) >= 0.0);
+    if (wo.phi > M_PI || wi.phi > M_PI) {
         return 0.0;
     }
     return 1.0 / M_PI;
 }
 
-Polar DiffuseBRDF::sample(const Polar &wi) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+Polar DiffuseBRDF::sample(const Polar &wo) const {
+    assert(utils::cosTheta(wo) >= 0.0);
 
     const double phi = hemisphereDist(re);
     return {1.0, phi};
 }
 
-double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double DiffuseBRDF::pdf(const Polar &wo, const Polar &wi, uint32_t nodeIndex) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    if (wi.phi > M_PI || wo.phi > M_PI) {
+    assert(utils::cosTheta(wi) >= 0.0);
+    if (wo.phi > M_PI || wi.phi > M_PI) {
         return 0.0;
     }
     const Range &range = mRangeMappings[nodeIndex];
@@ -57,8 +57,8 @@ double DiffuseBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) co
     return 1.0 / (rangeWidth * M_PI);
 }
 
-Polar DiffuseBRDF::sample(const Polar &wi, uint32_t nodeIndex) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+Polar DiffuseBRDF::sample(const Polar &wo, uint32_t nodeIndex) const {
+    assert(utils::cosTheta(wo) >= 0.0);
 
     const Range &range = mRangeMappings[nodeIndex];
     const double rangeWidth = range.end - range.start;
@@ -66,25 +66,25 @@ Polar DiffuseBRDF::sample(const Polar &wi, uint32_t nodeIndex) const {
     return {1.0, uniform * M_PI};
 }
 
-double DiffuseBRDF::eval(const Vec3f &wi, const Vec3f &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double DiffuseBRDF::eval(const Vec3f &wo, const Vec3f &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
+    assert(utils::cosTheta(wi) >= 0.0);
     return 1.0 / M_PI;
 }
 
-double DiffuseBRDF::pdf(const Vec3f &wi, const Vec3f &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double DiffuseBRDF::pdf(const Vec3f &wo, const Vec3f &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
+    assert(utils::cosTheta(wi) >= 0.0);
     // Equal pdf everywhere, since polar angle is uniformly distributed
     return 1.0 / (2 * M_PI);
 }
 
-Vec3f DiffuseBRDF::sample(const Vec3f &wi) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+Vec3f DiffuseBRDF::sample(const Vec3f &wo) const {
+    assert(utils::cosTheta(wo) >= 0.0);
     return utils::hemisphereSample();
 }
 
-void DiffuseBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
+void DiffuseBRDF::calculateMapping(const MSTree &msTree, const Polar &wo) {
     const auto &nodes = msTree.getNodes();
     mRangeMappings = std::vector<Range>(nodes.size());
     for (uint32_t i = 0; i < nodes.size(); ++i) {

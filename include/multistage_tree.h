@@ -38,7 +38,7 @@ struct LightSample {
 };
 
 struct MSTSample {
-    Polar wo;
+    Polar wi;
     double pdf;
 };
 
@@ -63,7 +63,7 @@ public:
     [[nodiscard]] double pdf(const Node &node) const;
 
     // Calculate the probability for a given direction
-    [[nodiscard]] double pdf(const Polar &wo) const;
+    [[nodiscard]] double pdf(const Polar &wi) const;
 
     void exportToCsv(const std::string &filename);
 

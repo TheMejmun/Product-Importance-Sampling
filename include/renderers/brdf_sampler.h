@@ -10,14 +10,14 @@
 class BRDFSampler final : public AbstractSampler {
 public:
     [[nodiscard]] double sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,
-                                const Polar &wi) const override;
+                                const Polar &wo) const override;
 
-    [[nodiscard]] double sample3D(const BRDF &brdf, const Vec3f &wi) const;
+    [[nodiscard]] double sample3D(const BRDF &brdf, const Vec3f &wo) const;
 
     [[nodiscard]] double equal_samples3D(
         std::uint32_t iterations,
         const BRDF &brdf,
-        const Vec3f &wi
+        const Vec3f &wo
     ) const;
 };
 

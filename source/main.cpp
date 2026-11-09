@@ -19,13 +19,13 @@
 #include "renderers/direct_light_sampler.h"
 #include "renderers/pis_sampler.h"
 
-#define RANDOM_WI
+#define RANDOM_WO
 
 // Combine any of these light sources to create different test scenarios
 // #define UNIFORM_LIGHT // uniform light source
 // #define ZENITH_POINT_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
-// #define FRONT_POINT_LIGHT // strong light from behind wi, 2% area
-// #define BACK_POINT_LIGHT // strong light from opposite wi (reflect wi around up normal), 2% area
+// #define FRONT_POINT_LIGHT // strong light from behind wo, 2% area
+// #define BACK_POINT_LIGHT // strong light from opposite wo (reflect wo around up normal), 2% area
 #define RANDOM_POINT_LIGHT_1 // strong light from random direction
 #define RANDOM_POINT_LIGHT_2 // strong light from random direction
 #define RANDOM_POINT_LIGHT_3 // strong light from random direction
@@ -113,86 +113,86 @@ MSTree setupIrradianceTree(const std::vector<LightSource> &lightSources) {
 
 struct Sample {
     Vec3f normal;
-    Vec3f wo;
+    Vec3f wi;
     double pdf;
 };
 
-Sample sampleMicrofacet3D(const mts::MicrofacetDistribution &distr, const Vec3f &wi) {
+Sample sampleMicrofacet3D(const mts::MicrofacetDistribution &distr, const Vec3f &wo) {
     const Point2f sample = {randDistr(randEng), randDistr(randEng)};
-    const Normal3f normal = distr.sample(wi, sample);
-    const double pdf = distr.solid_angle_density(wi, normal);
-    const Vec3f wo = utils::reflect(wi, normal);
-    return {normal, wo, pdf};
+    const Normal3f normal = distr.sample(wo, sample);
+    const double pdf = distr.solid_angle_density(wo, normal);
+    const Vec3f wi = utils::reflect(wo, normal);
+    return {normal, wi, pdf};
 }
 
 void testMicrofacet3D() {
     mts::MicrofacetDistribution test{0.1f};
-    const auto wi = utils::normalize(Vec3f{1.0, 0.0, 1.0});
-    printf("wi=[%f, %f, %f]\n", wi.x, wi.y, wi.z);
+    const auto wo = utils::normalize(Vec3f{1.0, 0.0, 1.0});
+    printf("wo=[%f, %f, %f]\n", wo.x, wo.y, wo.z);
 
     std::vector<Sample> samples(MICROFACET_TEST_SAMPLE_COUNT);
     for (int i = 0; i < MICROFACET_TEST_SAMPLE_COUNT; ++i) {
-        samples[i] = sampleMicrofacet3D(test, wi);
+        samples[i] = sampleMicrofacet3D(test, wo);
     }
 
     double avgPdf = 0.0;
     Vec3f avgNormal = {0.0, 0.0, 0.0};
-    Vec3f avgWo = {0.0, 0.0, 0.0};
-    for (const auto &[normal,wo,pdf]: samples) {
+    Vec3f avgWi = {0.0, 0.0, 0.0};
+    for (const auto &[normal,wi,pdf]: samples) {
         avgPdf += pdf;
         avgNormal = avgNormal + normal;
-        avgWo = avgWo + wo;
+        avgWi = avgWi + wi;
     }
     avgPdf = avgPdf / static_cast<double>(MICROFACET_TEST_SAMPLE_COUNT);
     avgNormal = avgNormal / MICROFACET_TEST_SAMPLE_COUNT;
-    avgWo = avgWo / MICROFACET_TEST_SAMPLE_COUNT;
+    avgWi = avgWi / MICROFACET_TEST_SAMPLE_COUNT;
 
     double varPdf = 0.0;
     Vec3f varNormal = {0.0, 0.0, 0.0};
-    Vec3f varWo = {0.0, 0.0, 0.0};
-    for (const auto &[normal,wo,pdf]: samples) {
+    Vec3f varWi = {0.0, 0.0, 0.0};
+    for (const auto &[normal,wi,pdf]: samples) {
         varPdf += (pdf - avgPdf) * (pdf - avgPdf);
         varNormal = varNormal + (normal - avgNormal) * (normal - avgNormal);
-        varWo = varWo + (wo - avgWo) * (wo - avgWo);
+        varWi = varWi + (wi - avgWi) * (wi - avgWi);
     }
     varPdf = varPdf / static_cast<double>(MICROFACET_TEST_SAMPLE_COUNT);
     varNormal = varNormal / MICROFACET_TEST_SAMPLE_COUNT;
-    varWo = varWo / MICROFACET_TEST_SAMPLE_COUNT;
+    varWi = varWi / MICROFACET_TEST_SAMPLE_COUNT;
 
     printf("avgNormal=[%f, %f, %f], varNormal=[%f, %f, %f]\n", avgNormal.x, avgNormal.y, avgNormal.z, varNormal.x,
            varNormal.y, varNormal.z);
     printf("avgPdf=%f, varPdf=%f\n", avgPdf, varPdf);
-    printf("avgWo=[%f, %f, %f], varWo=[%f, %f, %f]\n", avgWo.x, avgWo.y, avgWo.z, varWo.x, varWo.y, varWo.z);
+    printf("avgWi=[%f, %f, %f], varWi=[%f, %f, %f]\n", avgWi.x, avgWi.y, avgWi.z, varWi.x, varWi.y, varWi.z);
 }
 
 // TODO test brightness against Diffuse BRDF with full dome of light
 // TODO test brdf sampling mean against direct light sampling mean with microfacet
 
-struct Wi {
+struct Wo {
     Polar polar;
     Vec3f vec3;
 };
 
-static Wi calculateWi() {
-#ifdef RANDOM_WI
-    const Polar wi{1.0, randDistr(randEng) * M_PI};
-    const Vec3f wi3 = utils::hemisphereSample();
+static Wo calculateWo() {
+#ifdef RANDOM_WO
+    const Polar wo{1.0, randDistr(randEng) * M_PI};
+    const Vec3f wo3 = utils::hemisphereSample();
 #else
-    const Polar wi{1.0, M_PI / 4.0};
-    const Vec3f wi3 = utils::normalize(Vec3f{1.0, 0.0, 1.0});
+    const Polar wo{1.0, M_PI / 4.0};
+    const Vec3f wo3 = utils::normalize(Vec3f{1.0, 0.0, 1.0});
 #endif
 
-    // printf("wi: %s\n", wi.toString().c_str());
-    // printf("wi3: %s\n", wi3.toString().c_str());
+    // printf("wo: %s\n", wo.toString().c_str());
+    // printf("wo3: %s\n", wo3.toString().c_str());
 
-    return {wi, wi3};
+    return {wo, wo3};
 }
 
-void setupLights(std::vector<LightSource> &lightSources, const Polar wi) {
+void setupLights(std::vector<LightSource> &lightSources, const Polar wo) {
     lightSources.clear();
 
     // Should be fine for light sources to go below the horizontal plane.
-    // In the case of FRONT_LIGHT or BACK_LIGHT, when wi.phi is close to 0.0 or M_PI
+    // In the case of FRONT_LIGHT or BACK_LIGHT, when wo.phi is close to 0.0 or M_PI
 #ifdef UNIFORM_LIGHT
     lightSources.emplace_back(0.0, M_PI, LIGHT_MAX_INTENSITY / 100.0); // 100% hemisphere coverage
 #endif
@@ -200,12 +200,12 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wi) {
     lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
 #endif
 #ifdef FRONT_POINT_LIGHT
-    double directionFront = wi.phi;
+    double directionFront = wo.phi;
     lightSources.emplace_back(directionFront - M_PI * 0.01, directionFront + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
 #ifdef BACK_POINT_LIGHT
-    double directionBack = utils::reflect(wi, Polar(1.0, M_PI / 2)).phi; // reflect wi around vertical axis
+    double directionBack = utils::reflect(wo, Polar(1.0, M_PI / 2)).phi; // reflect wo around vertical axis
     lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
@@ -233,38 +233,38 @@ using TestBRDF = DiffuseBRDF;
 #endif
 
 struct TestSetup {
-    Polar wi{};
+    Polar wo{};
     std::vector<LightSource> lightSources{};
     MSTree irradianceTree{};
     double reference = 0.0;
-    TestBRDF brdf{}; // holds the sample mapping for this setup's wi and irradiance tree
+    TestBRDF brdf{}; // holds the sample mapping for this setup's wo and irradiance tree
 };
 
 void calculateTestSetup(
-    Polar &wi,
+    Polar &wo,
     std::vector<LightSource> &lightSources,
     MSTree &irradianceTree,
     double &reference,
     BRDF &brdf
 ) {
-    // printf("\nGenerating wi\n");
-    wi = calculateWi().polar;
+    // printf("\nGenerating wo\n");
+    wo = calculateWo().polar;
 
     // printf("\nSetting up light sources\n");
-    setupLights(lightSources, wi);
+    setupLights(lightSources, wo);
 
     // printf("\nSetting up irradiance tree\n");
     irradianceTree = setupIrradianceTree(lightSources);
 
     // printf("\nCalculating reference\n");
     const BRDFSampler brdf_sampler{};
-    reference = brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    reference = brdf_sampler.equal_samples(REFERENCE_SAMPLES, irradianceTree, brdf, lightSources, wo);
 
     // printf("\nCalculating uniform sample mapping\n");
-    brdf.calculateMapping(irradianceTree, wi);
+    brdf.calculateMapping(irradianceTree, wo);
 }
 
-// MSE of `render` over MSE_COUNT runs, each against a fresh wi, light setup and reference.
+// MSE of `render` over MSE_COUNT runs, each against a fresh wo, light setup and reference.
 // Setups are always built in parallel. renderThreads decides whether the renders run in parallel too:
 // pass 1 for equal-time renders, so they are timed with no other threads competing for the CPU.
 template<typename Render>
@@ -276,13 +276,13 @@ double benchmarkMse(const uint32_t renderThreads, const Render &render) {
         std::vector<TestSetup> setups(batchSize);
         utils::parallelFor(batchSize, THREAD_COUNT, [&](const uint32_t i) {
             TestSetup &s = setups[i];
-            calculateTestSetup(s.wi, s.lightSources, s.irradianceTree, s.reference, s.brdf);
+            calculateTestSetup(s.wo, s.lightSources, s.irradianceTree, s.reference, s.brdf);
         });
 
         std::vector<double> squaredErrors(batchSize);
         utils::parallelFor(batchSize, renderThreads, [&](const uint32_t i) {
             const TestSetup &s = setups[i];
-            const double error = render(s.irradianceTree, s.brdf, s.lightSources, s.wi) - s.reference;
+            const double error = render(s.irradianceTree, s.brdf, s.lightSources, s.wo) - s.reference;
             squaredErrors[i] = error * error;
         });
         for (const double squaredError: squaredErrors) {
@@ -292,14 +292,14 @@ double benchmarkMse(const uint32_t renderThreads, const Render &render) {
     return squaredErrorSum / static_cast<double>(MSE_COUNT);
 }
 
-// `func` is evaluated once per run and may use irradianceTree, brdf, lightSources and wi of that run
+// `func` is evaluated once per run and may use irradianceTree, brdf, lightSources and wo of that run
 #define _mse(renderThreads, func) benchmarkMse(renderThreads, \
-    [&](const MSTree &irradianceTree, const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wi) { \
+    [&](const MSTree &irradianceTree, const BRDF &brdf, const std::vector<LightSource> &lightSources, const Polar &wo) { \
         return func; \
     })
 
 int main() {
-    Polar wi{};
+    Polar wo{};
     std::vector<LightSource> lightSources{};
     MSTree irradianceTree{};
     double reference;
@@ -310,38 +310,38 @@ int main() {
     const MISSampler mis_sampler{};
     const PISSampler pis_sampler{};
 
-    calculateTestSetup(wi, lightSources, irradianceTree, reference, brdf);
+    calculateTestSetup(wo, lightSources, irradianceTree, reference, brdf);
 
     printf("\n");
 
-    // printf("Per-Sample MSE (%d samples, same wi):\n", MSE_BENCHMARK_SAMPLES);
-    // double brdf_mse = brdf_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // printf("Per-Sample MSE (%d samples, same wo):\n", MSE_BENCHMARK_SAMPLES);
+    // double brdf_mse = brdf_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo);
     // printf("\tBRDF Sampling: %f\n", brdf_mse);
-    // double mst_mse = light_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // double mst_mse = light_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo);
     // printf("\tLight Sampling: %f\n", mst_mse);
-    // double mis_mse = mis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // double mis_mse = mis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo);
     // printf("\tMIS: %f\n", mis_mse);
-    // double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi);
+    // double pis_mse = pis_sampler.mse(reference, MSE_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo);
     // printf("\tPIS: %f\n", pis_mse);
 
-    printf("Equal Samples (MSE of %d renders, new wi and %d samples each):\n", MSE_COUNT, ES_BENCHMARK_SAMPLES);
-    double brdf_es = _mse(THREAD_COUNT, brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    printf("Equal Samples (MSE of %d renders, new wo and %d samples each):\n", MSE_COUNT, ES_BENCHMARK_SAMPLES);
+    double brdf_es = _mse(THREAD_COUNT, brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tBRDF Sampling: %f\n", brdf_es);
-    double mst_es = _mse(THREAD_COUNT, light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double mst_es = _mse(THREAD_COUNT, light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tLight Sampling: %f\n", mst_es);
-    double mis_es = _mse(THREAD_COUNT, mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double mis_es = _mse(THREAD_COUNT, mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tMIS: %f\n", mis_es);
-    double pis_es = _mse(THREAD_COUNT, pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wi));
+    double pis_es = _mse(THREAD_COUNT, pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tPIS: %f\n", pis_es);
 
-    printf("Equal Time (MSE of %d renders, new wi and %fs each)\n", MSE_COUNT, ET_BENCHMARK_SECONDS);
-    double brdf_et = _mse(1, brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    printf("Equal Time (MSE of %d renders, new wo and %fs each)\n", MSE_COUNT, ET_BENCHMARK_SECONDS);
+    double brdf_et = _mse(1, brdf_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wo));
     printf("\tBRDF Sampling: %f\n", brdf_et);
-    double mst_et = _mse(1, light_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double mst_et = _mse(1, light_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wo));
     printf("\tLight Sampling: %f\n", mst_et);
-    double mis_et = _mse(1, mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double mis_et = _mse(1, mis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wo));
     printf("\tMIS: %f\n", mis_et);
-    double pis_et = _mse(1, pis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wi));
+    double pis_et = _mse(1, pis_sampler.equal_time(ET_BENCHMARK_SECONDS, irradianceTree, brdf, lightSources, wo));
     printf("\tPIS: %f\n", pis_et);
 
     return 0;

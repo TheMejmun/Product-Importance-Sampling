@@ -10,7 +10,7 @@
 class DirectLightSampler final : public AbstractSampler {
 public:
     [[nodiscard]] double sample(const MSTree &msTree, const BRDF &brdf, const std::vector<LightSource> &lightSources,
-                                const Polar &wi) const override;
+                                const Polar &wo) const override;
 };
 
 #endif //PIS_LIGHT_SAMPLING_H

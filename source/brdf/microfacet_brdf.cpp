@@ -21,103 +21,103 @@ const char *MicrofacetBRDF::name() const {
     return "Microfacet";
 }
 
-double MicrofacetBRDF::eval(const Polar &wi, const Polar &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double MicrofacetBRDF::eval(const Polar &wo, const Polar &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    if (wi.phi > M_PI || wo.phi > M_PI) {
+    assert(utils::cosTheta(wi) >= 0.0);
+    if (wo.phi > M_PI || wi.phi > M_PI) {
         return 0.0;
     }
     // return 0.5;
-    const double cosI = utils::cosTheta(wi);
     const double cosO = utils::cosTheta(wo);
-    guard_positive(cosI);
+    const double cosI = utils::cosTheta(wi);
     guard_positive(cosO);
+    guard_positive(cosI);
 
-    const Vec2f wiVec = utils::toVec(wi);
     const Vec2f woVec = utils::toVec(wo);
-    const Vec2f m = utils::toVec(Polar{1.0, (wi.phi + wo.phi) / 2.0});
+    const Vec2f wiVec = utils::toVec(wi);
+    const Vec2f m = utils::toVec(Polar{1.0, (wo.phi + wi.phi) / 2.0});
 
     // 2D Torrance-Sparrow with Smith shadowing-masking:
-    // D(m) G1(wi, m) G1(wo, m) <wi, m> / (2 cosI cosO)
-    // Unlike in 3D, the 2D half-vector Jacobian (1/2) does not cancel <wi, m>
+    // D(m) G1(wo, m) G1(wi, m) <wo, m> / (2 cosO cosI)
+    // Unlike in 3D, the 2D half-vector Jacobian (1/2) does not cancel <wo, m>
     return mDistribution2D.eval(m)
-           * mDistribution2D.smith_g1(wiVec, m)
            * mDistribution2D.smith_g1(woVec, m)
-           * std::abs(utils::dot(wiVec, m))
-           / (2.0 * cosI * cosO);
+           * mDistribution2D.smith_g1(wiVec, m)
+           * std::abs(utils::dot(woVec, m))
+           / (2.0 * cosO * cosI);
 }
 
-double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double MicrofacetBRDF::pdf(const Polar &wo, const Polar &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    if (wi.phi > M_PI || wo.phi > M_PI) {
+    assert(utils::cosTheta(wi) >= 0.0);
+    if (wo.phi > M_PI || wi.phi > M_PI) {
         return 0.0;
     }
 
-    Polar m{1.0, (wi.phi + wo.phi) / 2.0};
-    return mDistribution2D.reflected_pdf(utils::toVec(wi), utils::toVec(m));
+    Polar m{1.0, (wo.phi + wi.phi) / 2.0};
+    return mDistribution2D.reflected_pdf(utils::toVec(wo), utils::toVec(m));
 }
 
-Polar MicrofacetBRDF::sample(const Polar &wi) const {
-    assert(utils::cosTheta(wi) >= 0.0);
-
-    const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniformDist(re));
-    return utils::reflect(wi, utils::toPolar(m));
-}
-
-double MicrofacetBRDF::pdf(const Polar &wi, const Polar &wo, uint32_t nodeIndex) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+Polar MicrofacetBRDF::sample(const Polar &wo) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    if (wi.phi > M_PI || wo.phi > M_PI) {
+
+    const Vec2f m = mDistribution2D.sample(utils::toVec(wo), uniformDist(re));
+    return utils::reflect(wo, utils::toPolar(m));
+}
+
+double MicrofacetBRDF::pdf(const Polar &wo, const Polar &wi, uint32_t nodeIndex) const {
+    assert(utils::cosTheta(wo) >= 0.0);
+    assert(utils::cosTheta(wi) >= 0.0);
+    if (wo.phi > M_PI || wi.phi > M_PI) {
         return 0.0;
     }
     const Range &range = mRangeMappings[nodeIndex];
     const double rangeWidth = range.end - range.start;
     if (rangeWidth <= 0.0) { return 0.0; }
     // Full-domain pdf divided by the probability mass of the node's range
-    return pdf(wi, wo) / rangeWidth;
+    return pdf(wo, wi) / rangeWidth;
 }
 
-Polar MicrofacetBRDF::sample(const Polar &wi, uint32_t nodeIndex) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+Polar MicrofacetBRDF::sample(const Polar &wo, uint32_t nodeIndex) const {
+    assert(utils::cosTheta(wo) >= 0.0);
 
     const Range &range = mRangeMappings[nodeIndex];
     const double rangeWidth = range.end - range.start;
     const double uniform = range.start + rangeWidth * uniformDist(re);
-    const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniform);
-    return utils::reflect(wi, utils::toPolar(m));
+    const Vec2f m = mDistribution2D.sample(utils::toVec(wo), uniform);
+    return utils::reflect(wo, utils::toPolar(m));
 }
 
-double MicrofacetBRDF::eval(const Vec3f &wi, const Vec3f &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double MicrofacetBRDF::eval(const Vec3f &wo, const Vec3f &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
+    assert(utils::cosTheta(wi) >= 0.0);
     return 1.0 / M_PI;
 }
 
-double MicrofacetBRDF::pdf(const Vec3f &wi, const Vec3f &wo) const {
-    assert(utils::cosTheta(wi) >= 0.0);
+double MicrofacetBRDF::pdf(const Vec3f &wo, const Vec3f &wi) const {
     assert(utils::cosTheta(wo) >= 0.0);
-    const Vec3f m = utils::normalize(wi + wo);
-    return mDistribution3D.reflected_pdf(wi, m);
-}
-
-Vec3f MicrofacetBRDF::sample(const Vec3f &wi) const {
     assert(utils::cosTheta(wi) >= 0.0);
-    const Vec3f m = mDistribution3D.sample(wi, {uniformDist(re), uniformDist(re)});
-    const Vec3f wo = utils::reflect(wi, m);
-    return wo;
+    const Vec3f m = utils::normalize(wo + wi);
+    return mDistribution3D.reflected_pdf(wo, m);
 }
 
-void MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
+Vec3f MicrofacetBRDF::sample(const Vec3f &wo) const {
+    assert(utils::cosTheta(wo) >= 0.0);
+    const Vec3f m = mDistribution3D.sample(wo, {uniformDist(re), uniformDist(re)});
+    const Vec3f wi = utils::reflect(wo, m);
+    return wi;
+}
+
+void MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wo) {
     const auto &nodes = msTree.getNodes();
     mRangeMappings = std::vector<Range>(nodes.size());
 
     for (uint32_t i = 0; i <= MAPPING_SAMPLES; ++i) {
         const double uniform = static_cast<double>(i) / static_cast<double>(MAPPING_SAMPLES);
-        const Vec2f m = mDistribution2D.sample(utils::toVec(wi), uniform);
-        const Polar wo = utils::reflect(wi, utils::toPolar(m));
+        const Vec2f m = mDistribution2D.sample(utils::toVec(wo), uniform);
+        const Polar wi = utils::reflect(wo, utils::toPolar(m));
         for (uint32_t j = 0; j < nodes.size(); ++j) {
-            if (wo.phi >= nodes[j].startBoundary && wo.phi <= nodes[j].endBoundary) {
+            if (wi.phi >= nodes[j].startBoundary && wi.phi <= nodes[j].endBoundary) {
                 mRangeMappings[j].start = std::min(mRangeMappings[j].start, uniform);
                 mRangeMappings[j].end = std::max(mRangeMappings[j].end, uniform);
                 break;
@@ -132,7 +132,7 @@ void MicrofacetBRDF::calculateMapping(const MSTree &msTree, const Polar &wi) {
     }
 
     // for (uint32_t i = 0; i < nodes.size(); ++i) {
-    //     printf("uniform [%f, %f] -> wo [%f, %f]\n",
+    //     printf("uniform [%f, %f] -> wi [%f, %f]\n",
     //            mRangeMappings[i].start,
     //            mRangeMappings[i].end,
     //            nodes[i].startBoundary,

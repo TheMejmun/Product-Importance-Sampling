@@ -63,28 +63,28 @@ namespace mts {
             return result * cos_theta > 1e-20f ? result : 0.0;
         }
 
-        [[nodiscard]] double solid_angle_density(const Vec3f &wi, const Vec3f &m) const {
-            return eval(m) * smith_g1(wi, m) * std::abs(utils::dot(wi, m)) / utils::cosTheta(wi);
+        [[nodiscard]] double solid_angle_density(const Vec3f &wo, const Vec3f &m) const {
+            return eval(m) * smith_g1(wo, m) * std::abs(utils::dot(wo, m)) / utils::cosTheta(wo);
         }
 
-        [[nodiscard]] double reflected_pdf(const Vec3f &wi, const Vec3f &m) const {
+        [[nodiscard]] double reflected_pdf(const Vec3f &wo, const Vec3f &m) const {
             // https://github.com/mitsuba-renderer/mitsuba3/blob/9067366f4e7d398a2971efd46ec63944264dfb27/src/bsdfs/roughconductor.cpp#L421
-            return eval(m) * smith_g1(wi, m) / (4.0 * utils::cosTheta(wi));
+            return eval(m) * smith_g1(wo, m) / (4.0 * utils::cosTheta(wo));
         }
 
-        [[nodiscard]] Normal3f sample(const Vec3f &wi, const Point2f &sample) const {
-            // Step 1: stretch wi
-            const Vec3f wi_p = utils::normalize(Vec3f(
-                m_alpha_u * wi.x,
-                m_alpha_v * wi.y,
-                wi.z
+        [[nodiscard]] Normal3f sample(const Vec3f &wo, const Point2f &sample) const {
+            // Step 1: stretch wo
+            const Vec3f wo_p = utils::normalize(Vec3f(
+                m_alpha_u * wo.x,
+                m_alpha_v * wo.y,
+                wo.z
             ));
 
-            const double sin_phi = utils::sinPhi(wi_p);
-            const double cos_phi = utils::cosPhi(wi_p);
-            const double cos_theta = utils::cosTheta(wi_p);
+            const double sin_phi = utils::sinPhi(wo_p);
+            const double cos_phi = utils::cosPhi(wo_p);
+            const double cos_theta = utils::cosTheta(wo_p);
 
-            // Step 2: simulate P22_{wi}(slope.x, slope.y, 1, 1)
+            // Step 2: simulate P22_{wo}(slope.x, slope.y, 1, 1)
             Vec2f slope = sample_visible_11(cos_theta, sample);
 
             // Step 3: rotate & unstretch
@@ -119,11 +119,11 @@ namespace mts {
         }
 
         /// \brief Visible normal sampling code for the alpha=1 case
-        static Vec2f sample_visible_11(const double cos_theta_i, const Point2f sample) {
+        static Vec2f sample_visible_11(const double cos_theta_o, const Point2f sample) {
             // Choose a projection direction and re-scale the sample
             Point2f p = square_to_uniform_disk_concentric(sample);
 
-            const double s = 0.5f * (1.0 + cos_theta_i);
+            const double s = 0.5f * (1.0 + cos_theta_o);
             p.y = utils::lerp(utils::safeSqrt(1.0 - std::pow(p.x, 2.0)), p.y, s);
 
             const double x = p.x;
@@ -132,9 +132,9 @@ namespace mts {
             const double z = utils::safeSqrt(1.0 - utils::dot(p, p));
 
             // Convert to slope
-            const double sin_theta_i = utils::safeSqrt(1.0 - std::pow(cos_theta_i, 2.0));
-            const double norm = 1.0 / (sin_theta_i * y + cos_theta_i * z);
-            return Vec2f(cos_theta_i * y - sin_theta_i * z, x) * norm;
+            const double sin_theta_o = utils::safeSqrt(1.0 - std::pow(cos_theta_o, 2.0));
+            const double norm = 1.0 / (sin_theta_o * y + cos_theta_o * z);
+            return Vec2f(cos_theta_o * y - sin_theta_o * z, x) * norm;
         }
 
     protected:
