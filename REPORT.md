@@ -20,7 +20,7 @@ This PDF represents the likelihood of a particular sample being chosen, and divi
 of each sample to the final result.
 The choice of the sampling direction $\omega_{i,n}$ TODO
 
-TODO: Explain ray intersection / path tracing algorithm / scene intersaction -> locally want to choose best ray direction recursively, why the choice of sampling direction is so important, the choice of sampling direction, light sampling and brdf sampling are heuristics, path tracing as practical implementation of path tracing -> finding optimal ray direction
+TODO: Explain ray intersection / path tracing algorithm / scene intersaction -> locally want to choose best ray direction recursively, why the choice of sampling direction is so important, the choice of sampling direction, light sampling, and brdf sampling are heuristics, path tracing as practical implementation of path tracing -> finding optimal ray direction
 
 Multiple Importance Sampling approximates the rendering equation's integral (See figure below) by sampling the incoming
 light ($L_i$) and the BRDF ($f_r$) independently.
@@ -33,10 +33,27 @@ TODO: bidirectional BRDF -> path tracing traces reversed. Only render photons th
 
 # Methodology
 
-- Setup of the experiment
-    - 2D
-    - Microfacet Model
+|        ![PIS toy example graphic](pis_toy_graphic.png)        |
+|:-------------------------------------------------------------:|
+| _Figure 1: Graphical representation of the toy example setup_ |
+
+- TODO
     - Equal Time, Equal Samples tests
+    - explain graphic
+
+The goal of this project is to create a minimal toy example for testing a variant of Product Importance Sampling. 
+The benchmark compares three competing algorithms to PIS: BRDF sampling, Direct Light Sampling, and a combination of the former two using Multiple Importance Sampling.
+
+To keep the complexity of the project as low as possible, the scene was reduced to a minimum.
+The scene only contains the object being rendered and a number of light sources. 
+The object is a simple surface, and we only render a single point on it. 
+In 3D, the vectors $\omega_i$ and $\omega_o$ would normally be encoded as Euclidean coordinates $x$, $y$, and $z$.
+In 2D, we could encode them with Euclidean coordinates as well, but using polar coordinates $r$ and $\phi$ instead further reduces the number of dimensions, as the radius $r$ is always 1.
+In combination, by only considering a single point on a surface and using polar coordinates for all vectors, we eliminate the need for absolute positions entirely. 
+The entire scene can now be represented by angles relative to the surface.
+
+To better represent the state-of-the-art, a microfacet BRDF is used in all benchmarks, unless defined otherwise. 
+The microfacet model has more complex specular reflections than the diffuse BRDF, and some other simple BRDFs, and as such better represents the advantages of Product Importance Sampling.
 
 # Implementation
 
