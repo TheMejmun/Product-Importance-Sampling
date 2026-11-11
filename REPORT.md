@@ -105,7 +105,7 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 
 The following benchmarks all use the microfacet model instead of a diffuse material to better represent the
 state-of-the-art use cases.
-The light sources from here on are all high-intensity light sources covering 2% of the hemicircle.
+The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified otherwise.
 In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle
 of $90^\circ$.
 
@@ -122,8 +122,9 @@ of $90^\circ$.
 |:----------------------------------------------------------------:|
 | _Figure 3: Positioning of a front light relative to $\omega_o$._ |
 
-In this benchmark, the same light source is placed in the direction $\omega_o$, behind the camera.
+In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera.
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
+This positioning represents the contribution of the surface albedo.
 
 | Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
@@ -138,6 +139,9 @@ The term front light is borrowed from photography, referring to a subject lit fr
 |:---------------------------------------------------------------------------------:|
 | _Figure 4: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
+Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal.
+This positioning is expected to accentuate the contribution of specular reflections.
+
 | Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
 | BRDF Sampling  |                  1.164458 |                 0.290111 |
@@ -146,6 +150,8 @@ The term front light is borrowed from photography, referring to a subject lit fr
 | PIS            |                  0.095535 |                 0.034527 |
 
 ### Microfacet + front, back, and zenith light
+
+The following table shows a benchmark containing all three aforementioned light sources.
 
 | Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
 |----------------|--------------------------:|-------------------------:|

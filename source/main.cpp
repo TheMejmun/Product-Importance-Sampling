@@ -71,7 +71,7 @@ constant(ET_BENCHMARK_SECONDS, 0.001);
 constant(ET_BENCHMARK_SECONDS, 0.01);
 #endif
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
-constant(MSE_COUNT, dpow(2, 14));
+constant(MSE_COUNT, dpow(2, 12));
 constant(THREAD_COUNT, std::max(1u, std::thread::hardware_concurrency()));
 constant(SETUP_BATCH_SIZE, 4 * THREAD_COUNT);
 
