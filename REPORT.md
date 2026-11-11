@@ -105,7 +105,8 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 
 The following benchmarks all use the microfacet model instead of a diffuse material to better represent the
 state-of-the-art use cases.
-The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified otherwise.
+The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified
+otherwise.
 In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle
 of $90^\circ$.
 
@@ -139,7 +140,8 @@ This positioning represents the contribution of the surface albedo.
 |:---------------------------------------------------------------------------------:|
 | _Figure 4: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
-Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal.
+Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface
+normal.
 This positioning is expected to accentuate the contribution of specular reflections.
 
 | Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
@@ -162,10 +164,14 @@ The following table shows a benchmark containing all three aforementioned light 
 
 # Conclusion
 
-We can see that the Product Importance Sampling algorithm produces roughly similar results to Multiple Importance Sampling when the complexity of the light field is low.
-The benchmarks which only contained single light sources did not show significant differences in performance between these two algorithms.
-Only when multiple light sources are combined with high specularity does the product calculation show significant benefits in performance.
-For scenes containing low complexity BRDFs are fewer larger light sources, the increased computation cost per sample may show worse results when compared to MIS or other algorithms.
+We can see that the Product Importance Sampling algorithm produces roughly similar results to Multiple Importance
+Sampling when the complexity of the light field is low.
+The benchmarks which only contained single light sources did not show significant differences in performance between
+these two algorithms.
+Only when multiple light sources are combined with high specularity does the product calculation show significant
+benefits in performance.
+For scenes containing low complexity BRDFs are fewer larger light sources, the increased computation cost per sample may
+show worse results when compared to MIS or other algorithms.
 
 As this project is very limited in scene complexity, these results do not represent real-world use cases.
 Thus, further testing in an actual 3D path tracing application is needed.
@@ -194,7 +200,7 @@ Thus, further testing in an actual 3D path tracing application is needed.
 
 | Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
-| BRDF Sampling  |                   |              |
-| Light Sampling |                  |               |
-| MIS            |              |             |
-| PIS            |               |               |
+| BRDF Sampling  |                  0.647758 |                 0.178515 |
+| Light Sampling |                  9.681134 |                 1.876051 |
+| MIS            |                  0.720927 |                 0.296384 |
+| PIS            |                  0.475834 |                 0.167014 |
