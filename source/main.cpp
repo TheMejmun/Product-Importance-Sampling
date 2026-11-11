@@ -26,9 +26,12 @@
 // #define ZENITH_POINT_LIGHT // strong light at peak of hemisphere, 2% of hemisphere area
 // #define FRONT_POINT_LIGHT // strong light from behind wo, 2% area
 // #define BACK_POINT_LIGHT // strong light from opposite wo (reflect wo around up normal), 2% area
-#define RANDOM_POINT_LIGHT_1 // strong light from random direction
-#define RANDOM_POINT_LIGHT_2 // strong light from random direction
-#define RANDOM_POINT_LIGHT_3 // strong light from random direction
+// #define RANDOM_POINT_LIGHT_1 // strong light from random direction
+// #define RANDOM_POINT_LIGHT_2 // strong light from random direction
+// #define RANDOM_POINT_LIGHT_3 // strong light from random direction
+#define RANDOM_RANDOM_LIGHT_1 // strong light from random direction
+#define RANDOM_RANDOM_LIGHT_2 // strong light from random direction
+#define RANDOM_RANDOM_LIGHT_3 // strong light from random direction
 
 #define MICROFACET_BRDF
 
@@ -68,7 +71,7 @@ constant(ET_BENCHMARK_SECONDS, 0.001);
 constant(ET_BENCHMARK_SECONDS, 0.01);
 #endif
 constant(MICROFACET_TEST_SAMPLE_COUNT, dpow(2, 20));
-constant(MSE_COUNT, dpow(2, 12));
+constant(MSE_COUNT, dpow(2, 14));
 constant(THREAD_COUNT, std::max(1u, std::thread::hardware_concurrency()));
 constant(SETUP_BATCH_SIZE, 4 * THREAD_COUNT);
 
@@ -196,6 +199,7 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wo) {
 #ifdef UNIFORM_LIGHT
     lightSources.emplace_back(0.0, M_PI, LIGHT_MAX_INTENSITY / 100.0); // 100% hemisphere coverage
 #endif
+
 #ifdef ZENITH_POINT_LIGHT
     lightSources.emplace_back(M_PI * 0.49, M_PI * 0.51, LIGHT_MAX_INTENSITY); // 2% hemisphere coverage
 #endif
@@ -209,6 +213,7 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wo) {
     lightSources.emplace_back(directionBack - M_PI * 0.01, directionBack + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
+
 #ifdef RANDOM_POINT_LIGHT_1
     double directionR1 = randDistr(randEng) * M_PI;
     lightSources.emplace_back(directionR1 - M_PI * 0.01, directionR1 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
@@ -223,6 +228,16 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wo) {
     double directionR3 = randDistr(randEng) * M_PI;
     lightSources.emplace_back(directionR3 - M_PI * 0.01, directionR3 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
+#endif
+
+#ifdef RANDOM_RANDOM_LIGHT_1
+    lightSources.emplace_back(randDistr(randEng) * M_PI,randDistr(randEng) * M_PI, LIGHT_MAX_INTENSITY * randDistr(randEng));
+#endif
+#ifdef RANDOM_RANDOM_LIGHT_2
+    lightSources.emplace_back(randDistr(randEng) * M_PI,randDistr(randEng) * M_PI, LIGHT_MAX_INTENSITY * randDistr(randEng));
+#endif
+#ifdef RANDOM_RANDOM_LIGHT_3
+    lightSources.emplace_back(randDistr(randEng) * M_PI,randDistr(randEng) * M_PI, LIGHT_MAX_INTENSITY * randDistr(randEng));
 #endif
 }
 
