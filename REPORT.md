@@ -20,7 +20,10 @@ This PDF represents the likelihood of a particular sample being chosen, and divi
 of each sample to the final result.
 The choice of the sampling direction $\omega_{i,n}$ TODO
 
-TODO: Explain ray intersection / path tracing algorithm / scene intersaction -> locally want to choose best ray direction recursively, why the choice of sampling direction is so important, the choice of sampling direction, light sampling, and brdf sampling are heuristics, path tracing as practical implementation of path tracing -> finding optimal ray direction
+TODO: Explain ray intersection / path tracing algorithm / scene intersaction -> locally want to choose best ray
+direction recursively, why the choice of sampling direction is so important, the choice of sampling direction, light
+sampling, and brdf sampling are heuristics, path tracing as practical implementation of path tracing -> finding optimal
+ray direction
 
 Multiple Importance Sampling approximates the rendering equation's integral (See figure below) by sampling the incoming
 light ($L_i$) and the BRDF ($f_r$) independently.
@@ -33,27 +36,31 @@ TODO: bidirectional BRDF -> path tracing traces reversed. Only render photons th
 
 # Methodology
 
-|        ![PIS toy example graphic](pis_toy_graphic.png)        |
-|:-------------------------------------------------------------:|
-| _Figure 1: Graphical representation of the toy example setup_ |
+|        ![PIS toy example graphic](pis_toy_graphic.png)         |
+|:--------------------------------------------------------------:|
+| _Figure 1: Graphical representation of the toy example setup._ |
 
 - TODO
     - Equal Time, Equal Samples tests
     - explain graphic
 
-The goal of this project is to create a minimal toy example for testing a variant of Product Importance Sampling. 
-The benchmark compares three competing algorithms to PIS: BRDF sampling, Direct Light Sampling, and a combination of the former two using Multiple Importance Sampling.
+The goal of this project is to create a minimal toy example for testing a variant of Product Importance Sampling.
+The benchmark compares three competing algorithms to PIS: BRDF sampling, Direct Light Sampling, and a combination of the
+former two using Multiple Importance Sampling.
 
 To keep the complexity of the project as low as possible, the scene was reduced to a minimum.
-The scene only contains the object being rendered and a number of light sources. 
-The object is a simple surface, and we only render a single point on it. 
+The scene only contains the object being rendered and a number of light sources.
+The object is a simple surface, and we only render a single point on it.
 In 3D, the vectors $\omega_i$ and $\omega_o$ would normally be encoded as Euclidean coordinates $x$, $y$, and $z$.
-In 2D, we could encode them with Euclidean coordinates as well, but using polar coordinates $r$ and $\phi$ instead further reduces the number of dimensions, as the radius $r$ is always 1.
-In combination, by only considering a single point on a surface and using polar coordinates for all vectors, we eliminate the need for absolute positions entirely. 
+In 2D, we could encode them with Euclidean coordinates as well, but using polar coordinates $r$ and $\phi$ instead
+further reduces the number of dimensions, as the radius $r$ is always 1.
+In combination, by only considering a single point on a surface and using polar coordinates for all vectors, we
+eliminate the need for absolute positions entirely.
 The entire scene can now be represented by angles relative to the surface.
 
-To better represent the state-of-the-art, a microfacet BRDF is used in all benchmarks, unless defined otherwise. 
-The microfacet model has more complex specular reflections than the diffuse BRDF, and some other simple BRDFs, and as such better represents the advantages of Product Importance Sampling.
+To better represent the state-of-the-art, a microfacet BRDF is used in all benchmarks, unless defined otherwise.
+The microfacet model has more complex specular reflections than the diffuse BRDF, and some other simple BRDFs, and as
+such better represents the advantages of Product Importance Sampling.
 
 # Implementation
 
@@ -92,9 +99,9 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 
 ### Microfacet + 2% zenith light
 
-| ![TODO](light_setup_zenith.png) |
-|:-------------------------------:|
-|        _Figure 2: TODO_         |
+|           ![TODO](light_setup_zenith.png)           |
+|:---------------------------------------------------:|
+| _Figure 2: Positioning of the zenith light source._ |
 
 The following benchmarks all use the microfacet model instead of a diffuse material to better represent the
 state-of-the-art use cases.
@@ -111,9 +118,9 @@ of $90^\circ$.
 
 ### Microfacet + 2% front light
 
-| ![TODO](light_setup_front.png) |
-|:------------------------------:|
-|        _Figure 3: TODO_        |
+|                  ![TODO](light_setup_front.png)                  |
+|:----------------------------------------------------------------:|
+| _Figure 3: Positioning of a front light relative to $\omega_o$._ |
 
 In this benchmark, the same light source is placed in the direction $\omega_o$, behind the camera.
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
@@ -127,9 +134,9 @@ The term front light is borrowed from photography, referring to a subject lit fr
 
 ### Microfacet + 2% back light
 
-| ![TODO](light_setup_back.png) |
-|:-----------------------------:|
-|       _Figure 4: TODO_        |
+|                           ![TODO](light_setup_back.png)                           |
+|:---------------------------------------------------------------------------------:|
+| _Figure 4: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
 | Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
