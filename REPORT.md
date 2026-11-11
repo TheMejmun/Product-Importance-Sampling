@@ -156,12 +156,26 @@ The term front light is borrowed from photography, referring to a subject lit fr
 
 # Conclusion
 
-- Good in limited experiment
-- Explain strengths and weaknesses of PIS
+We can see that the Product Importance Sampling algorithm produces roughly similar results to Multiple Importance Sampling when the complexity of the light field is low.
+The benchmarks which only contained single light sources did not show significant differences in performance between these two algorithms.
+Only when multiple light sources are combined with high specularity does the product calculation show significant benefits in performance.
+For scenes containing low complexity BRDFs are fewer larger light sources, the increased computation cost per sample may show worse results when compared to MIS or other algorithms.
+
+As this project is very limited in scene complexity, these results do not represent real-world use cases.
+Thus, further testing in an actual 3D path tracing application is needed.
 
 # Appendix
 
-### Microfacet + 3 random 2% lights
+### Microfacet + random 2% light source
+
+| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                  0.176544 |                 0.045782 |
+| Light Sampling |                  0.010507 |                 0.005491 |
+| MIS            |                  0.006193 |                 0.003142 |
+| PIS            |                  0.008881 |                 0.004651 |
+
+### Microfacet + 3 random 2% light sources
 
 | Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
@@ -169,3 +183,12 @@ The term front light is borrowed from photography, referring to a subject lit fr
 | Light Sampling |                  0.271002 |                 0.069114 |
 | MIS            |                  0.109378 |                 0.055997 |
 | PIS            |                  0.075543 |                 0.025742 |
+
+### Microfacet + 3 random light sources with random size and intensity
+
+| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
+|----------------|--------------------------:|-------------------------:|
+| BRDF Sampling  |                   |              |
+| Light Sampling |                  |               |
+| MIS            |              |             |
+| PIS            |               |               |
