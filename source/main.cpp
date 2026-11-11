@@ -215,29 +215,35 @@ void setupLights(std::vector<LightSource> &lightSources, const Polar wo) {
 #endif
 
 #ifdef RANDOM_POINT_LIGHT_1
-    double directionR1 = randDistr(randEng) * M_PI;
-    lightSources.emplace_back(directionR1 - M_PI * 0.01, directionR1 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
+    double directionRP1 = randDistr(randEng) * M_PI;
+    lightSources.emplace_back(directionRP1 - M_PI * 0.01, directionRP1 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
 #ifdef RANDOM_POINT_LIGHT_2
-    double directionR2 = randDistr(randEng) * M_PI;
-    lightSources.emplace_back(directionR2 - M_PI * 0.01, directionR2 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
+    double directionRP2 = randDistr(randEng) * M_PI;
+    lightSources.emplace_back(directionRP2 - M_PI * 0.01, directionRP2 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
 #ifdef RANDOM_POINT_LIGHT_3
-    double directionR3 = randDistr(randEng) * M_PI;
-    lightSources.emplace_back(directionR3 - M_PI * 0.01, directionR3 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
+    double directionRP3 = randDistr(randEng) * M_PI;
+    lightSources.emplace_back(directionRP3 - M_PI * 0.01, directionRP3 + M_PI * 0.01, LIGHT_MAX_INTENSITY);
     // 2% hemisphere coverage
 #endif
 
 #ifdef RANDOM_RANDOM_LIGHT_1
-    lightSources.emplace_back(randDistr(randEng) * M_PI,randDistr(randEng) * M_PI, LIGHT_MAX_INTENSITY * randDistr(randEng));
+    double directionRR1Start = randDistr(randEng) * M_PI;
+    double directionRR1End = directionRR1Start + randDistr(randEng) * (M_PI - directionRR1Start);
+    lightSources.emplace_back(directionRR1Start, directionRR1End, LIGHT_MAX_INTENSITY * randDistr(randEng));
 #endif
 #ifdef RANDOM_RANDOM_LIGHT_2
-    lightSources.emplace_back(randDistr(randEng) * M_PI,randDistr(randEng) * M_PI, LIGHT_MAX_INTENSITY * randDistr(randEng));
+    double directionRR2Start = randDistr(randEng) * M_PI;
+    double directionRR2End = directionRR2Start + randDistr(randEng) * (M_PI - directionRR2Start);
+    lightSources.emplace_back(directionRR2Start, directionRR2End, LIGHT_MAX_INTENSITY * randDistr(randEng));
 #endif
 #ifdef RANDOM_RANDOM_LIGHT_3
-    lightSources.emplace_back(randDistr(randEng) * M_PI,randDistr(randEng) * M_PI, LIGHT_MAX_INTENSITY * randDistr(randEng));
+    double directionRR3Start = randDistr(randEng) * M_PI;
+    double directionRR3End = directionRR3Start + randDistr(randEng) * (M_PI - directionRR3Start);
+    lightSources.emplace_back(directionRR3Start, directionRR3End, LIGHT_MAX_INTENSITY * randDistr(randEng));
 #endif
 }
 
@@ -340,13 +346,17 @@ int main() {
     // printf("\tPIS: %f\n", pis_mse);
 
     printf("Equal Samples (MSE of %d renders, new wo and %d samples each):\n", MSE_COUNT, ES_BENCHMARK_SAMPLES);
-    double brdf_es = _mse(THREAD_COUNT, brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
+    double brdf_es = _mse(THREAD_COUNT,
+                          brdf_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tBRDF Sampling: %f\n", brdf_es);
-    double mst_es = _mse(THREAD_COUNT, light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
+    double mst_es = _mse(THREAD_COUNT,
+                         light_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tLight Sampling: %f\n", mst_es);
-    double mis_es = _mse(THREAD_COUNT, mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
+    double mis_es = _mse(THREAD_COUNT,
+                         mis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tMIS: %f\n", mis_es);
-    double pis_es = _mse(THREAD_COUNT, pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
+    double pis_es = _mse(THREAD_COUNT,
+                         pis_sampler.equal_samples(ES_BENCHMARK_SAMPLES, irradianceTree, brdf, lightSources, wo));
     printf("\tPIS: %f\n", pis_es);
 
     printf("Equal Time (MSE of %d renders, new wo and %fs each)\n", MSE_COUNT, ET_BENCHMARK_SECONDS);
