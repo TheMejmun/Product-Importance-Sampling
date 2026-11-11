@@ -100,7 +100,7 @@ The following benchmarks all use the microfacet model instead of a diffuse mater
 state-of-the-art use cases.
 The light sources from here on are all high-intensity light sources covering 2% of the hemicircle.
 In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle
-of $90&deg;$.
+of $90^\circ$.
 
 | Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
 |----------------|--------------------------:|-------------------------:|
