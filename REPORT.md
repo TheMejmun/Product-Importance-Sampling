@@ -1,21 +1,27 @@
 # Motivation behind Product Importance Sampling
 
-The primary goal of path tracing is to quickly and accurately approximate the rendering equation.
-In particular, we are interested in the integral over the hemisphere $\Omega$, as $L_e$ is usually known.
+The goal of rendering draw images as realistically as possible. 
+To accomplish this, we want to simulate how real light would behave in a scene. 
+By simulating real light exactly as it would behave, we could draw images that would be indistinguishable from real photographs.
+Mathematically speaking, we would need to solve the following equation for every point in the scene.
 
 $$
 L_o (x \rightarrow \omega_o) = L_e (x \rightarrow \omega_o) + \int_{\Omega} f_r (x, \omega_i \rightarrow \omega_o) \, L_i (x \leftarrow \omega_i) \, \cos\theta \, d\omega_i
 $$
 
-For this approximation, Monte Carlo Integration is commonly used. This method allows us to estimate the integral by
-calculating a weighted average of many random samples.
+Here, $L_o$ is the light leaving the point, $L_e$ is the light emitted from the point, $f_r$ is the bidirectional reflectance distribution function (BRDF), and $L_i$ is the light arriving at the point.
+In particular, we are interested in the integral over the hemisphere $\Omega$, as $L_e$ is usually known.
+Solving this integral for any given point can be very computationally expensive, so we need to find a way to approximate it efficiently.
+
+For this approximation, Monte Carlo Integration is commonly used. 
+This method allows us to estimate the integral by calculating a weighted average of many random samples. 
+The higher the number of samples, the more accurate the estimate will be.
 
 $$
 L_o (x \rightarrow \omega_o) \approx L_e (x \rightarrow \omega_o) + \frac{1}{N} \sum_{n=1}^{N} \frac{f_r (x, \omega_{i,n} \rightarrow \omega_o) \, L_i (x \leftarrow \omega_{i,n}) \, \cos\theta_n}{p (\omega_{i,n})}
 $$
 
-By dividing the integrand by the probability density function $p (\omega_{i,n})$, we ensure that we do not introduce
-bias into our estimate.
+By dividing the integrand by the probability density function $p(\omega_{i,n})$, we ensure that we do not introduce bias into our estimate.
 This PDF represents the likelihood of a particular sample being chosen, and dividing by it normalizes the contribution
 of each sample to the final result.
 The choice of the sampling direction $\omega_{i,n}$ TODO
@@ -25,8 +31,7 @@ direction recursively, why the choice of sampling direction is so important, the
 sampling, and brdf sampling are heuristics, path tracing as practical implementation of path tracing -> finding optimal
 ray direction
 
-Multiple Importance Sampling approximates the rendering equation's integral (See figure below) by sampling the incoming
-light ($L_i$) and the BRDF ($f_r$) independently.
+Multiple Importance Sampling approximates the rendering equation's integral (See figure below) by sampling the incoming light $L_i$ and the BRDF $f_r$ independently.
 It then takes a weighted sum of both these values for the final output.
 
 Product Importance Sampling instead attempts to sample the product of these two components directly.
@@ -80,24 +85,24 @@ These _renders_ are performed 1024 times, with a new $\omega_o$ viewing directio
 For each of those 1024 renders, we calculate the error with a high-sample-count reference value.
 From that, we calculate the Mean Squared Error.
 
-### Diffuse + single uniform light
+### Diffuse BRDF + single uniform light
 
 The first benchmark is a sanity check for the implementation.
 We render with a diffuse material and a single uniform light source.
 
-| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
-| BRDF Sampling  |                  0.000230 |                 0.000010 |
-| Light Sampling |                  0.000221 |                 0.000030 |
-| MIS            |                  0.000110 |                 0.000018 |
-| PIS            |                  0.000226 |                 0.000036 |
+| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
+| BRDF Sampling  |                                        0.000230 |                               0.000010 |
+| Light Sampling |                                        0.000221 |                               0.000030 |
+| MIS            |                                        0.000110 |                               0.000018 |
+| PIS            |                                        0.000226 |                               0.000036 |
 
 As expected, all except MIS deliver similar results in the Equal Samples benchmark.
 The score of MIS is half that, because it combines two samples, one for BRDF and one for light sampling, per resulting
 MIS sample.
 The equal time benchmark is indirectly proportional to the calculation speed of each algorithm.
 
-### Microfacet + 2% zenith light
+### Microfacet BRDF + 2% zenith light
 
 |           ![TODO](light_setup_zenith.png)           |
 |:---------------------------------------------------:|
@@ -110,14 +115,14 @@ otherwise.
 In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle
 of $90^\circ$.
 
-| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.208543 |                 0.055958 |
 | Light Sampling |                  0.004186 |                 0.001341 |
 | MIS            |                  0.005747 |                 0.002155 |
 | PIS            |                  0.005727 |                 0.002426 |
 
-### Microfacet + 2% front light
+### Microfacet BRDF + 2% front light
 
 |                  ![TODO](light_setup_front.png)                  |
 |:----------------------------------------------------------------:|
@@ -127,14 +132,14 @@ In this benchmark, the same light source is placed in the direction $\omega_o$, 
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
 This positioning represents the contribution of the surface albedo.
 
-| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.110784 |                 0.024245 |
 | Light Sampling |                  0.010034 |                 0.004485 |
 | MIS            |                  0.003876 |                 0.001846 |
 | PIS            |                  0.004911 |                 0.001772 |
 
-### Microfacet + 2% back light
+### Microfacet BRDF + 2% back light
 
 |                           ![TODO](light_setup_back.png)                           |
 |:---------------------------------------------------------------------------------:|
@@ -144,19 +149,19 @@ Here, the same 2% hemicircle light source is placed in the direction of the refl
 normal.
 This positioning is expected to accentuate the contribution of specular reflections.
 
-| Method         | Equal Samples 1024 x 1024 | Equal Time 1024 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  1.164458 |                 0.290111 |
 | Light Sampling |                  0.175121 |                 0.031702 |
 | MIS            |                  0.060111 |                 0.029806 |
 | PIS            |                  0.095535 |                 0.034527 |
 
-### Microfacet + front, back, and zenith light
+### Microfacet BRDF + front, back, and zenith light
 
 The following table shows a benchmark containing all three aforementioned light sources.
 
-| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  1.431970 |                 0.375976 |
 | Light Sampling |                  1.393794 |                 0.351780 |
 | MIS            |                  0.424944 |                 0.221453 |
@@ -178,29 +183,40 @@ Thus, further testing in an actual 3D path tracing application is needed.
 
 # Appendix
 
-### Microfacet + random 2% light source
+### Microfacet BRDF + random 2% light source
 
-| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
+| BRDF Sampling  |                  0.176544 |                 0.045782 |
 | BRDF Sampling  |                  0.176544 |                 0.045782 |
 | Light Sampling |                  0.010507 |                 0.005491 |
 | MIS            |                  0.006193 |                 0.003142 |
 | PIS            |                  0.008881 |                 0.004651 |
+**MSE of**
 
-### Microfacet + 3 random 2% light sources
+### Microfacet BRDF + 3 random 2% light sources
 
-| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.527210 |                 0.121707 |
 | Light Sampling |                  0.271002 |                 0.069114 |
 | MIS            |                  0.109378 |                 0.055997 |
 | PIS            |                  0.075543 |                 0.025742 |
 
-### Microfacet + 3 random light sources with random size and intensity
+### Microfacet BRDF + 3 random light sources with random size and intensity
 
-| Method         | Equal Samples 4096 x 1024 | Equal Time 4096 x 0.001s |
-|----------------|--------------------------:|-------------------------:|
+| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.647758 |                 0.178515 |
 | Light Sampling |                  9.681134 |                 1.876051 |
 | MIS            |                  0.720927 |                 0.296384 |
 | PIS            |                  0.475834 |                 0.167014 |
+
+### Diffuse BRDF + 3 random light sources with random size and intensity
+
+| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+|----------------|:------------------------------------------------|:---------------------------------------|
+| BRDF Sampling  |                  2.714644 |                 0.150944 |
+| Light Sampling |                  1.005209 |                 0.142597 |
+| MIS            |                  0.727812 |                 0.187183 |
+| PIS            |                  1.545598 |                 0.232981 |
