@@ -1,16 +1,17 @@
 # Motivation behind Product Importance Sampling
 
-The goal of rendering draw images as realistically as possible. 
+In rendering, the goal is to draw images as realistically as possible. 
 To accomplish this, we want to simulate how real light would behave in a scene. 
-By simulating real light exactly as it would behave, we could draw images that would be indistinguishable from real photographs.
+By simulating physical light exactly as it would behave in the real world, we could draw images that would be indistinguishable from real photographs.
 Mathematically speaking, we would need to solve the following equation for every point in the scene.
 
 $$
 L_o (x \rightarrow \omega_o) = L_e (x \rightarrow \omega_o) + \int_{\Omega} f_r (x, \omega_i \rightarrow \omega_o) \, L_i (x \leftarrow \omega_i) \, \cos\theta \, d\omega_i
 $$
 
-Here, $L_o$ is the light leaving the point, $L_e$ is the light emitted from the point, $f_r$ is the bidirectional reflectance distribution function (BRDF), and $L_i$ is the light arriving at the point.
-In particular, we are interested in the integral over the hemisphere $\Omega$, as $L_e$ is usually known.
+Here, $L_o$ is the light leaving any given point in a specific direction, $L_e$ is the light emitted from that point, $f_r$ is the bidirectional reflectance distribution function (BRDF) of the material of the point, and $L_i$ is the light arriving at the point.
+In combination, this formula represents how light moves and interacts with surfaces in a scene.
+In particular, we are interested in the integral over the hemisphere $\Omega$, as the other component $L_e$ is usually known.
 Solving this integral for any given point can be very computationally expensive, so we need to find a way to approximate it efficiently.
 
 For this approximation, Monte Carlo Integration is commonly used. 
@@ -21,23 +22,32 @@ $$
 L_o (x \rightarrow \omega_o) \approx L_e (x \rightarrow \omega_o) + \frac{1}{N} \sum_{n=1}^{N} \frac{f_r (x, \omega_{i,n} \rightarrow \omega_o) \, L_i (x \leftarrow \omega_{i,n}) \, \cos\theta_n}{p (\omega_{i,n})}
 $$
 
-By dividing the integrand by the probability density function $p(\omega_{i,n})$, we ensure that we do not introduce bias into our estimate.
-This PDF represents the likelihood of a particular sample being chosen, and dividing by it normalizes the contribution
-of each sample to the final result.
-The choice of the sampling direction $\omega_{i,n}$ TODO
+The new term $p(\omega_{i,n})$ represents the likelihood of a particular sample being chosen.
+We can modify our distribution of sampling directions to spend more computing resources on areas that contribute more light to the final pixel value.
+By dividing the resulting sample value by the PDF $p(\omega_{i,n})$, we can eliminate any bias introduced by our chosen distribution of sampling directions.
+How we distribute our samples thus has a big impact on how fast the algorithm converges, which reduces noise in the resulting image.
 
-TODO: Explain ray intersection / path tracing algorithm / scene intersaction -> locally want to choose best ray
-direction recursively, why the choice of sampling direction is so important, the choice of sampling direction, light
-sampling, and brdf sampling are heuristics, path tracing as practical implementation of path tracing -> finding optimal
-ray direction
+As part of the incoming may be light that was reflected from other points, this process needs to be repeated recursively.
+The viewer, or camera, looks at a surface.
+For each pixel, a ray is cast from the camera and intersected with the scene to find the visible point $x$.
+The brightness of that surface is determined by the light reaching it directly from light sources or by light that other surfaces reflect towards the initial surface.
+To estimate the integral, a sampling direction $\omega_o$ is chosen, a new ray is cast in that direction, and the light $L_i$ arriving from it is estimated recursively in the same way at the next intersection.
+This recursive accumulation of reflected light is called path tracing.
 
-Multiple Importance Sampling approximates the rendering equation's integral (See figure below) by sampling the incoming light $L_i$ and the BRDF $f_r$ independently.
+Every bounce of a path requires choosing a direction, and a poorly chosen direction wastes not just a single ray, but all the calculations of subsequent bounces.
+BRDF sampling chooses directions according to $f_r$. 
+Direct light sampling chooses directions according to an estimate of $L_i$.
+Neither of these approaches is optimal, as BRDF sampling does not consider the light field (i.e. the light sources in the scene), and direct light sampling does not consider the BRDF.
+Multiple Importance Sampling approximates the rendering equation's integral by sampling the incoming light $L_i$ and the BRDF $f_r$ independently.
 It then takes a weighted sum of both these values for the final output.
+This may not be optimal, MIS biases towards placing samples where just one of the factors is large.
+The product $f_r (x, \omega_i \rightarrow \omega_o) \, L_i (x \leftarrow \omega_i)$ can therefore degenerate if the distributions do not overlap well, i.e. if either $f_r (x, \omega_i \rightarrow \omega_o)$ or $L_i (x \leftarrow \omega_i)$ is very small.
 
-Product Importance Sampling instead attempts to sample the product of these two components directly.
-TODO: Product should be optimal
+Product Importance Sampling instead attempts to sample the product of these two components directly, distributing samples where the product $f_r (x, \omega_i \rightarrow \omega_o) \, L_i (x \leftarrow \omega_i)$ is large.
+As this product is exactly the integrand, sampling it is mathematically optimal.
+In practice, $L_i$ is not known exactly, so PIS has to work with an approximation of it, and computing the product makes each sample more expensive.
 
-TODO: bidirectional BRDF -> path tracing traces reversed. Only render photons the camera actually sees. (Importon)
+The goal of this project is to determine whether the faster convergence of PIS outweighs the increased cost of computing the product at every ray intersection.
 
 # Methodology
 
