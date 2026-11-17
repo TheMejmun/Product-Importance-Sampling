@@ -55,27 +55,21 @@ The goal of this project is to determine whether the faster convergence of PIS o
 |:--------------------------------------------------------------:|
 | _Figure 1: Graphical representation of the toy example setup._ |
 
-- TODO
-    - Equal Time, Equal Samples tests
-    - explain graphic
-
-The goal of this project is to create a minimal toy example for testing a variant of Product Importance Sampling.
+In this project, we benchmark a variant of Product Importance Sampling against other algorithms in a minimal toy example.
 The benchmark compares three competing algorithms to PIS: BRDF sampling, Direct Light Sampling, and a combination of the
 former two using Multiple Importance Sampling.
 
 To keep the complexity of the project as low as possible, the scene was reduced to a minimum.
 The scene only contains the object being rendered and a number of light sources.
-The object is a simple surface, and we only render a single point on it.
+The object is a simple surface, and we only render a single point $x$ on it.
 In 3D, the vectors $\omega_i$ and $\omega_o$ would normally be encoded as Euclidean coordinates $x$, $y$, and $z$.
-In 2D, we could encode them with Euclidean coordinates as well, but using polar coordinates $r$ and $\phi$ instead
-further reduces the number of dimensions, as the radius $r$ is always 1.
-In combination, by only considering a single point on a surface and using polar coordinates for all vectors, we
-eliminate the need for absolute positions entirely.
-The entire scene can now be represented by angles relative to the surface.
+In 2D, we could encode them with Euclidean coordinates as well, but using polar coordinates $r$ and $\phi$ instead further reduces the number of dimensions, as the radius $r$ is always 1. (See figure 1)
+In combination, by only considering a single point on a surface and using polar coordinates for all vectors, we eliminate the need for absolute positions entirely.
+The entire scene can now be represented by angles relative to the surface. 
+The size and placement of light sources is represented by start and end angles relative to the surface. ( $L1$ and $L2$ in figure 1)
 
 To better represent the state-of-the-art, a microfacet BRDF is used in all benchmarks, unless defined otherwise.
-The microfacet model has more complex specular reflections than the diffuse BRDF, and some other simple BRDFs, and as
-such better represents the advantages of Product Importance Sampling.
+The microfacet model has more complex specular reflections than the diffuse BRDF, and some other simple BRDFs, and as such better represents the advantages of Product Importance Sampling.
 
 # Implementation
 
@@ -94,6 +88,8 @@ In the _Equal Time_ section, we limit the integral calculation not by sample cou
 These _renders_ are performed 1024 times, with a new $\omega_o$ viewing direction each.
 For each of those 1024 renders, we calculate the error with a high-sample-count reference value.
 From that, we calculate the Mean Squared Error.
+
+TODO: Equal Samples, Equal Time
 
 ### Diffuse BRDF + single uniform light
 
