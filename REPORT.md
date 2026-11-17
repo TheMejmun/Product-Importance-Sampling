@@ -76,6 +76,7 @@ The microfacet model has more complex specular reflections than the diffuse BRDF
 - Problems encountered
     - Integral calculation
     - Mapping of uniform samples (to limit sampling area)
+    - Microfacet dimension reduction
 - w_i and w_o swapped
 
 # Benchmarks
@@ -85,18 +86,16 @@ In the _Equal Samples_ section, we compute the integral of the rendering equatio
 In other words: We render a single pixel with a sample count of 1024.
 In the _Equal Time_ section, we limit the integral calculation not by sample count, but by a time of 0.001 seconds.
 
-These _renders_ are performed 1024 times, with a new $\omega_o$ viewing direction each.
-For each of those 1024 renders, we calculate the error with a high-sample-count reference value.
+These _renders_ are performed many times (usually 1024 or 4096), with a new $\omega_o$ viewing direction each.
+For each of those renders, we calculate the squared error with a high-sample-count reference value.
 From that, we calculate the Mean Squared Error.
-
-TODO: Equal Samples, Equal Time
 
 ### Diffuse BRDF + single uniform light
 
 The first benchmark is a sanity check for the implementation.
 We render with a diffuse material and a single uniform light source.
 
-| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                                        0.000230 |                               0.000010 |
 | Light Sampling |                                        0.000221 |                               0.000030 |
@@ -104,8 +103,7 @@ We render with a diffuse material and a single uniform light source.
 | PIS            |                                        0.000226 |                               0.000036 |
 
 As expected, all except MIS deliver similar results in the Equal Samples benchmark.
-The score of MIS is half that, because it combines two samples, one for BRDF and one for light sampling, per resulting
-MIS sample.
+The score of MIS is half that, because it combines two samples, one for BRDF and one for light sampling, per resulting MIS sample.
 The equal time benchmark is indirectly proportional to the calculation speed of each algorithm.
 
 ### Microfacet BRDF + 2% zenith light
@@ -114,14 +112,11 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 |:---------------------------------------------------:|
 | _Figure 2: Positioning of the zenith light source._ |
 
-The following benchmarks all use the microfacet model instead of a diffuse material to better represent the
-state-of-the-art use cases.
-The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified
-otherwise.
-In this benchmark specifically, the light source is placed in the direction of the surface normal, i.e. at an angle
-of $90^\circ$.
+The following benchmarks all use the microfacet model instead of a diffuse material to better represent the state-of-the-art use cases.
+The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified otherwise.
+In this benchmark specifically, a single light source is placed in the direction of the surface normal, i.e. at an angle of $90^\circ$. (See figure 2)
 
-| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.208543 |                 0.055958 |
 | Light Sampling |                  0.004186 |                 0.001341 |
@@ -134,11 +129,11 @@ of $90^\circ$.
 |:----------------------------------------------------------------:|
 | _Figure 3: Positioning of a front light relative to $\omega_o$._ |
 
-In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera.
+In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera. (See figure 3)
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
 This positioning represents the contribution of the surface albedo.
 
-| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.110784 |                 0.024245 |
 | Light Sampling |                  0.010034 |                 0.004485 |
@@ -151,11 +146,10 @@ This positioning represents the contribution of the surface albedo.
 |:---------------------------------------------------------------------------------:|
 | _Figure 4: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
-Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface
-normal.
+Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal. (See figure 4)
 This positioning is expected to accentuate the contribution of specular reflections.
 
-| <br> Method    | MSE Equal Samples <br> 1024 runs x 1024 samples | MSE Equal Time <br> 1024 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  1.164458 |                 0.290111 |
 | Light Sampling |                  0.175121 |                 0.031702 |
@@ -166,7 +160,7 @@ This positioning is expected to accentuate the contribution of specular reflecti
 
 The following table shows a benchmark containing all three aforementioned light sources.
 
-| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 4096 runs x 1024 samples | MSE of Equal Time <br> 4096 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  1.431970 |                 0.375976 |
 | Light Sampling |                  1.393794 |                 0.351780 |
@@ -175,14 +169,9 @@ The following table shows a benchmark containing all three aforementioned light 
 
 # Conclusion
 
-We can see that the Product Importance Sampling algorithm produces roughly similar results to Multiple Importance
-Sampling when the complexity of the light field is low.
-The benchmarks which only contained single light sources did not show significant differences in performance between
-these two algorithms.
-Only when multiple light sources are combined with high specularity does the product calculation show significant
-benefits in performance.
-For scenes containing low complexity BRDFs are fewer larger light sources, the increased computation cost per sample may
-show worse results when compared to MIS or other algorithms.
+We can see that the Product Importance Sampling algorithm produces roughly similar results to Multiple Importance Sampling when the complexity of the light field is low, e.g. when only a single light source is present.
+Only when multiple light sources are combined with high specularity does the product calculation show significant benefits in performance.
+For scenes containing low complexity BRDFs, e.g. a simple diffuse model, or fewer larger light sources, the increased computational cost per sample may show slower convergence when compared to MIS or other algorithms. (See appendix for more benchmark results)
 
 As this project is very limited in scene complexity, these results do not represent real-world use cases.
 Thus, further testing in an actual 3D path tracing application is needed.
@@ -191,7 +180,7 @@ Thus, further testing in an actual 3D path tracing application is needed.
 
 ### Microfacet BRDF + random 2% light source
 
-| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 4096 runs x 1024 samples | MSE of Equal Time <br> 4096 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.176544 |                 0.045782 |
 | BRDF Sampling  |                  0.176544 |                 0.045782 |
@@ -202,7 +191,7 @@ Thus, further testing in an actual 3D path tracing application is needed.
 
 ### Microfacet BRDF + 3 random 2% light sources
 
-| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 4096 runs x 1024 samples | MSE of Equal Time <br> 4096 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.527210 |                 0.121707 |
 | Light Sampling |                  0.271002 |                 0.069114 |
@@ -211,7 +200,7 @@ Thus, further testing in an actual 3D path tracing application is needed.
 
 ### Microfacet BRDF + 3 random light sources with random size and intensity
 
-| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 4096 runs x 1024 samples | MSE of Equal Time <br> 4096 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  0.647758 |                 0.178515 |
 | Light Sampling |                  9.681134 |                 1.876051 |
@@ -220,7 +209,7 @@ Thus, further testing in an actual 3D path tracing application is needed.
 
 ### Diffuse BRDF + 3 random light sources with random size and intensity
 
-| <br> Method    | MSE Equal Samples <br> 4096 runs x 1024 samples | MSE Equal Time <br> 4096 runs x 0.001s |
+| <br> Method    | MSE of Equal Samples <br> 4096 runs x 1024 samples | MSE of Equal Time <br> 4096 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
 | BRDF Sampling  |                  2.714644 |                 0.150944 |
 | Light Sampling |                  1.005209 |                 0.142597 |
