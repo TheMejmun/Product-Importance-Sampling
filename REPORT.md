@@ -76,8 +76,16 @@ The microfacet model has more complex specular reflections than the diffuse BRDF
 - Problems encountered
     - Integral calculation
     - Mapping of uniform samples (to limit sampling area)
-    - Microfacet dimension reduction
+    - Microfacet dimension reduction -> eval function?
 - w_i and w_o swapped
+
+Benchmark configuration can be changed using pre-processer definitions in _source/main.cpp_
+
+Several BRDFs, Sampling algorithms, and benchmark strategies were implemented such that they can be swapped. Abstract classes
+
+MSTree for light data structure. Calculated at runtime.
+
+
 
 # Benchmarks
 
