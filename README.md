@@ -1,3 +1,3 @@
-# dnTemplate
+# Product Importance Sampling Toy Example
 
-## Dependencies:
+See [REPORT.md](REPORT.md)
