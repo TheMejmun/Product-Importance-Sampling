@@ -87,6 +87,14 @@ MSTree for light data structure. Calculated at runtime.
 
 ## Product Importance Sampling
 
+|           ![TODO](images/pis_product.png)           |
+|:---------------------------------------------------:|
+| _Figure 2: Calculation of the product._ |
+
+|           ![TODO](images/pis_mapping.png)           |
+|:---------------------------------------------------:|
+| _Figure 3: Limiting the sampling area._ |
+
 
 ## Light Sampling Data Structure
 
@@ -122,11 +130,11 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 
 |           ![TODO](images/light_setup_zenith.png)           |
 |:---------------------------------------------------:|
-| _Figure 2: Positioning of the zenith light source._ |
+| _Figure 4: Positioning of the zenith light source._ |
 
 The following benchmarks all use the microfacet model instead of a diffuse material to better represent the state-of-the-art use cases.
 The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified otherwise.
-In this benchmark specifically, a single light source is placed in the direction of the surface normal, i.e. at an angle of $90^\circ$. (See figure 2)
+In this benchmark specifically, a single light source is placed in the direction of the surface normal, i.e. at an angle of $90^\circ$. (See figure 4)
 
 | <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
@@ -139,9 +147,9 @@ In this benchmark specifically, a single light source is placed in the direction
 
 |                  ![TODO](images/light_setup_front.png)                  |
 |:----------------------------------------------------------------:|
-| _Figure 3: Positioning of a front light relative to $\omega_o$._ |
+| _Figure 5: Positioning of a front light relative to $\omega_o$._ |
 
-In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera. (See figure 3)
+In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera. (See figure 5)
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
 This positioning represents the contribution of the surface albedo.
 
@@ -156,9 +164,9 @@ This positioning represents the contribution of the surface albedo.
 
 |                           ![TODO](images/light_setup_back.png)                           |
 |:---------------------------------------------------------------------------------:|
-| _Figure 4: Positioning of a back light relative to the reflection of $\omega_o$._ |
+| _Figure 6: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
-Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal. (See figure 4)
+Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal. (See figure 6)
 This positioning is expected to accentuate the contribution of specular reflections.
 
 | <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
