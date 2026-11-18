@@ -131,7 +131,14 @@ The resulting mapping of uniform samples to quadtree nodes can also be used to c
 
 ## 2D Microfacet Model
 
-- Microfacet dimension reduction -> eval function was necessary for performance of PIS, but not of MIS.
+The microfacet BRDF is based on the 3D GGX model with visible normal sampling, as implemented in Mitsuba 3, and was reduced to 2D for the toy example.
+In 2D, the microfacet normal $m$ is described by a single angle, and the half-vector between $\omega_i$ and $\omega_o$ is simply the average of their angles.
+The normal distribution $D$ and the Smith masking term $G_1$ also have different closed forms in 2D.
+Unlike in the common 3D form $\frac{D \, G}{4 \cos\theta_o \cos\theta_i}$, the term $\langle \omega_o, m \rangle$ does not cancel out, as the Jacobian of the half-vector mapping is a constant $\frac{1}{2}$ in 2D.
+
+While most of the project's 3D to 2D conversions reduced complexity, reducing the microfacet model to 2D was very challenging, potentially resulting in higher project complexity over 3D.
+
+Any 3D implementation would not need to consider this. 
 
 ## C++ implementation details
 
