@@ -90,6 +90,9 @@ The Quadtree is thus also reduced to a binary tree.
 
 The accumulation of irradiance used in this data structure is done as a pre-processing step.
 The tree subdivides the hemicircle wherever a region holds more than 10% of the total light, so bright regions are represented in more detail.
+This data structure is a simplified version of the SD-tree by Müller et al.[^mueller2017]
+
+[^mueller2017]: T. Müller, M. Gross, and J. Novák, "Practical Path Guiding for Efficient Light-Transport Simulation", Computer Graphics Forum 36(4), Eurographics Symposium on Rendering 2017. DOI: 10.1111/cgf.13227
 
 ## Product Importance Sampling
 
