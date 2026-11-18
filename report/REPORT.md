@@ -73,14 +73,23 @@ The microfacet model has more complex specular reflections than the diffuse BRDF
 
 # Implementation
 
-- Microfacet dimension reduction -> eval function?
-- w_i and w_o swapped
+## Light Sampling Data Structure
 
-Benchmark configuration can be changed using pre-processer definitions in _source/main.cpp_
+Practical 3D applications usually store an approximation of the radiance in a scene in a 2-layer data structure. 
+This data structurue is used in light sampling to locally find the direction of the highest intensity incoming light. 
+The first layer of this data structure is often a Bounding Volume Hierarchy (BVH) or Octree, which is are tree structures that subdivide the scene into smaller regions. 
+This is used for placing each data point of the second layer in the 3D scene.
+These data points are local accumulations of irradiance.
+In other words, the store how much light reaches the given point from any given direction. 
+This second layer often stores its directions in 2D using spherical coordinates ina Quadtree.
 
-Several BRDFs, Sampling algorithms, and benchmark strategies were implemented such that they can be swapped. Abstract classes
+In our toy example, the first layer is completely eliminated, as we are only considering a single point in the scene, and the first layer only defines positions.
+The second layer is reduced from 2D to 1D, as our scene is reduced from 3D to 2D. 
+So instead of spherical coordinates, we use polar coordinates.
+The Quadtree is thus also reduced to a binary tree.
 
-Light Sampling Data Structure, MSTree for light data structure. Calculated at runtime.
+The accumulation of irradiance used in this data structure is done as a pre-processing step.
+The tree subdivides the hemicircle wherever a region holds more than 10% of the total light, so bright regions are represented in more detail.
 
 ## Product Importance Sampling
 
@@ -95,6 +104,20 @@ Light Sampling Data Structure, MSTree for light data structure. Calculated at ru
 
 - Integral calculation
 - Mapping of uniform samples (to limit sampling area)
+
+## 2D Microfacet Model
+
+- Microfacet dimension reduction -> eval function was necessary for performance of PIS, but not of MIS.
+
+## C++ implementation details
+
+The project's entrypoint `source/main.cpp` contains a number of pre-processer definitions that are used as settings for the Benchmarks.
+The BRDF can be switched, and various pre-defined light sources can be turned on or off.
+There are also various constants that define the number of samples used at various stages of the benchmark.
+
+The BRDFs and sampling algorithms are implemented as abstract classes, so that they can be swapped between benchmarks.
+Each BRDF can be evaluated, sampled, and queried for the PDF of a direction; a diffuse and a microfacet BRDF are available.
+Each sampling algorithm only implements how a single sample is taken, while the shared base class implements the _Equal Samples_ and _Equal Time_ benchmark strategies on top of it.
 
 # Benchmarks
 
