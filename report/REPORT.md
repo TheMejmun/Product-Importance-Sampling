@@ -73,6 +73,10 @@ The microfacet model has more complex specular reflections than the diffuse BRDF
 
 # Implementation
 
+This chapter describes how the toy example was implemented, and is divided into four parts.
+First, we describe the data structure used for light sampling, followed by the implementation of Product Importance Sampling itself.
+We then describe how the microfacet model was reduced to 2D, and finally, how the C++ project is structured.
+
 ## Light Sampling Data Structure
 
 Practical 3D applications usually store an approximation of the radiance in a scene in a 2-layer data structure. 
