@@ -1,3 +1,3 @@
 # Product Importance Sampling Toy Example
 
-See [REPORT.md](REPORT.md)
+See [REPORT.md](report/REPORT.md)

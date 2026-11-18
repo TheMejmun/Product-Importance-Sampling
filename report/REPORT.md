@@ -51,7 +51,7 @@ The goal of this project is to determine whether the faster convergence of PIS o
 
 # Methodology
 
-|        ![PIS toy example graphic](pis_toy_graphic.png)         |
+|        ![PIS toy example graphic](images/pis_toy_graphic.png)         |
 |:--------------------------------------------------------------:|
 | _Figure 1: Graphical representation of the toy example setup._ |
 
@@ -120,7 +120,7 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 
 ### Microfacet BRDF + 2% zenith light
 
-|           ![TODO](light_setup_zenith.png)           |
+|           ![TODO](images/light_setup_zenith.png)           |
 |:---------------------------------------------------:|
 | _Figure 2: Positioning of the zenith light source._ |
 
@@ -137,7 +137,7 @@ In this benchmark specifically, a single light source is placed in the direction
 
 ### Microfacet BRDF + 2% front light
 
-|                  ![TODO](light_setup_front.png)                  |
+|                  ![TODO](images/light_setup_front.png)                  |
 |:----------------------------------------------------------------:|
 | _Figure 3: Positioning of a front light relative to $\omega_o$._ |
 
@@ -154,7 +154,7 @@ This positioning represents the contribution of the surface albedo.
 
 ### Microfacet BRDF + 2% back light
 
-|                           ![TODO](light_setup_back.png)                           |
+|                           ![TODO](images/light_setup_back.png)                           |
 |:---------------------------------------------------------------------------------:|
 | _Figure 4: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
