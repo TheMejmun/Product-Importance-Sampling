@@ -100,17 +100,34 @@ This data structure is a simplified version of the SD-tree by Müller et al.[^mu
 
 ## Product Importance Sampling
 
+This implementation of Product Importance Sampling is based on the irradiance data structure described in the section above.
+
 |           ![TODO](images/pis_product.png)           |
 |:---------------------------------------------------:|
 | _Figure 2: Calculation of the product._ |
 
-|           ![TODO](images/pis_mapping.png)           |
-|:---------------------------------------------------:|
-| _Figure 3: Limiting the sampling area._ |
+We want to combine the distributions of the irradiance data with the BRDF's sample distribution _before_ drawing a sample.
+This is in contrast to MIS, which combines the samples' resulting color after fully computing both of them.
 
+In light sampling, an area of the Quadtree is chosen based on how much light it receives. 
+Then a uniform sample is drawn from that area.
+We instead want to combine this distribution with the BRDF before deciding on the area to sample from.
+To do that, we first need to integrate the BRDF for each area that each quadtree node covers.
+By then multiplying these distributions, we get an approximation of the product distribution.
 
-- Integral calculation
-- Mapping of uniform samples (to limit sampling area)
+The main problem is that our resolution is now limited by the original resolution of the quadtree. (See figure 2)
+To remidy this problem and restore high-frequency details, we do not draw uniform samples from the chosen quadtree section.
+Instead, we draw from the BRDF distribution within the area defined by the quadtree. 
+
+In 3D, sampling the BRDF only within a limited area can become very difficult.
+Usually, the BRDF calculates its samples from a 2D uniform distribution.
+We need to reverse these calculations, as we know the region our sampling direction should be limited to, but not which uniform samples to provide that would result in such a direction.
+To limit the outgoing direction to a certain area defined by the irradiance quadtree, we pre-calculate the mapping of quadtree nodes to uniform samples for this toy example.
+This is done by simply sampling the uniform sample space with high resolution and recording which quadtree node the sample would fall into.
+This approach is computationally expensive and not applicable to real-time rendering.
+Thus, a reversal of the BRDF distribution's calculations is necessary for practical use.
+
+The resulting mapping of uniform samples to quadtree nodes can also be used to calculate the BRDF's integrals described above. As we then know which part of the uniform sample space $[0;1]$ corresponds to each quadtree node, we directly know the probability of a sample falling into that node.
 
 ## 2D Microfacet Model
 
@@ -157,11 +174,11 @@ The equal time benchmark is indirectly proportional to the calculation speed of 
 
 |           ![TODO](images/light_setup_zenith.png)           |
 |:---------------------------------------------------:|
-| _Figure 4: Positioning of the zenith light source._ |
+| _Figure 3: Positioning of the zenith light source._ |
 
 The following benchmarks all use the microfacet model instead of a diffuse material to better represent the state-of-the-art use cases.
 The light sources from here on are all high-intensity light sources covering 2% of the hemicircle, unless specified otherwise.
-In this benchmark specifically, a single light source is placed in the direction of the surface normal, i.e. at an angle of $90^\circ$. (See figure 4)
+In this benchmark specifically, a single light source is placed in the direction of the surface normal, i.e. at an angle of $90^\circ$. (See figure 3)
 
 | <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
 |----------------|:------------------------------------------------|:---------------------------------------|
@@ -174,9 +191,9 @@ In this benchmark specifically, a single light source is placed in the direction
 
 |                  ![TODO](images/light_setup_front.png)                  |
 |:----------------------------------------------------------------:|
-| _Figure 5: Positioning of a front light relative to $\omega_o$._ |
+| _Figure 4: Positioning of a front light relative to $\omega_o$._ |
 
-In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera. (See figure 5)
+In this benchmark, the same light source is placed in the direction $\omega_o$, i.e. behind the camera. (See figure 4)
 The term front light is borrowed from photography, referring to a subject lit from the same direction as the camera.
 This positioning represents the contribution of the surface albedo.
 
@@ -191,9 +208,9 @@ This positioning represents the contribution of the surface albedo.
 
 |                           ![TODO](images/light_setup_back.png)                           |
 |:---------------------------------------------------------------------------------:|
-| _Figure 6: Positioning of a back light relative to the reflection of $\omega_o$._ |
+| _Figure 5: Positioning of a back light relative to the reflection of $\omega_o$._ |
 
-Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal. (See figure 6)
+Here, the same 2% hemicircle light source is placed in the direction of the reflection of $\omega_o$ about the surface normal. (See figure 5)
 This positioning is expected to accentuate the contribution of specular reflections.
 
 | <br> Method    | MSE of Equal Samples <br> 1024 runs x 1024 samples | MSE of Equal Time <br> 1024 runs x 0.001s |
